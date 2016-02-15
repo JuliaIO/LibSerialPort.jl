@@ -1,0 +1,100 @@
+## Enumerations
+ - `sp_return`
+ - `sp_mode`
+ - `sp_event`
+ - `sp_buffer`
+ - `sp_parity`
+ - `sp_rts`
+ - `sp_cts`
+ - `sp_dtr`
+ - `sp_dsr`
+ - `sp_xonxoff`
+ - `sp_flowcontrol`
+ - `sp_signal`
+ - `sp_transport`
+
+## Structs:
+ - `struct sp_port` (opaque, no Julia type)
+ - `struct sp_port_config` (opaque, no Julia type)
+ - `struct sp_event_set`
+
+## Functions
+ - `enum sp_return sp_get_port_by_name(const char *portname, struct sp_port **port_ptr);`
+ - `void sp_free_port(struct sp_port *port);`
+ - `enum sp_return sp_list_ports(struct sp_port ***list_ptr);`
+ - `enum sp_return sp_copy_port(const struct sp_port *port, struct sp_port **copy_ptr);`
+ - `void sp_free_port_list(struct sp_port **ports);`
+ - `enum sp_return sp_open(struct sp_port *port, enum sp_mode flags);`
+ - `enum sp_return sp_close(struct sp_port *port);`
+ - `char *sp_get_port_name(const struct sp_port *port);`
+ - `char *sp_get_port_description(const struct sp_port *port);`
+ - `enum sp_transport sp_get_port_transport(const struct sp_port *port);`
+ - `enum sp_return sp_get_port_usb_bus_address(const struct sp_port *port, int *usb_bus, int *usb_address);`
+ - `enum sp_return sp_get_port_usb_vid_pid(const struct sp_port *port, int *usb_vid, int *usb_pid);`
+ - `char *sp_get_port_usb_manufacturer(const struct sp_port *port);`
+ - `char *sp_get_port_usb_product(const struct sp_port *port);`
+ - `char *sp_get_port_usb_serial(const struct sp_port *port);`
+ - `char *sp_get_port_bluetooth_address(const struct sp_port *port);`
+ - `enum sp_return sp_get_port_handle(const struct sp_port *port, void *result_ptr);`
+ - `enum sp_return sp_new_config(struct sp_port_config **config_ptr);`
+ - `void sp_free_config(struct sp_port_config *config);`
+ - `enum sp_return sp_get_config(struct sp_port *port, struct sp_port_config *config);`
+ - `enum sp_return sp_set_config(struct sp_port *port, const struct sp_port_config *config);`
+ - `enum sp_return sp_set_baudrate(struct sp_port *port, int baudrate);`
+ - `enum sp_return sp_get_config_baudrate(const struct sp_port_config *config, int *baudrate_ptr);`
+ - `enum sp_return sp_set_config_baudrate(struct sp_port_config *config, int baudrate);`
+ - `enum sp_return sp_set_bits(struct sp_port *port, int bits);`
+ - `enum sp_return sp_get_config_bits(const struct sp_port_config *config, int *bits_ptr);`
+ - `enum sp_return sp_set_config_bits(struct sp_port_config *config, int bits);`
+ - `enum sp_return sp_set_parity(struct sp_port *port, enum sp_parity parity);`
+ - `enum sp_return sp_get_config_parity(const struct sp_port_config *config, enum sp_parity *parity_ptr);`
+ - `enum sp_return sp_set_config_parity(struct sp_port_config *config, enum sp_parity parity);`
+ - `enum sp_return sp_set_stopbits(struct sp_port *port, int stopbits);`
+ - `enum sp_return sp_get_config_stopbits(const struct sp_port_config *config, int *stopbits_ptr);`
+ - `enum sp_return sp_set_config_stopbits(struct sp_port_config *config, int stopbits);`
+ - `enum sp_return sp_set_rts(struct sp_port *port, enum sp_rts rts);`
+ - `enum sp_return sp_get_config_rts(const struct sp_port_config *config, enum sp_rts *rts_ptr);`
+ - `enum sp_return sp_set_config_rts(struct sp_port_config *config, enum sp_rts rts);`
+ - `enum sp_return sp_set_cts(struct sp_port *port, enum sp_cts cts);`
+ - `enum sp_return sp_get_config_cts(const struct sp_port_config *config, enum sp_cts *cts_ptr);`
+ - `enum sp_return sp_set_config_cts(struct sp_port_config *config, enum sp_cts cts);`
+ - `enum sp_return sp_set_dtr(struct sp_port *port, enum sp_dtr dtr);`
+ - `enum sp_return sp_get_config_dtr(const struct sp_port_config *config, enum sp_dtr *dtr_ptr);`
+ - `enum sp_return sp_set_config_dtr(struct sp_port_config *config, enum sp_dtr dtr);`
+ - `enum sp_return sp_set_dsr(struct sp_port *port, enum sp_dsr dsr);`
+ - `enum sp_return sp_get_config_dsr(const struct sp_port_config *config, enum sp_dsr *dsr_ptr);`
+ - `enum sp_return sp_set_config_dsr(struct sp_port_config *config, enum sp_dsr dsr);`
+ - `enum sp_return sp_set_xon_xoff(struct sp_port *port, enum sp_xonxoff xon_xoff);`
+ - `enum sp_return sp_get_config_xon_xoff(const struct sp_port_config *config, enum sp_xonxoff *xon_xoff_ptr);`
+ - `enum sp_return sp_set_config_xon_xoff(struct sp_port_config *config, enum sp_xonxoff xon_xoff);`
+ - `enum sp_return sp_set_config_flowcontrol(struct sp_port_config *config, enum sp_flowcontrol flowcontrol);`
+ - `enum sp_return sp_set_flowcontrol(struct sp_port *port, enum sp_flowcontrol flowcontrol);`
+ - `enum sp_return sp_blocking_read(struct sp_port *port, void *buf, size_t count, unsigned int timeout_ms);`
+ - `enum sp_return sp_blocking_read_next(struct sp_port *port, void *buf, size_t count, unsigned int timeout_ms);`
+ - `enum sp_return sp_nonblocking_read(struct sp_port *port, void *buf, size_t count);`
+ - `enum sp_return sp_blocking_write(struct sp_port *port, const void *buf, size_t count, unsigned int timeout_ms);`
+ - `enum sp_return sp_nonblocking_write(struct sp_port *port, const void *buf, size_t count);`
+ - `enum sp_return sp_input_waiting(struct sp_port *port);`
+ - `enum sp_return sp_output_waiting(struct sp_port *port);`
+ - `enum sp_return sp_flush(struct sp_port *port, enum sp_buffer buffers);`
+ - `enum sp_return sp_drain(struct sp_port *port);`
+ - `enum sp_return sp_new_event_set(struct sp_event_set **result_ptr);`
+ - `enum sp_return sp_add_port_events(struct sp_event_set *event_set, const struct sp_port *port, enum sp_event mask);`
+ - `enum sp_return sp_wait(struct sp_event_set *event_set, unsigned int timeout_ms);`
+ - `void sp_free_event_set(struct sp_event_set *event_set);`
+ - `enum sp_return sp_get_signals(struct sp_port *port, enum sp_signal *signal_mask);`
+ - `enum sp_return sp_start_break(struct sp_port *port);`
+ - `enum sp_return sp_end_break(struct sp_port *port);`
+ - `int sp_last_error_code(void);`
+ - `char *sp_last_error_message(void);`
+ - `void sp_free_error_message(char *message);`
+ - `void sp_set_debug_handler(void (*handler)(const char *format, ...));`
+ - `void sp_default_debug_handler(const char *format, ...);`
+ - `int sp_get_major_package_version(void);`
+ - `int sp_get_minor_package_version(void);`
+ - `int sp_get_micro_package_version(void);`
+ - `const char *sp_get_package_version_string(void);`
+ - `int sp_get_current_lib_version(void);`
+ - `int sp_get_revision_lib_version(void);`
+ - `int sp_get_age_lib_version(void);`
+ - `const char *sp_get_lib_version_string(void);`
