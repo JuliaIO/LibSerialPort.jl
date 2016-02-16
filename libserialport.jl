@@ -215,10 +215,34 @@ function sp_get_port_usb_bus_address(port::Ref{Void})
 end
 
 # TODO enum sp_return sp_get_port_usb_vid_pid(const struct sp_port *port, int *usb_vid, int *usb_pid);
-# TODO char *sp_get_port_usb_manufacturer(const struct sp_port *port);
-# TODO char *sp_get_port_usb_product(const struct sp_port *port);
-# TODO char *sp_get_port_usb_serial(const struct sp_port *port);
-# TODO char *sp_get_port_bluetooth_address(const struct sp_port *port);
+
+# char *sp_get_port_usb_manufacturer(const struct sp_port *port);
+function sp_get_port_usb_manufacturer(port::Ref{Void})
+    m = ccall((:sp_get_port_usb_manufacturer, "libserialport"),
+              Ptr{UInt8}, (Ref{Void},), port)
+    manufacturer = (m != C_NULL) ? bytestring(m) : ""
+end
+
+# char *sp_get_port_usb_product(const struct sp_port *port);
+function sp_get_port_usb_product(port::Ref{Void})
+    p = ccall((:sp_get_port_usb_product, "libserialport"),
+              Ptr{UInt8}, (Ref{Void},), port)
+    product = (p != C_NULL) ? bytestring(p) : ""
+end
+
+# char *sp_get_port_usb_serial(const struct sp_port *port);
+function sp_get_port_usb_serial(port::Ref{Void})
+    s = ccall((:sp_get_port_usb_serial, "libserialport"),
+              Ptr{UInt8}, (Ref{Void},), port)
+    serial = (s != C_NULL) ? bytestring(s) : ""
+end
+
+# char *sp_get_port_bluetooth_address(const struct sp_port *port);
+function sp_get_port_bluetooth_address(port::Ref{Void})
+    a = ccall((:sp_get_port_bluetooth_address, "libserialport"),
+              Ptr{UInt8}, (Ref{Void},), port)
+    address = (a != C_NULL) ? bytestring(a) : ""
+end
 
 # enum sp_return sp_get_port_handle(const struct sp_port *port, void *result_ptr);
 function sp_get_port_handle(port::Ref{Void})
