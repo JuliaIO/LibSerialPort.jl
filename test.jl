@@ -8,6 +8,10 @@ function print_config_info(config)
     println("\tparity\t", sp_get_config_parity(config))
     println("\tstopbits\t", sp_get_config_stopbits(config))
     println("\tRTS\t", sp_get_config_rts(config))
+    println("\tCTS\t", sp_get_config_cts(config))
+    println("\tDTR\t", sp_get_config_dtr(config))
+    println("\tDSR\t", sp_get_config_dsr(config))
+    println("\tXonXoff\t", sp_get_config_xon_xoff(config))
 end
 
 # Print libserialport version (tested on 0.1.1)

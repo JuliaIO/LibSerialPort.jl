@@ -247,21 +247,7 @@ function sp_free_config(config::Ref{Void})
     ccall((:sp_free_config, "libserialport"), Void, (Ref{Void},), config)
 end
 
-# enum sp_return sp_get_config(struct sp_port *port, struct sp_port_config *config);
-# function sp_get_config(port::Ref{Void}, config::Ref{Void})
-#     ret = ccall((:sp_get_config, "libserialport"), SPReturn,
-#                 (Ref{Void}, Ref{Void}), port, config)
-#     notify_on_error(ret)
-#     config
-# end
-# function sp_get_config(port::Ref{Void}, config::Ptr{Void})
-#     ret = ccall((:sp_get_config, "libserialport"), SPReturn,
-#                 (Ref{Void}, Ptr{Void}), port, config)
-#     notify_on_error(ret)
-#     # config
-# end
 function sp_get_config(port::Ref{Void})
-    # config = Ref{Void}()
     config = sp_new_config()
     ret = ccall((:sp_get_config, "libserialport"), SPReturn,
                 (Ref{Void}, Ref{Void}), port, config)
@@ -276,12 +262,6 @@ function sp_set_config(port::Ref{Void}, config::Ref{Void})
     notify_on_error(ret)
     ret
 end
-# function sp_set_config(port::Ptr{Void}, config::Ptr{Void})
-#     ret = ccall((:sp_set_config, "libserialport"), SPReturn,
-#                 (Ptr{Void}, Ptr{Void}), port, config)
-#     notify_on_error(ret)
-#     ret
-# end
 
 # enum sp_return sp_set_baudrate(struct sp_port *port, int baudrate);
 function sp_set_baudrate(port::Ref{Void}, baudrate::Integer)
@@ -384,9 +364,7 @@ function sp_set_config_stopbits(config::Ref{Void}, stopbits::Integer)
     ret
 end
 
-# TODO enum sp_return sp_set_rts(struct sp_port *port, enum sp_rts rts);
-# TODO enum sp_return sp_get_config_rts(const struct sp_port_config *config, enum sp_rts *rts_ptr);
-# TODO enum sp_return sp_set_config_rts(struct sp_port_config *config, enum sp_rts rts);
+# enum sp_return sp_set_rts(struct sp_port *port, enum sp_rts rts);
 function sp_set_rts(port::Ref{Void}, rts::SPrts)
     ret = ccall((:sp_set_rts, "libserialport"), SPReturn,
                 (Ref{Void}, SPrts), port, rts)
@@ -394,6 +372,7 @@ function sp_set_rts(port::Ref{Void}, rts::SPrts)
     ret
 end
 
+# enum sp_return sp_get_config_rts(const struct sp_port_config *config, enum sp_rts *rts_ptr);
 function sp_get_config_rts(config::Ref{Void})
     rts = Ref{SPrts}()
     ret = ccall((:sp_get_config_rts, "libserialport"), SPReturn,
@@ -402,6 +381,7 @@ function sp_get_config_rts(config::Ref{Void})
     rts[]
 end
 
+# enum sp_return sp_set_config_rts(struct sp_port_config *config, enum sp_rts rts);
 function sp_set_config_rts(config::Ref{Void}, rts::SPrts)
     ret = ccall((:sp_set_config_rts, "libserialport"), SPReturn,
                 (Ref{Void}, SPrts), config, SPrts)
@@ -409,24 +389,121 @@ function sp_set_config_rts(config::Ref{Void}, rts::SPrts)
     ret
 end
 
-# TODO enum sp_return sp_set_cts(struct sp_port *port, enum sp_cts cts);
-# TODO enum sp_return sp_get_config_cts(const struct sp_port_config *config, enum sp_cts *cts_ptr);
-# TODO enum sp_return sp_set_config_cts(struct sp_port_config *config, enum sp_cts cts);
+# enum sp_return sp_set_cts(struct sp_port *port, enum sp_cts cts);
+function sp_set_cts(port::Ref{Void}, cts::SPcts)
+    ret = ccall((:sp_set_cts, "libserialport"), SPReturn,
+                (Ref{Void}, SPcts), port, cts)
+    notify_on_error(ret)
+    ret
+end
 
-# TODO enum sp_return sp_set_dtr(struct sp_port *port, enum sp_dtr dtr);
-# TODO enum sp_return sp_get_config_dtr(const struct sp_port_config *config, enum sp_dtr *dtr_ptr);
-# TODO enum sp_return sp_set_config_dtr(struct sp_port_config *config, enum sp_dtr dtr);
+# enum sp_return sp_get_config_cts(const struct sp_port_config *config, enum sp_cts *cts_ptr);
+function sp_get_config_cts(config::Ref{Void})
+    cts = Ref{SPcts}()
+    ret = ccall((:sp_get_config_cts, "libserialport"), SPReturn,
+                (Ref{Void}, Ref{SPcts}), config, cts)
+    notify_on_error(ret)
+    cts[]
+end
 
-# TODO enum sp_return sp_set_dsr(struct sp_port *port, enum sp_dsr dsr);
-# TODO enum sp_return sp_get_config_dsr(const struct sp_port_config *config, enum sp_dsr *dsr_ptr);
-# TODO enum sp_return sp_set_config_dsr(struct sp_port_config *config, enum sp_dsr dsr);
+# enum sp_return sp_set_config_cts(struct sp_port_config *config, enum sp_cts cts);
+function sp_set_config_cts(config::Ref{Void}, cts::SPcts)
+    ret = ccall((:sp_set_config_cts, "libserialport"), SPReturn,
+                (Ref{Void}, SPcts), config, SPcts)
+    notify_on_error(ret)
+    ret
+end
 
-# TODO enum sp_return sp_set_xon_xoff(struct sp_port *port, enum sp_xonxoff xon_xoff);
-# TODO enum sp_return sp_get_config_xon_xoff(const struct sp_port_config *config, enum sp_xonxoff *xon_xoff_ptr);
-# TODO enum sp_return sp_set_config_xon_xoff(struct sp_port_config *config, enum sp_xonxoff xon_xoff);
+# enum sp_return sp_set_dtr(struct sp_port *port, enum sp_dtr dtr);
+function sp_set_dtr(port::Ref{Void}, dtr::SPdtr)
+    ret = ccall((:sp_set_dtr, "libserialport"), SPReturn,
+                (Ref{Void}, SPdtr), port, dtr)
+    notify_on_error(ret)
+    ret
+end
 
-# TODO enum sp_return sp_set_config_flowcontrol(struct sp_port_config *config, enum sp_flowcontrol flowcontrol);
-# TODO enum sp_return sp_set_flowcontrol(struct sp_port *port, enum sp_flowcontrol flowcontrol);
+# enum sp_return sp_get_config_dtr(const struct sp_port_config *config, enum sp_dtr *dtr_ptr);
+function sp_get_config_dtr(config::Ref{Void})
+    dtr = Ref{SPdtr}()
+    ret = ccall((:sp_get_config_dtr, "libserialport"), SPReturn,
+                (Ref{Void}, Ref{SPdtr}), config, dtr)
+    notify_on_error(ret)
+    dtr[]
+end
+
+# enum sp_return sp_set_config_dtr(struct sp_port_config *config, enum sp_dtr dtr);
+function sp_set_config_dtr(config::Ref{Void}, dtr::SPdtr)
+    ret = ccall((:sp_set_config_dtr, "libserialport"), SPReturn,
+                (Ref{Void}, SPdtr), config, SPdtr)
+    notify_on_error(ret)
+    ret
+end
+
+# enum sp_return sp_set_dsr(struct sp_port *port, enum sp_dsr dsr);
+function sp_set_dsr(port::Ref{Void}, dsr::SPdsr)
+    ret = ccall((:sp_set_dsr, "libserialport"), SPReturn,
+                (Ref{Void}, SPdsr), port, dsr)
+    notify_on_error(ret)
+    ret
+end
+
+# enum sp_return sp_get_config_dsr(const struct sp_port_config *config, enum sp_dsr *dsr_ptr);
+function sp_get_config_dsr(config::Ref{Void})
+    dsr = Ref{SPdsr}()
+    ret = ccall((:sp_get_config_dsr, "libserialport"), SPReturn,
+                (Ref{Void}, Ref{SPdsr}), config, dsr)
+    notify_on_error(ret)
+    dsr[]
+end
+
+# enum sp_return sp_set_config_dsr(struct sp_port_config *config, enum sp_dsr dsr);
+function sp_set_config_dsr(config::Ref{Void}, dsr::SPdsr)
+    ret = ccall((:sp_set_config_dsr, "libserialport"), SPReturn,
+                (Ref{Void}, SPdsr), config, SPdsr)
+    notify_on_error(ret)
+    ret
+end
+
+# enum sp_return sp_set_xon_xoff(struct sp_port *port, enum sp_xonxoff xon_xoff);
+function sp_set_xon_xoff(port::Ref{Void}, xon_xoff::SPXonXoff)
+    ret = ccall((:sp_set_xon_xoff, "libserialport"), SPReturn,
+                (Ref{Void}, SPXonXoff), port, xon_xoff)
+    notify_on_error(ret)
+    ret
+end
+
+# enum sp_return sp_get_config_xon_xoff(const struct sp_port_config *config, enum sp_xonxoff *xon_xoff_ptr);
+function sp_get_config_xon_xoff(config::Ref{Void})
+    xon_xoff = Ref{SPXonXoff}()
+    ret = ccall((:sp_get_config_xon_xoff, "libserialport"), SPReturn,
+                (Ref{Void}, Ref{SPXonXoff}), config, xon_xoff)
+    notify_on_error(ret)
+    xon_xoff[]
+end
+
+# enum sp_return sp_set_config_xon_xoff(struct sp_port_config *config, enum sp_xonxoff xon_xoff);
+function sp_set_config_xon_xoff(config::Ref{Void}, xon_xoff::SPXonXoff)
+    ret = ccall((:sp_set_config_xon_xoff, "libserialport"), SPReturn,
+                (Ref{Void}, SPXonXoff), config, xon_xoff)
+    notify_on_error(ret)
+    ret
+end
+
+# enum sp_return sp_set_config_flowcontrol(struct sp_port_config *config, enum sp_flowcontrol flowcontrol);
+function sp_set_config_flowcontrol(config::Ref{Void}, flowcontrol::SPFlowControl)
+    ret = ccall((:sp_set_config_flowcontrol, "libserialport"), SPReturn,
+                (Ref{Void}, SPFlowControl), config, flowcontrol)
+    notify_on_error(ret)
+    ret
+end
+
+# enum sp_return sp_set_flowcontrol(struct sp_port *port, enum sp_flowcontrol flowcontrol);
+function sp_set_flowcontrol(port::Ref{Void}, flowcontrol::SPFlowControl)
+    ret = ccall((:sp_set_flowcontrol, "libserialport"), SPReturn,
+                (Ref{Void}, SPFlowControl), port, flowcontrol)
+    notify_on_error(ret)
+    ret
+end
 
 # enum sp_return sp_blocking_read(struct sp_port *port, void *buf, size_t count, unsigned int timeout_ms);
 function sp_blocking_read(port::Ref{Void}; nbytes::Unsigned=1024, timeout_ms::Unsigned=100)
