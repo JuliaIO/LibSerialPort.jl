@@ -99,7 +99,7 @@ function notify_on_error(ret::SPReturn)
         error("Unknown SPReturn value")
     end
 
-    warn(msg)
+    error(msg)
 end
 
 # enum sp_return sp_get_port_by_name(const char *portname, struct sp_port **port_ptr);
@@ -117,43 +117,12 @@ function sp_free_port(port::Ref{Void})
 end
 
 # enum sp_return sp_list_ports(struct sp_port ***list_ptr);
-function sp_list_ports(; describe::Bool=true)
+function sp_list_ports()
     ports = Ref{Ptr{Ptr{Void}}}()
-
-    ret = ccall((:sp_list_ports, "libserialport"), SPReturn, (Ref{Ptr{Ptr{Void}}},), ports)
-
-    if ret != SP_OK
-        error("libserialport returned $ret")
-        return
-    end
-
-    # Creates a Vector{Ptr{Void}}
-    # Allocating space for 128 ports, arbitrarily and hopefully conservatively
-    # TODO: check further into getting size of ports[] array
-    v = pointer_to_array(ports[], 128, false)
-
-    for p in v
-
-        if p == C_NULL
-            break
-        end
-
-        name = sp_get_port_name(p)
-        if name != ""
-            println(name)
-        end
-
-        if describe
-            println("\tDescription:\t", sp_get_port_description(p))
-
-            transport = sp_get_port_transport(p)
-            println("\tTransport type:\t", transport)
-
-        end
-    end
-
-    sp_free_port_list(ports[])
-    ret
+    ret = ccall((:sp_list_ports, "libserialport"),
+                SPReturn, (Ref{Ptr{Ptr{Void}}},), ports)
+    notify_on_error(ret)
+    return ports[]
 end
 
 # TODO enum sp_return sp_copy_port(const struct sp_port *port, struct sp_port **copy_ptr);
@@ -207,14 +176,34 @@ function sp_get_port_usb_bus_address(port::Ref{Void})
     ret = ccall((:sp_get_port_usb_bus_address, "libserialport"), SPReturn,
                 (Ref{Void}, Ref{Cint}, Ref{Cint}), port, usb_bus, usb_address)
 
+    if ret == SP_ERR_SUPP
+        return -1, -1
+    end
+
     notify_on_error(ret)
-
-    ret == SP_OK || return Cint(0), Cint(0)
-
-    usb_bus[], usb_address[]
+    return usb_bus[], usb_address[]
 end
 
-# TODO enum sp_return sp_get_port_usb_vid_pid(const struct sp_port *port, int *usb_vid, int *usb_pid);
+# enum sp_return sp_get_port_usb_vid_pid(const struct sp_port *port, int *usb_vid, int *usb_pid);
+function sp_get_port_usb_vid_pid(port::Ref{Void})
+
+    if sp_get_port_transport(port) != SP_TRANSPORT_USB
+        warn("Port does not use USB transport")
+        return
+    end
+
+    vid = Ref{Cint}()
+    pid = Ref{Cint}()
+    ret = ccall((:sp_get_port_usb_vid_pid, "libserialport"), SPReturn,
+                (Ref{Void}, Ref{Cint}, Ref{Cint}), port, vid, pid)
+
+    if ret == SP_ERR_SUPP
+        return -1, -1
+    end
+
+    notify_on_error(ret)
+    return vid[], pid[]
+end
 
 # char *sp_get_port_usb_manufacturer(const struct sp_port *port);
 function sp_get_port_usb_manufacturer(port::Ref{Void})
@@ -254,7 +243,7 @@ function sp_get_port_handle(port::Ref{Void})
     ret = ccall((:sp_get_port_handle, "libserialport"), SPReturn,
                 (Ref{Void}, Ref{Cint}), port, result)
     notify_on_error(ret)
-    result
+    result[]
 end
 
 # enum sp_return sp_new_config(struct sp_port_config **config_ptr);
