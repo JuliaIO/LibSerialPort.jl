@@ -177,14 +177,82 @@ function print_version()
 end
 
 """
+Serial loopback test using blocking read/write.
+A microcontroller is connected over USB/USART and is echoing a test message
+written here.
+"""
+function test_blocking_serial_loopback(port)
+
+    println("\nTesting serial loopback with blocking write/read functions...")
+    println(sp_blocking_read(port, 128, 2000))
+    sp_drain(port)
+    sp_flush(port, SP_BUF_BOTH)
+
+    write_timeout_ms = 10
+    read_timeout_ms = 40
+    counter = 0
+
+    tic()
+    while counter < 100
+        counter += 1
+        msg = Array{UInt8}("Test message $counter\n")
+        sp_blocking_write(port, msg, write_timeout_ms)
+        sp_drain(port)
+        sp_flush(port, SP_BUF_OUTPUT)
+        result = sp_blocking_read(port, 128, read_timeout_ms)
+        if length(result) > 0
+            print(result)
+        end
+        sp_flush(port, SP_BUF_INPUT)
+    end
+    toc()
+end
+
+
+function test_nonblocking_serial_loopback(port)
+
+    println("\nTesting serial loopback with nonblocking write/read functions...")
+    println(sp_blocking_read(port, 128, 2000))
+    sp_drain(port)
+    sp_flush(port, SP_BUF_BOTH)
+
+    event_set = sp_new_event_set()
+    sp_add_port_events(event_set, port, SP_EVENT_TX_READY)
+    sp_add_port_events(event_set, port, SP_EVENT_RX_READY)
+
+    read_timeout_ms = 1000
+    counter = 0
+    tic()
+    while counter < 100
+        counter += 1
+        msg = Array{UInt8}("Test message $counter\n")
+        sp_nonblocking_write(port, msg)
+        sp_drain(port)
+
+        # Wait for requested events
+        sp_wait(event_set, 0)
+
+        result = sp_nonblocking_read(port, 128)
+        if length(result) > 0
+            print(result)
+        end
+    end
+
+    # Wait briefly, then read any remaining data
+    sleep(0.1)
+    print(sp_nonblocking_read(port, 128))
+
+    sp_flush(port, SP_BUF_BOTH)
+
+    toc()
+end
+
+"""
 This example demonstrates serial communication with one port. The default
 configuration is 9600-8-N-1, i.e. 9600 bps with 8 data bits, no parity check,
 and one stop bit. The baud rate is overridden on the command line with a
 second argument. Hardware and software flow control measures are disabled by
 default.
-
-Serial loopback test: a microcontroller is connected over USB and is echoing
-the test message written here via the USART serial line.
 """
 function main()
 
@@ -204,45 +272,15 @@ function main()
 
     sp_open(port, SP_MODE_READ_WRITE)
 
-    # test_port_configuration(port)
+    test_port_configuration(port)
 
     sp_set_baudrate(port, parse(Int, baudrate))
 
-    println(sp_blocking_read(port, 128, 3000))
-    sp_drain(port)
-    sp_flush(port, SP_BUF_BOTH)
+    test_blocking_serial_loopback(port)
 
-    counter = 0
-    while counter < 100
-        counter += 1
-        msg = Array{UInt8}("Message $counter\n")
-        # sp_nonblocking_write(port, msg)
-        sp_blocking_write(port, msg, 50)
+    test_nonblocking_serial_loopback(port)
 
-        # Wait up to 100 ms for the output buffer to clear out
-        countdown = 100
-        while Int(sp_output_waiting(port)) > 0 && countdown > 0
-            sleep(0.001)
-            countdown -= 1
-        end
-
-        # Done writing, now read
-        countdown = 100
-        while Int(sp_input_waiting(port)) > 0 && countdown > 0
-            sleep(0.001)
-            countdown -= 1
-        end
-        # result = sp_nonblocking_read(port, 64)
-        result = sp_blocking_read(port, 64, 50)
-        if length(result) > 0
-            print(result)
-        end
-
-        sp_drain(port)
-        sp_flush(port, SP_BUF_BOTH)
-    end
-
-    println("\nClosing and freeing port. Over and out.")
+    println("\nClosing and freeing port. Over and out!")
     sp_close(port)
     sp_free_port(port)
 end
