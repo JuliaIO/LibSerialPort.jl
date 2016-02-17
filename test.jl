@@ -35,7 +35,7 @@ Print info found for this port.
 Note: port should be open to obtain a valid FD/handle before accessing fields.
 """
 function print_port_info(port; show_config::Bool=true)
-    println("\nPort name:\t",            sp_get_port_name(port))
+    println("\nPort name:\t",       sp_get_port_name(port))
     println("Manufacturer:\t",      sp_get_port_usb_manufacturer(port))
     println("Product:\t",           sp_get_port_usb_product(port))
     println("USB serial number:\t", sp_get_port_usb_serial(port))
@@ -82,8 +82,18 @@ function print_config_info(config)
 end
 
 """
-Test that we can change some port configuration settings on a copy of the provided port.
+Test that we can change some port configuration settings on a copy of the
+provided port. Use two approaches to cover the various set and get functions.
+The original port configuration should not be modified by these tests!
 """
+function test_port_configuration(port)
+    # 1. (Direct) use setter functions for the port struct
+    test_change_port_copy_method1(port)
+    # 2. (Roundabout) get a new sp_port_configuration instance, modify it, then
+    # copy its data fields to the port struct.
+    test_change_port_copy_method2(port)
+end
+
 function test_change_port_copy_method1(port)
     port2 = sp_copy_port(port)
     sp_close(port)
@@ -94,7 +104,7 @@ function test_change_port_copy_method1(port)
     print("\n[TEST1] INITIAL ")
     print_port_config(port2)
     println("[TEST1] changing port configuration settings.")
-    sp_set_baudrate(port2, 57600)
+    sp_set_baudrate(port2, 115200)
     sp_set_bits(port2, 6)
     sp_set_parity(port2, SP_PARITY_EVEN)
     sp_set_stopbits(port2, 2)
@@ -134,7 +144,7 @@ function test_change_port_copy_method2(port)
     print_config_info(config2)
 
     println("[TEST2] changing configuration settings.")
-    sp_set_config_baudrate(config2, 57600)
+    sp_set_config_baudrate(config2, 115200)
     sp_set_config_bits(config2, 6)
     sp_set_config_parity(config2, SP_PARITY_EVEN)
     sp_set_config_stopbits(config2, 2)
@@ -186,16 +196,21 @@ function main()
 
     sp_open(port, SP_MODE_READ_WRITE)
 
-    print_port_info(port)
+    # test_port_configuration(port)
 
-    # Test interface by using two approaches to modifying port configuration
-    # on a copy of this port. The original port configuration should not be
-    # modified by these tests!
-    # 1. (Direct) use setter functions for the port struct
-    test_change_port_copy_method1(port)
-    # 2. (Roundabout) get a new sp_port_configuration instance, modify it, then
-    # copy its data fields to the port struct.
-    test_change_port_copy_method2(port)
+    sp_set_baudrate(port, parse(Int, baudrate))
+
+    println(sp_nonblocking_read(port, 256))
+    # println(sp_blocking_read(port, 256))
+
+    msg = Array{UInt8}("Hello")
+    sp_nonblocking_write(port, msg)
+    # sp_blocking_write(port, msg, 100)
+    sleep(0.5)
+    result = sp_nonblocking_read(port, 256)
+    sleep(0.5)
+    println(typeof(result), " ", length(result))
+    println(result)
 
     println("\nClosing and freeing port. Over and out.")
     sp_close(port)
@@ -203,7 +218,3 @@ function main()
 end
 
 main()
-
-# println(@__FILE__, ", ", @__LINE__)
-
-# *****
