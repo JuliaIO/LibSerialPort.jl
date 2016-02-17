@@ -614,24 +614,122 @@ function sp_drain(port::Ref{Void})
     ret
 end
 
-
 # enum sp_return sp_new_event_set(struct sp_event_set **result_ptr);
+function sp_new_event_set()
+    event_set = Ref{Ptr{SPEventSet}}()
+    ret = ccall((:sp_new_event_set, "libserialport"), SPReturn,
+                (Ref{Ptr{SPEventSet}},), event_set)
+    notify_on_error(ret)
+    event_set[]
+end
+
 # enum sp_return sp_add_port_events(struct sp_event_set *event_set, const struct sp_port *port, enum sp_event mask);
+function sp_add_port_events(event_set::Ref{SPEventSet}, port::Ref{Void}, mask::SPEvent)
+    ret = ccall((:sp_add_port_events, "libserialport"), SPReturn,
+                (Ref{SPEventSet}, Ref{Void}, SPEvent), event_set, port, mask)
+    notify_on_error(ret)
+    ret
+end
+
 # enum sp_return sp_wait(struct sp_event_set *event_set, unsigned int timeout_ms);
+function sp_wait(event_set::Ref{SPEventSet}, timeout_ms::Integer)
+    ret = ccall((:sp_wait, "libserialport"), SPReturn,
+                (Ref{SPEventSet}, Cuint), event_set, timeout_ms)
+    notify_on_error(ret)
+    ret
+end
+
 # void sp_free_event_set(struct sp_event_set *event_set);
+function sp_free_event_set(event_set::Ref{SPEventSet})
+    ret = ccall((:sp_free_event_set, "libserialport"), SPReturn,
+                (Ref{SPEventSet},), event_set)
+    notify_on_error(ret)
+    ret
+end
+
 # enum sp_return sp_get_signals(struct sp_port *port, enum sp_signal *signal_mask);
+function sp_get_signals(port::Ref{Void}, signal_mask::Ref{SPSignal})
+    ret = ccall((:sp_get_signals, "libserialport"), SPReturn,
+                (Ref{Void}, Ref{SPSignal}), port, signal_mask)
+    notify_on_error(ret)
+    signal_mask[]
+end
+
 # enum sp_return sp_start_break(struct sp_port *port);
+function sp_start_break(port::Ref{Void})
+    ret = ccall((:sp_start_break, "libserialport"), SPReturn, (Ref{Void},), port)
+    notify_on_error(ret)
+    ret
+end
+
 # enum sp_return sp_end_break(struct sp_port *port);
+function sp_end_break(port::Ref{Void})
+    ret = ccall((:sp_end_break, "libserialport"), SPReturn, (Ref{Void},), port)
+    notify_on_error(ret)
+    ret
+end
+
 # int sp_last_error_code(void);
+function sp_last_error_code()
+    ccall((:sp_last_error_code, "libserialport"), Cint, ())
+end
+
 # char *sp_last_error_message(void);
+function sp_last_error_message()
+    msg = ccall((:sp_last_error_message, "libserialport"), Ptr{UInt8}, ())
+    msg_jl = bytestring(msg)
+    sp_free_error_message(msg)
+    return msg_jl
+end
+
 # void sp_free_error_message(char *message);
+function sp_free_error_message(message::Ptr{UInt8})
+    ccall((:sp_free_error_message, "libserialport"), Void, (Ptr{UInt8},), message)
+end
+
+# Due to ccall's incomplete variadic argument support, the following two
+# functions are not (yet) wrapped.
 # void sp_set_debug_handler(void (*handler)(const char *format, ...));
 # void sp_default_debug_handler(const char *format, ...);
+
 # int sp_get_major_package_version(void);
+function sp_get_major_package_version()
+    ccall((:sp_get_major_package_version, "libserialport"), Cint, ())
+end
+
 # int sp_get_minor_package_version(void);
+function sp_get_minor_package_version()
+    ccall((:sp_get_minor_package_version, "libserialport"), Cint, ())
+end
+
 # int sp_get_micro_package_version(void);
+function sp_get_micro_package_version()
+    ccall((:sp_get_micro_package_version, "libserialport"), Cint, ())
+end
+
 # const char *sp_get_package_version_string(void);
+function sp_get_package_version_string()
+    ver = ccall((:sp_get_package_version_string, "libserialport"), Ptr{UInt8}, ())
+    bytestring(ver)
+end
+
 # int sp_get_current_lib_version(void);
+function sp_get_current_lib_version()
+    ccall((:sp_get_current_lib_version, "libserialport"), Cint, ())
+end
+
 # int sp_get_revision_lib_version(void);
+function sp_get_revision_lib_version()
+    ccall((:sp_get_revision_lib_version, "libserialport"), Cint, ())
+end
+
 # int sp_get_age_lib_version(void);
+function sp_get_age_lib_version()
+    ccall((:sp_get_age_lib_version, "libserialport"), Cint, ())
+end
+
 # const char *sp_get_lib_version_string(void);
+function sp_get_lib_version_string()
+    ver = ccall((:sp_get_lib_version_string, "libserialport"), Ptr{UInt8}, ())
+    bytestring(ver)
+end
