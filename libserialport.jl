@@ -534,10 +534,22 @@ function sp_blocking_read(port::Ref{Void}, nbytes::Integer, timeout_ms::Integer)
                 port, buffer, sizeof(buffer), Cuint(timeout_ms))
     notify_on_error(ret)
 
+    buffer[end] = 0
     return bytestring(pointer(buffer))
 end
 
 # enum sp_return sp_blocking_read_next(struct sp_port *port, void *buf, size_t count, unsigned int timeout_ms);
+function sp_blocking_read_next(port::Ref{Void}, nbytes::Integer, timeout_ms::Integer)
+    buffer = Array(UInt8, nbytes)
+
+    ret = ccall((:sp_blocking_read_next, "libserialport"), SPReturn,
+                (Ref{Void}, Ptr{UInt8}, Csize_t, Cuint),
+                port, buffer, sizeof(buffer), Cuint(timeout_ms))
+    notify_on_error(ret)
+
+    buffer[end] = 0
+    return bytestring(pointer(buffer))
+end
 
 # enum sp_return sp_nonblocking_read(struct sp_port *port, void *buf, size_t count);
 function sp_nonblocking_read(port::Ref{Void}, nbytes::Integer)
@@ -550,23 +562,6 @@ function sp_nonblocking_read(port::Ref{Void}, nbytes::Integer)
     return bytestring(pointer(buffer))
 end
 
-# function sp_nonblocking_read(port::Ref{Void})
-#     # buffer = Ref{Void}()
-
-#     nbytes = Csize_t(1024)
-#     # buffer = Array(UInt8, 1024)
-#     buffer = Ref{Ptr{UInt8}}()
-
-#     ret = ccall((:sp_nonblocking_read, "libserialport"), SPReturn,
-#                 (Ref{Void}, Ref{Ptr{UInt8}}, Csize_t), port, buffer, nbytes)
-#     # ret = ccall((:sp_nonblocking_read, "libserialport"), SPReturn,
-#     #             (Ref{Void}, Array{UInt8}, Csize_t), port, buffer, nbytes)
-#     notify_on_error(ret)
-
-#     buffer[]
-#     # bytestring(buffer[])
-# end
-
 # enum sp_return sp_blocking_write(struct sp_port *port, const void *buf, size_t count, unsigned int timeout_ms);
 function sp_blocking_write(port::Ref{Void}, buffer::Array{UInt8}, timeout_ms::Integer)
     ret = ccall((:sp_blocking_write, "libserialport"), SPReturn,
@@ -575,15 +570,6 @@ function sp_blocking_write(port::Ref{Void}, buffer::Array{UInt8}, timeout_ms::In
     notify_on_error(ret)
     ret
 end
-
-
-# function sp_nonblocking_write(port::Ref{Void}, msg::Array{UInt8}, nbytes::Integer)
-#     buffer = pointer(msg)
-#     ret = ccall((:sp_nonblocking_write, "libserialport"), SPReturn,
-#                 (Ref{Void}, Ptr{UInt8}, Csize_t), port, buffer, Csize_t(nbytes))
-#     notify_on_error(ret)
-#     ret
-# end
 
 # enum sp_return sp_nonblocking_write(struct sp_port *port, const void *buf, size_t count);
 function sp_nonblocking_write(port::Ref{Void}, buffer::Array{UInt8})
