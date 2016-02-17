@@ -200,17 +200,39 @@ function main()
 
     sp_set_baudrate(port, parse(Int, baudrate))
 
-    println(sp_nonblocking_read(port, 256))
-    # println(sp_blocking_read(port, 256))
+    println(sp_blocking_read(port, 128, 3000))
+    sp_drain(port)
+    sp_flush(port, SP_BUF_BOTH)
 
-    msg = Array{UInt8}("Hello")
-    sp_nonblocking_write(port, msg)
-    # sp_blocking_write(port, msg, 100)
-    sleep(0.5)
-    result = sp_nonblocking_read(port, 256)
-    sleep(0.5)
-    println(typeof(result), " ", length(result))
-    println(result)
+    counter = 0
+    while counter < 100
+        counter += 1
+        msg = Array{UInt8}("Message $counter\n")
+        # sp_nonblocking_write(port, msg)
+        sp_blocking_write(port, msg, 50)
+
+        # Wait up to 100 ms for the output buffer to clear out
+        countdown = 100
+        while Int(sp_output_waiting(port)) > 0 && countdown > 0
+            sleep(0.001)
+            countdown -= 1
+        end
+
+        # Done writing, now read
+        countdown = 100
+        while Int(sp_input_waiting(port)) > 0 && countdown > 0
+            sleep(0.001)
+            countdown -= 1
+        end
+        # result = sp_nonblocking_read(port, 64)
+        result = sp_blocking_read(port, 64, 50)
+        if length(result) > 0
+            print(result)
+        end
+
+        sp_drain(port)
+        sp_flush(port, SP_BUF_BOTH)
+    end
 
     println("\nClosing and freeing port. Over and out.")
     sp_close(port)
