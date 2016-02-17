@@ -1,24 +1,24 @@
-## Enumerations
- - `sp_return`
- - `sp_mode`
- - `sp_event`
- - `sp_buffer`
- - `sp_parity`
- - `sp_rts`
- - `sp_cts`
- - `sp_dtr`
- - `sp_dsr`
- - `sp_xonxoff`
- - `sp_flowcontrol`
- - `sp_signal`
- - `sp_transport`
+## Enumerations (Converted to Julia types using the `@enum` macro)
+ - `sp_transport` --> `SPTransport`
+ - `sp_signal` --> `SPSignal`
+ - `sp_flowcontrol` --> `SPFlowControl`
+ - `sp_xonxoff` --> `SPXonXoff`
+ - `sp_dsr` --> `SPdsr`
+ - `sp_dtr` --> `SPdtr`
+ - `sp_cts` --> `SPcts`
+ - `sp_rts` --> `SPrts`
+ - `sp_parity` --> `SPParity`
+ - `sp_buffer` --> `SPBuffer`
+ - `sp_event` --> `SPEvent`
+ - `sp_mode` --> `SPMode`
+ - `sp_return` --> `SPReturn`
 
 ## Structs:
  - `struct sp_port` (opaque, no Julia type)
  - `struct sp_port_config` (opaque, no Julia type)
  - `struct sp_event_set`
 
-## Functions
+## Functions wrapped using `ccall`
  - `enum sp_return sp_get_port_by_name(const char *portname, struct sp_port **port_ptr);`
  - `void sp_free_port(struct sp_port *port);`
  - `enum sp_return sp_list_ports(struct sp_port ***list_ptr);`
@@ -88,8 +88,6 @@
  - `int sp_last_error_code(void);`
  - `char *sp_last_error_message(void);`
  - `void sp_free_error_message(char *message);`
- - `void sp_set_debug_handler(void (*handler)(const char *format, ...));`
- - `void sp_default_debug_handler(const char *format, ...);`
  - `int sp_get_major_package_version(void);`
  - `int sp_get_minor_package_version(void);`
  - `int sp_get_micro_package_version(void);`
@@ -98,3 +96,7 @@
  - `int sp_get_revision_lib_version(void);`
  - `int sp_get_age_lib_version(void);`
  - `const char *sp_get_lib_version_string(void);`
+
+# Functions not (yet) wrapped
+ - `void sp_set_debug_handler(void (*handler)(const char *format, ...));`
+ - `void sp_default_debug_handler(const char *format, ...);`
