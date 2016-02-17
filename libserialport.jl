@@ -526,12 +526,12 @@ function sp_set_flowcontrol(port::Ref{Void}, flowcontrol::SPFlowControl)
 end
 
 # enum sp_return sp_blocking_read(struct sp_port *port, void *buf, size_t count, unsigned int timeout_ms);
-function sp_blocking_read(port::Ref{Void}, nbytes::Integer)
+function sp_blocking_read(port::Ref{Void}, nbytes::Integer, timeout_ms::Integer)
     buffer = Array(UInt8, nbytes)
 
     ret = ccall((:sp_blocking_read, "libserialport"), SPReturn,
                 (Ref{Void}, Ptr{UInt8}, Csize_t, Cuint),
-                port, buffer, sizeof(buffer), Cuint(1000))
+                port, buffer, sizeof(buffer), Cuint(timeout_ms))
     notify_on_error(ret)
 
     return bytestring(pointer(buffer))
@@ -614,7 +614,21 @@ function sp_output_waiting(port::Ref{Void})
 end
 
 # enum sp_return sp_flush(struct sp_port *port, enum sp_buffer buffers);
+function sp_flush(port::Ref{Void}, buffers::SPBuffer)
+    ret = ccall((:sp_flush, "libserialport"), SPReturn,
+                (Ref{Void}, SPBuffer), port, buffers)
+    notify_on_error(ret)
+    ret
+end
+
 # enum sp_return sp_drain(struct sp_port *port);
+function sp_drain(port::Ref{Void})
+    ret = ccall((:sp_drain, "libserialport"), SPReturn, (Ref{Void},), port)
+    notify_on_error(ret)
+    ret
+end
+
+
 # enum sp_return sp_new_event_set(struct sp_event_set **result_ptr);
 # enum sp_return sp_add_port_events(struct sp_event_set *event_set, const struct sp_port *port, enum sp_event mask);
 # enum sp_return sp_wait(struct sp_event_set *event_set, unsigned int timeout_ms);
