@@ -529,26 +529,26 @@ end
 function sp_blocking_read(port::Ref{Void}, nbytes::Integer, timeout_ms::Integer)
     buffer = Array(UInt8, nbytes)
 
+    # If the read succeeds, the return value is the number of bytes read.
     ret = ccall((:sp_blocking_read, "libserialport"), SPReturn,
                 (Ref{Void}, Ptr{UInt8}, Csize_t, Cuint),
                 port, buffer, sizeof(buffer), Cuint(timeout_ms))
     notify_on_error(ret)
 
-    buffer[end] = 0
-    return bytestring(pointer(buffer))
+    return bytestring(pointer(buffer), Int(ret) + 1)
 end
 
 # enum sp_return sp_blocking_read_next(struct sp_port *port, void *buf, size_t count, unsigned int timeout_ms);
 function sp_blocking_read_next(port::Ref{Void}, nbytes::Integer, timeout_ms::Integer)
     buffer = Array(UInt8, nbytes)
 
+    # If the read succeeds, the return value is the number of bytes read.
     ret = ccall((:sp_blocking_read_next, "libserialport"), SPReturn,
                 (Ref{Void}, Ptr{UInt8}, Csize_t, Cuint),
                 port, buffer, sizeof(buffer), Cuint(timeout_ms))
     notify_on_error(ret)
 
-    buffer[end] = 0
-    return bytestring(pointer(buffer))
+    return bytestring(pointer(buffer), Int(ret) + 1)
 end
 
 # enum sp_return sp_nonblocking_read(struct sp_port *port, void *buf, size_t count);
@@ -558,8 +558,7 @@ function sp_nonblocking_read(port::Ref{Void}, nbytes::Integer)
                 (Ref{Void}, Ptr{UInt8}, Csize_t), port, buffer, sizeof(buffer))
     notify_on_error(ret)
 
-    buffer[end] = 0
-    return bytestring(pointer(buffer))
+    return bytestring(pointer(buffer), Int(ret) + 1)
 end
 
 # enum sp_return sp_blocking_write(struct sp_port *port, const void *buf, size_t count, unsigned int timeout_ms);
