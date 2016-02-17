@@ -3,15 +3,6 @@
 include("libserialport.jl")
 
 """
-Print libserialport version (tested on 0.1.1)
-"""
-function print_library_version()
-    # TODO replace this with wrapped version
-    ver = ccall((:sp_get_package_version_string, "libserialport"), Ptr{UInt8}, ())
-    println(bytestring(ver))
-end
-
-"""
 Print a list of currently visible ports, along with some basic info
 """
 function list_ports()
@@ -172,11 +163,28 @@ function test_change_port_copy_method2(port)
 end
 
 """
+Use all wrapped functions to display version info (tested on 0.1.1)
+"""
+function print_version()
+    println(sp_get_major_package_version())
+    println(sp_get_minor_package_version())
+    println(sp_get_micro_package_version())
+    println(sp_get_package_version_string())
+    println(sp_get_current_lib_version())
+    println(sp_get_revision_lib_version())
+    println(sp_get_age_lib_version())
+    println(sp_get_lib_version_string())
+end
+
+"""
 This example demonstrates serial communication with one port. The default
 configuration is 9600-8-N-1, i.e. 9600 bps with 8 data bits, no parity check,
 and one stop bit. The baud rate is overridden on the command line with a
 second argument. Hardware and software flow control measures are disabled by
 default.
+
+Serial loopback test: a microcontroller is connected over USB and is echoing
+the test message written here via the USART serial line.
 """
 function main()
 
@@ -191,7 +199,7 @@ function main()
     port = sp_get_port_by_name(ARGS[1]) # e.g. "/dev/cu.wchusbserial1410"
     baudrate = nargs >= 2 ? ARGS[2] : 9600
 
-    print_library_version()
+    print_version()
     list_ports()
 
     sp_open(port, SP_MODE_READ_WRITE)
