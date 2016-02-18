@@ -3,63 +3,9 @@
 using LibSerialPort
 
 """
-Print a list of currently visible ports, along with some basic info
-"""
-function list_ports()
-    ports = sp_list_ports()
-    nports_overestimate = 32
-
-    for port in pointer_to_array(ports, nports_overestimate, false)
-        port == C_NULL && return
-
-        println(sp_get_port_name(port))
-        println("\tDescription:\t",    sp_get_port_description(port))
-        println("\tTransport type:\t", sp_get_port_transport(port))
-    end
-
-    sp_free_port_list(ports)
-    return
-end
-
-"""
-Print info found for this port.
-Note: port should be open to obtain a valid FD/handle before accessing fields.
-"""
-function print_port_info(port; show_config::Bool=true)
-    println("\nPort name:\t",       sp_get_port_name(port))
-    println("Manufacturer:\t",      sp_get_port_usb_manufacturer(port))
-    println("Product:\t",           sp_get_port_usb_product(port))
-    println("USB serial number:\t", sp_get_port_usb_serial(port))
-    println("Bluetooth address:\t", sp_get_port_bluetooth_address(port))
-    println("File descriptor:\t",   sp_get_port_handle(port))
-
-    bus, addr = sp_get_port_usb_bus_address(port)
-    if bus != -1
-        println("USB bus #:\t",   bus)
-        println("Address on bus:\t",  addr)
-    end
-
-    vid, pid = sp_get_port_usb_vid_pid(port)
-    if vid != -1
-        println("Vendor ID:\t",   vid)
-        println("Product ID:\t",  pid)
-    end
-    if show_config
-        print_port_config(port)
-    end
-end
-
-function print_port_config(port)
-    println("Configuration for ", sp_get_port_name(port), ":")
-    config = sp_get_config(port)
-    print_config_info(config)
-    sp_free_config(config)
-end
-
-"""
 Print settings currently stored in sp_port_config struct
 """
-function print_config_info(config)
+function print_config_info(config::LibSerialPort.Config)
     println("\tbaudrate\t", sp_get_config_baudrate(config))
     println("\tbits\t",     sp_get_config_bits(config))
     println("\tparity\t",   sp_get_config_parity(config))
@@ -72,12 +18,19 @@ function print_config_info(config)
     println("")
 end
 
+function print_port_config(port::LibSerialPort.Port)
+    println("Configuration for ", sp_get_port_name(port), ":")
+    config = sp_get_config(port)
+    print_config_info(config)
+    sp_free_config(config)
+end
+
 """
 Test that we can change some port configuration settings on a copy of the
 provided port. Use two approaches to cover the various set and get functions.
 The original port configuration should not be modified by these tests!
 """
-function test_port_configuration(port)
+function test_port_configuration(port::LibSerialPort.Port)
     # 1. (Direct) use setter functions for the port struct
     test_change_port_copy_method1(port)
     # 2. (Roundabout) get a new sp_port_configuration instance, modify it, then
@@ -85,7 +38,7 @@ function test_port_configuration(port)
     test_change_port_copy_method2(port)
 end
 
-function test_change_port_copy_method1(port)
+function test_change_port_copy_method1(port::LibSerialPort.Port)
     port2 = sp_copy_port(port)
     sp_close(port)
     sp_open(port2, SP_MODE_READ_WRITE)
@@ -122,7 +75,7 @@ function test_change_port_copy_method1(port)
     print_port_config(port)
 end
 
-function test_change_port_copy_method2(port)
+function test_change_port_copy_method2(port::LibSerialPort.Port)
     port2 = sp_copy_port(port)
     sp_close(port)
     sp_open(port2, SP_MODE_READ_WRITE)
@@ -182,68 +135,54 @@ Serial loopback test using blocking read/write.
 A microcontroller is connected over USB/USART and is echoing a test message
 written here.
 """
-function test_blocking_serial_loopback(port)
+function test_blocking_serial_loopback(port::LibSerialPort.Port,
+    write_timeout_ms::Integer, read_timeout_ms::Integer)
 
     println("\nTesting serial loopback with blocking write/read functions...")
-    println(sp_blocking_read(port, 128, 2000))
+    println()
+    data = bytestring(sp_blocking_read(port, 1024, 2000))
+    println(data)
     sp_drain(port)
     sp_flush(port, SP_BUF_BOTH)
 
-    write_timeout_ms = 10
-    read_timeout_ms = 40
-    counter = 0
-
     tic()
-    while counter < 100
-        counter += 1
-        msg = Array{UInt8}("Test message $counter\n")
-        sp_blocking_write(port, msg, write_timeout_ms)
+    for i = 1:100
+        sp_blocking_write(port, Array{UInt8}("Test message $i\n"), write_timeout_ms)
         sp_drain(port)
         sp_flush(port, SP_BUF_OUTPUT)
-        result = sp_blocking_read(port, 128, read_timeout_ms)
-        if length(result) > 0
-            print(result)
-        end
+        data = bytestring(sp_blocking_read(port, 128, read_timeout_ms))
+        print(data)
         sp_flush(port, SP_BUF_INPUT)
     end
     toc()
 end
 
-function test_nonblocking_serial_loopback(port)
+function test_nonblocking_serial_loopback(port::LibSerialPort.Port)
 
-    println("\nTesting serial loopback with nonblocking write/read functions...")
-    println(sp_blocking_read(port, 128, 2000))
-    sp_drain(port)
-    sp_flush(port, SP_BUF_BOTH)
-
-    event_set = sp_new_event_set()
-    sp_add_port_events(event_set, port, SP_EVENT_TX_READY)
-    sp_add_port_events(event_set, port, SP_EVENT_RX_READY)
-
-    read_timeout_ms = 1000
-    counter = 0
-    tic()
-    while counter < 100
-        counter += 1
-        msg = Array{UInt8}("Test message $counter\n")
-        sp_nonblocking_write(port, msg)
-        sp_drain(port)
-
-        # Wait for requested events
-        sp_wait(event_set, 0)
-
-        result = sp_nonblocking_read(port, 128)
-        if length(result) > 0
-            print(result)
-        end
+    println("\n[TEST] Read any incoming data for ~1 second...")
+    for i = 1:1000
+        print(bytestring(sp_nonblocking_read(port, 1024)))
+        sleep(0.001)
     end
 
-    # Wait briefly, then read any remaining data
-    sleep(0.1)
-    print(sp_nonblocking_read(port, 128))
-
     sp_flush(port, SP_BUF_BOTH)
 
+    print("\n\n[TEST] Serial loopback - ")
+    println("Send 100 short messages and read whatever comes back...")
+    tic()
+    for i = 1:100
+        sp_nonblocking_write(port, Array{UInt8}("Test message $i\n"))
+        sp_drain(port)
+        print(bytestring(sp_nonblocking_read(port, 256)))
+    end
+
+    # Read and print any remaining data for ~50 ms
+    for i = 1:50
+        print(bytestring(sp_nonblocking_read(port, 256)))
+        sleep(0.001)
+    end
+
+    sp_flush(port, SP_BUF_BOTH)
     toc()
 end
 
@@ -276,7 +215,7 @@ function main()
 
     sp_set_baudrate(port, baudrate)
 
-    test_blocking_serial_loopback(port)
+    test_blocking_serial_loopback(port, 10, 40)
 
     test_nonblocking_serial_loopback(port)
 
