@@ -536,38 +536,43 @@ end
 
 # enum sp_return sp_blocking_read(struct sp_port *port, void *buf, size_t count, unsigned int timeout_ms);
 function sp_blocking_read(port::Port, nbytes::Integer, timeout_ms::Integer)
-    buffer = Array(UInt8, nbytes)
+    buffer = zeros(UInt8, nbytes)
 
     # If the read succeeds, the return value is the number of bytes read.
     ret = ccall((:sp_blocking_read, "libserialport"), SPReturn,
                 (Port, Ptr{UInt8}, Csize_t, Cuint),
-                port, buffer, sizeof(buffer), Cuint(timeout_ms))
+                port, buffer, Csize_t(nbytes), Cuint(timeout_ms))
     handle_error(ret, loc())
 
-    return bytestring(pointer(buffer), Int(ret) + 1)
+    nb = Int(ret)
+    return nb > 0 ? buffer[1:nb] : Vector{UInt8}()
 end
 
 # enum sp_return sp_blocking_read_next(struct sp_port *port, void *buf, size_t count, unsigned int timeout_ms);
 function sp_blocking_read_next(port::Port, nbytes::Integer, timeout_ms::Integer)
-    buffer = Array(UInt8, nbytes)
+    buffer = zeros(UInt8, nbytes)
 
     # If the read succeeds, the return value is the number of bytes read.
     ret = ccall((:sp_blocking_read_next, "libserialport"), SPReturn,
                 (Port, Ptr{UInt8}, Csize_t, Cuint),
-                port, buffer, sizeof(buffer), Cuint(timeout_ms))
+                port, buffer, Csize_t(nbytes), Cuint(timeout_ms))
     handle_error(ret, loc())
 
-    return bytestring(pointer(buffer), Int(ret) + 1)
+    nb = Int(ret)
+    return nb > 0 ? buffer[1:nb] : Vector{UInt8}()
 end
 
 # enum sp_return sp_nonblocking_read(struct sp_port *port, void *buf, size_t count);
 function sp_nonblocking_read(port::Port, nbytes::Integer)
-    buffer = Array(UInt8, nbytes)
+    buffer = zeros(UInt8, nbytes)
+
+    # If the read succeeds, the return value is the number of bytes read.
     ret = ccall((:sp_nonblocking_read, "libserialport"), SPReturn,
-                (Port, Ptr{UInt8}, Csize_t), port, buffer, sizeof(buffer))
+                (Port, Ptr{UInt8}, Csize_t), port, buffer, Csize_t(nbytes))
     handle_error(ret, loc())
 
-    return bytestring(pointer(buffer), Int(ret) + 1)
+    nb = Int(ret)
+    return nb > 0 ? buffer[1:nb] : Vector{UInt8}()
 end
 
 # enum sp_return sp_blocking_write(struct sp_port *port, const void *buf, size_t count, unsigned int timeout_ms);
