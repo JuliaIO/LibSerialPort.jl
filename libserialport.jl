@@ -2,6 +2,10 @@
 module LibSerialPort
 
 export
+
+    # Wrapper object for high-level API
+    SerialPort,
+
     # Enum types
     SPReturn,
     SPMode,
@@ -160,5 +164,6 @@ export
     sp_get_lib_version_string
 
     include("wrap.jl")
+    include("high-level-api.jl")
 
 end # LibSerialPort
