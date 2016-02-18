@@ -58,11 +58,11 @@ end
 Print info found for this port.
 Note: port should be open to obtain a valid FD/handle before accessing fields.
 """
-function print_port_info(sp::SerialPort; show_config::Bool=true)
-    print_port_info(sp.ref, show_config=show_config)
+function print_port_metadata(sp::SerialPort; show_config::Bool=true)
+    print_port_metadata(sp.ref, show_config=show_config)
 end
 
-function print_port_info(port::Port; show_config::Bool=true)
+function print_port_metadata(port::Port; show_config::Bool=true)
     println("\nPort name:\t",       sp_get_port_name(port))
     println("Manufacturer:\t",      sp_get_port_usb_manufacturer(port))
     println("Product:\t",           sp_get_port_usb_product(port))
@@ -82,9 +82,34 @@ function print_port_info(port::Port; show_config::Bool=true)
         println("Product ID:\t",  pid)
     end
     if show_config
-        print_port_config(port)
+        print_port_settings(port)
     end
 end
+
+"""
+Print settings currently stored in sp_port_config struct
+"""
+function print_port_settings(config::LibSerialPort.Config)
+    println("\tbaudrate\t", sp_get_config_baudrate(config))
+    println("\tbits\t",     sp_get_config_bits(config))
+    println("\tparity\t",   sp_get_config_parity(config))
+    println("\tstopbits\t", sp_get_config_stopbits(config))
+    println("\tRTS\t",      sp_get_config_rts(config))
+    println("\tCTS\t",      sp_get_config_cts(config))
+    println("\tDTR\t",      sp_get_config_dtr(config))
+    println("\tDSR\t",      sp_get_config_dsr(config))
+    println("\tXonXoff\t",  sp_get_config_xon_xoff(config))
+    println("")
+end
+
+function print_port_settings(port::LibSerialPort.Port)
+    println("Configuration for ", sp_get_port_name(port), ":")
+    config = sp_get_config(port)
+    print_port_settings(config)
+    sp_free_config(config)
+end
+
+print_port_settings(sp::SerialPort) = print_port_settings(sp.ref)
 
 function Base.open(sp::SerialPort; mode::SPMode=SP_MODE_READ_WRITE)
     sp_open(sp.ref, mode)

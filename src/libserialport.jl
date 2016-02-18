@@ -2,10 +2,6 @@
 module LibSerialPort
 
 export
-
-    # Wrapper object for high-level API
-    SerialPort,
-
     # Enum types
     SPReturn,
     SPMode,
@@ -163,9 +159,13 @@ export
     sp_get_age_lib_version,
     sp_get_lib_version_string,
 
+    # Wrapper object for high-level API
+    SerialPort,
+
     # Functions from high-level API
     list_ports,
-    print_port_info,
+    print_port_metadata,
+    print_port_settings,
     set_speed,
     set_frame,
     set_flow_control

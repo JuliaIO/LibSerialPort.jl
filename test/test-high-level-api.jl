@@ -39,7 +39,8 @@ function main()
     set_speed(sp, 19200)
     set_frame(sp, ndatabits=8, parity=SP_PARITY_NONE, nstopbits=1)
 
-    # print_port_info(sp)
+    print_port_metadata(sp)
+    print_port_settings(sp)
 
     test_nonblocking_serial_loopback(sp)
 

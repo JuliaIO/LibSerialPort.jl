@@ -3,29 +3,6 @@
 using LibSerialPort
 
 """
-Print settings currently stored in sp_port_config struct
-"""
-function print_config_info(config::LibSerialPort.Config)
-    println("\tbaudrate\t", sp_get_config_baudrate(config))
-    println("\tbits\t",     sp_get_config_bits(config))
-    println("\tparity\t",   sp_get_config_parity(config))
-    println("\tstopbits\t", sp_get_config_stopbits(config))
-    println("\tRTS\t",      sp_get_config_rts(config))
-    println("\tCTS\t",      sp_get_config_cts(config))
-    println("\tDTR\t",      sp_get_config_dtr(config))
-    println("\tDSR\t",      sp_get_config_dsr(config))
-    println("\tXonXoff\t",  sp_get_config_xon_xoff(config))
-    println("")
-end
-
-function print_port_config(port::LibSerialPort.Port)
-    println("Configuration for ", sp_get_port_name(port), ":")
-    config = sp_get_config(port)
-    print_config_info(config)
-    sp_free_config(config)
-end
-
-"""
 Test that we can change some port configuration settings on a copy of the
 provided port. Use two approaches to cover the various set and get functions.
 The original port configuration should not be modified by these tests!
@@ -44,7 +21,7 @@ function test_change_port_copy_method1(port::LibSerialPort.Port)
     sp_open(port2, SP_MODE_READ_WRITE)
 
     print("\n[TEST1] INITIAL ")
-    print_port_config(port2)
+    print_port_settings(port2)
     println("[TEST1] changing port configuration settings.")
     sp_set_baudrate(port2, 115200)
     sp_set_bits(port2, 6)
@@ -62,7 +39,7 @@ function test_change_port_copy_method1(port::LibSerialPort.Port)
     sp_set_xon_xoff(port2, SP_XONXOFF_INOUT)
 
     print("[TEST1] UPDATED ")
-    print_port_config(port2)
+    print_port_settings(port2)
 
     println("[TEST1] closing and deleting copied port")
     sp_close(port2)
@@ -72,7 +49,7 @@ function test_change_port_copy_method1(port::LibSerialPort.Port)
     sp_open(port, SP_MODE_READ_WRITE)
 
     print("[TEST1] ORIGINAL ")
-    print_port_config(port)
+    print_port_settings(port)
 end
 
 function test_change_port_copy_method2(port::LibSerialPort.Port)
@@ -86,7 +63,7 @@ function test_change_port_copy_method2(port::LibSerialPort.Port)
     config2 = sp_get_config(port2)
 
     print("\n[TEST2] INITIAL ")
-    print_config_info(config2)
+    print_port_settings(config2)
 
     println("[TEST2] changing configuration settings.")
     sp_set_config_baudrate(config2, 115200)
@@ -103,7 +80,7 @@ function test_change_port_copy_method2(port::LibSerialPort.Port)
     sp_free_config(config2)
 
     print("[TEST2] UPDATED ")
-    print_port_config(port2)
+    print_port_settings(port2)
 
     println("[TEST2] closing and deleting copied port")
     sp_close(port2)
@@ -113,7 +90,7 @@ function test_change_port_copy_method2(port::LibSerialPort.Port)
     sp_open(port, SP_MODE_READ_WRITE)
 
     print("[TEST2] ORIGINAL ")
-    print_port_config(port)
+    print_port_settings(port)
 end
 
 """
