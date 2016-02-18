@@ -90,8 +90,6 @@ function test_change_port_copy_method1(port)
     sp_close(port)
     sp_open(port2, SP_MODE_READ_WRITE)
 
-    # Beware of error that RTS & CTS flow control must be enabled together
-
     print("\n[TEST1] INITIAL ")
     print_port_config(port2)
     println("[TEST1] changing port configuration settings.")
@@ -99,10 +97,15 @@ function test_change_port_copy_method1(port)
     sp_set_bits(port2, 6)
     sp_set_parity(port2, SP_PARITY_EVEN)
     sp_set_stopbits(port2, 2)
+
+    # Request to send / clear to send go as a pair.
+    # They must be enabled or disabled together.
     sp_set_rts(port2, SP_RTS_OFF)
     sp_set_cts(port2, SP_CTS_IGNORE)
+
     sp_set_dtr(port2, SP_DTR_OFF)
     sp_set_dsr(port2, SP_DSR_IGNORE)
+
     sp_set_xon_xoff(port2, SP_XONXOFF_INOUT)
 
     print("[TEST1] UPDATED ")
