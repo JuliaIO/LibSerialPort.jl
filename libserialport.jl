@@ -1,3 +1,11 @@
+type SPPort end
+type SPConfig end
+type SPEventSet end
+
+typealias Port    Ref{SPPort}
+typealias PortP   Ref{Ptr{SPPort}}
+typealias Config  Ref{SPConfig}
+typealias ConfigP Ref{Ptr{SPConfig}}
 
 @enum(SPReturn,
     SP_OK = 0,
@@ -75,12 +83,6 @@
     SP_TRANSPORT_USB,
     SP_TRANSPORT_BLUETOOTH)
 
-type SPEventSet
-    handles::Ptr{Void}
-    masks::Ptr{SPEvent}
-    count::Cuint
-end
-
 function notify_on_error(ret::SPReturn)
     ret >= SP_OK && return
 
@@ -104,74 +106,74 @@ end
 
 # enum sp_return sp_get_port_by_name(const char *portname, struct sp_port **port_ptr);
 function sp_get_port_by_name(portname::AbstractString)
-    portref = Ref{Ptr{Void}}()
+    portp = PortP()
     ret = ccall((:sp_get_port_by_name, "libserialport"), SPReturn,
-                (Ptr{UInt8}, Ref{Ptr{Void}}), portname, portref)
+                (Ptr{UInt8}, PortP), portname, portp)
     notify_on_error(ret)
-    portref[]
+    portp[]
 end
 
 # void sp_free_port(struct sp_port *port);
-function sp_free_port(port::Ref{Void})
-    ccall((:sp_free_port, "libserialport"), Void, (Ref{Void},), port)
+function sp_free_port(port::Port)
+    ccall((:sp_free_port, "libserialport"), Void, (Port,), port)
 end
 
 # enum sp_return sp_list_ports(struct sp_port ***list_ptr);
 function sp_list_ports()
-    ports = Ref{Ptr{Ptr{Void}}}()
+    ports = Ref{Ptr{Ptr{SPPort}}}()
     ret = ccall((:sp_list_ports, "libserialport"),
-                SPReturn, (Ref{Ptr{Ptr{Void}}},), ports)
+                SPReturn, (Ref{Ptr{Ptr{SPPort}}},), ports)
     notify_on_error(ret)
     return ports[]
 end
 
 # enum sp_return sp_copy_port(const struct sp_port *port, struct sp_port **copy_ptr);
-function sp_copy_port(port::Ref{Void})
-    port_copy = Ref{Ptr{Void}}()
+function sp_copy_port(port::Port)
+    port_copy = PortP()
     ret = ccall((:sp_copy_port, "libserialport"), SPReturn,
-                (Ref{Void}, Ref{Ptr{Void}}), port, port_copy)
+                (Port, PortP), port, port_copy)
     notify_on_error(ret)
     return port_copy[]
 end
 
 # void sp_free_port_list(struct sp_port **ports);
-function sp_free_port_list(ports::Ref{Ptr{Void}})
-    ccall((:sp_free_port_list, "libserialport"), Void, (Ref{Ptr{Void}},), ports)
+function sp_free_port_list(ports::PortP)
+    ccall((:sp_free_port_list, "libserialport"), Void, (PortP,), ports)
 end
 
 # enum sp_return sp_open(struct sp_port *port, enum sp_mode flags);
-function sp_open(port::Ref{Void}, mode::SPMode)
-    ret = ccall((:sp_open, "libserialport"), SPReturn, (Ref{Void}, SPMode), port, mode)
+function sp_open(port::Port, mode::SPMode)
+    ret = ccall((:sp_open, "libserialport"), SPReturn, (Port, SPMode), port, mode)
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_close(struct sp_port *port);
-function sp_close(port::Ref{Void})
-    ret = ccall((:sp_close, "libserialport"), SPReturn, (Ref{Void},), port)
+function sp_close(port::Port)
+    ret = ccall((:sp_close, "libserialport"), SPReturn, (Port,), port)
     notify_on_error(ret)
     ret
 end
 
 # char *sp_get_port_name(const struct sp_port *port);
-function sp_get_port_name(port::Ref{Void})
-    cname = ccall((:sp_get_port_name, "libserialport"), Ptr{UInt8}, (Ref{Void},), port)
+function sp_get_port_name(port::Port)
+    cname = ccall((:sp_get_port_name, "libserialport"), Ptr{UInt8}, (Port,), port)
     name = cname != C_NULL ? bytestring(cname) : ""
 end
 
 # char *sp_get_port_description(const struct sp_port *port);
-function sp_get_port_description(port::Ref{Void})
-    d = ccall((:sp_get_port_description, "libserialport"), Ptr{UInt8}, (Ref{Void},), port)
+function sp_get_port_description(port::Port)
+    d = ccall((:sp_get_port_description, "libserialport"), Ptr{UInt8}, (Port,), port)
     desc = d != C_NULL ? bytestring(d) : ""
 end
 
 # enum sp_transport sp_get_port_transport(const struct sp_port *port);
-function sp_get_port_transport(port::Ref{Void})
-    ccall((:sp_get_port_transport, "libserialport"), SPTransport, (Ref{Void},), port)
+function sp_get_port_transport(port::Port)
+    ccall((:sp_get_port_transport, "libserialport"), SPTransport, (Port,), port)
 end
 
 # enum sp_return sp_get_port_usb_bus_address(const struct sp_port *port, int *usb_bus, int *usb_address);
-function sp_get_port_usb_bus_address(port::Ref{Void})
+function sp_get_port_usb_bus_address(port::Port)
 
     if sp_get_port_transport(port) != SP_TRANSPORT_USB
         warn("Port does not use USB transport")
@@ -181,7 +183,7 @@ function sp_get_port_usb_bus_address(port::Ref{Void})
     usb_bus = Ref{Cint}()
     usb_address = Ref{Cint}()
     ret = ccall((:sp_get_port_usb_bus_address, "libserialport"), SPReturn,
-                (Ref{Void}, Ref{Cint}, Ref{Cint}), port, usb_bus, usb_address)
+                (Port, Ref{Cint}, Ref{Cint}), port, usb_bus, usb_address)
 
     if ret == SP_ERR_SUPP
         return -1, -1
@@ -192,7 +194,7 @@ function sp_get_port_usb_bus_address(port::Ref{Void})
 end
 
 # enum sp_return sp_get_port_usb_vid_pid(const struct sp_port *port, int *usb_vid, int *usb_pid);
-function sp_get_port_usb_vid_pid(port::Ref{Void})
+function sp_get_port_usb_vid_pid(port::Port)
 
     if sp_get_port_transport(port) != SP_TRANSPORT_USB
         warn("Port does not use USB transport")
@@ -202,7 +204,7 @@ function sp_get_port_usb_vid_pid(port::Ref{Void})
     vid = Ref{Cint}()
     pid = Ref{Cint}()
     ret = ccall((:sp_get_port_usb_vid_pid, "libserialport"), SPReturn,
-                (Ref{Void}, Ref{Cint}, Ref{Cint}), port, vid, pid)
+                (Port, Ref{Cint}, Ref{Cint}), port, vid, pid)
 
     if ret == SP_ERR_SUPP
         return -1, -1
@@ -213,325 +215,324 @@ function sp_get_port_usb_vid_pid(port::Ref{Void})
 end
 
 # char *sp_get_port_usb_manufacturer(const struct sp_port *port);
-function sp_get_port_usb_manufacturer(port::Ref{Void})
+function sp_get_port_usb_manufacturer(port::Port)
     m = ccall((:sp_get_port_usb_manufacturer, "libserialport"),
-              Ptr{UInt8}, (Ref{Void},), port)
+              Ptr{UInt8}, (Port,), port)
     manufacturer = (m != C_NULL) ? bytestring(m) : ""
 end
 
 # char *sp_get_port_usb_product(const struct sp_port *port);
-function sp_get_port_usb_product(port::Ref{Void})
+function sp_get_port_usb_product(port::Port)
     p = ccall((:sp_get_port_usb_product, "libserialport"),
-              Ptr{UInt8}, (Ref{Void},), port)
+              Ptr{UInt8}, (Port,), port)
     product = (p != C_NULL) ? bytestring(p) : ""
 end
 
 # char *sp_get_port_usb_serial(const struct sp_port *port);
-function sp_get_port_usb_serial(port::Ref{Void})
+function sp_get_port_usb_serial(port::Port)
     s = ccall((:sp_get_port_usb_serial, "libserialport"),
-              Ptr{UInt8}, (Ref{Void},), port)
+              Ptr{UInt8}, (Port,), port)
     serial = (s != C_NULL) ? bytestring(s) : ""
 end
 
 # char *sp_get_port_bluetooth_address(const struct sp_port *port);
-function sp_get_port_bluetooth_address(port::Ref{Void})
+function sp_get_port_bluetooth_address(port::Port)
     a = ccall((:sp_get_port_bluetooth_address, "libserialport"),
-              Ptr{UInt8}, (Ref{Void},), port)
+              Ptr{UInt8}, (Port,), port)
     address = (a != C_NULL) ? bytestring(a) : ""
 end
 
 # enum sp_return sp_get_port_handle(const struct sp_port *port, void *result_ptr);
-function sp_get_port_handle(port::Ref{Void})
+function sp_get_port_handle(port::Port)
     # For Linux and OS X
     result = Ref{Cint}(0)
 
     # TODO: on Windows, result should be Ref{HANDLE}
 
     ret = ccall((:sp_get_port_handle, "libserialport"), SPReturn,
-                (Ref{Void}, Ref{Cint}), port, result)
+                (Port, Ref{Cint}), port, result)
     notify_on_error(ret)
     result[]
 end
 
 # enum sp_return sp_new_config(struct sp_port_config **config_ptr);
 function sp_new_config()
-    pc = Ref{Ptr{Void}}()
-    ret = ccall((:sp_new_config, "libserialport"), SPReturn,
-                (Ref{Ptr{Void}},), pc)
+    pc = ConfigP()
+    ret = ccall((:sp_new_config, "libserialport"), SPReturn, (ConfigP,), pc)
     notify_on_error(ret)
     pc[]
 end
 
 # void sp_free_config(struct sp_port_config *config);
-function sp_free_config(config::Ref{Void})
-    ccall((:sp_free_config, "libserialport"), Void, (Ref{Void},), config)
+function sp_free_config(config::Config)
+    ccall((:sp_free_config, "libserialport"), Void, (Config,), config)
 end
 
-function sp_get_config(port::Ref{Void})
+function sp_get_config(port::Port)
     config = sp_new_config()
     ret = ccall((:sp_get_config, "libserialport"), SPReturn,
-                (Ref{Void}, Ref{Void}), port, config)
+                (Port, Config), port, config)
     notify_on_error(ret)
     config
 end
 
 # enum sp_return sp_set_config(struct sp_port *port, const struct sp_port_config *config);
-function sp_set_config(port::Ref{Void}, config::Ref{Void})
+function sp_set_config(port::Port, config::Config)
     ret = ccall((:sp_set_config, "libserialport"), SPReturn,
-                (Ref{Void}, Ref{Void}), port, config)
+                (Port, Config), port, config)
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_set_baudrate(struct sp_port *port, int baudrate);
-function sp_set_baudrate(port::Ref{Void}, baudrate::Integer)
+function sp_set_baudrate(port::Port, baudrate::Integer)
     ret = ccall((:sp_set_baudrate, "libserialport"), SPReturn,
-                (Ref{Void}, Cint), port, Cint(baudrate))
+                (Port, Cint), port, Cint(baudrate))
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_get_config_baudrate(const struct sp_port_config *config, int *baudrate_ptr);
-function sp_get_config_baudrate(config::Ref{Void})
+function sp_get_config_baudrate(config::Config)
     baudrate = Ref{Cint}()
     ret = ccall((:sp_get_config_baudrate, "libserialport"), SPReturn,
-                (Ref{Void}, Ref{Cint}), config, baudrate)
+                (Config, Ref{Cint}), config, baudrate)
     notify_on_error(ret)
     baudrate[]
 end
 
 # enum sp_return sp_set_config_baudrate(struct sp_port_config *config, int baudrate);
-function sp_set_config_baudrate(config::Ref{Void}, baudrate::Integer)
+function sp_set_config_baudrate(config::Config, baudrate::Integer)
     ret = ccall((:sp_set_config_baudrate, "libserialport"), SPReturn,
-                (Ref{Void}, Cint), config, Cint(baudrate))
+                (Config, Cint), config, Cint(baudrate))
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_set_bits(struct sp_port *port, int bits);
-function sp_set_bits(port::Ref{Void}, bits::Integer)
+function sp_set_bits(port::Port, bits::Integer)
     @assert 5 <= bits <= 8
     ret = ccall((:sp_set_bits, "libserialport"), SPReturn,
-                (Ref{Void}, Cint), port, Cint(bits))
+                (Port, Cint), port, Cint(bits))
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_get_config_bits(const struct sp_port_config *config, int *bits_ptr);
-function sp_get_config_bits(config::Ref{Void})
+function sp_get_config_bits(config::Config)
     bits = Ref{Cint}()
     ret = ccall((:sp_get_config_bits, "libserialport"), SPReturn,
-                (Ref{Void}, Ref{Cint}), config, bits)
+                (Config, Ref{Cint}), config, bits)
     notify_on_error(ret)
     bits[]
 end
 
 # enum sp_return sp_set_config_bits(struct sp_port_config *config, int bits);
-function sp_set_config_bits(config::Ref{Void}, bits::Integer)
+function sp_set_config_bits(config::Config, bits::Integer)
     ret = ccall((:sp_set_config_bits, "libserialport"), SPReturn,
-                (Ref{Void}, Cint), config, Cint(bits))
+                (Config, Cint), config, Cint(bits))
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_set_parity(struct sp_port *port, enum sp_parity parity);
-function sp_set_parity(port::Ref{Void}, parity::SPParity)
+function sp_set_parity(port::Port, parity::SPParity)
     ret = ccall((:sp_set_parity, "libserialport"), SPReturn,
-                (Ref{Void}, SPParity), port, parity)
+                (Port, SPParity), port, parity)
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_get_config_parity(const struct sp_port_config *config, enum sp_parity *parity_ptr);
-function sp_get_config_parity(config::Ref{Void})
+function sp_get_config_parity(config::Config)
     parity = Ref{SPParity}()
     ret = ccall((:sp_get_config_parity, "libserialport"), SPReturn,
-                (Ref{Void}, Ref{SPParity}), config, parity)
+                (Config, Ref{SPParity}), config, parity)
     notify_on_error(ret)
     parity[]
 end
 
 # enum sp_return sp_set_config_parity(struct sp_port_config *config, enum sp_parity parity);
-function sp_set_config_parity(config::Ref{Void}, parity::SPParity)
+function sp_set_config_parity(config::Config, parity::SPParity)
     ret = ccall((:sp_set_config_parity, "libserialport"), SPReturn,
-                (Ref{Void}, SPParity), config, parity)
+                (Config, SPParity), config, parity)
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_set_stopbits(struct sp_port *port, int stopbits);
-function sp_set_stopbits(port::Ref{Void}, stopbits::Integer)
+function sp_set_stopbits(port::Port, stopbits::Integer)
     ret = ccall((:sp_set_stopbits, "libserialport"), SPReturn,
-                (Ref{Void}, Cint), port, Cint(stopbits))
+                (Port, Cint), port, Cint(stopbits))
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_get_config_stopbits(const struct sp_port_config *config, int *stopbits_ptr);
-function sp_get_config_stopbits(config::Ref{Void})
+function sp_get_config_stopbits(config::Config)
     bits = Ref{Cint}()
     ret = ccall((:sp_get_config_stopbits, "libserialport"), SPReturn,
-                (Ref{Void}, Ref{Cint}), config, bits)
+                (Config, Ref{Cint}), config, bits)
     notify_on_error(ret)
     bits[]
 end
 
 # enum sp_return sp_set_config_stopbits(struct sp_port_config *config, int stopbits);
-function sp_set_config_stopbits(config::Ref{Void}, stopbits::Integer)
+function sp_set_config_stopbits(config::Config, stopbits::Integer)
     ret = ccall((:sp_set_config_stopbits, "libserialport"), SPReturn,
-                (Ref{Void}, Cint), config, Cint(stopbits))
+                (Config, Cint), config, Cint(stopbits))
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_set_rts(struct sp_port *port, enum sp_rts rts);
-function sp_set_rts(port::Ref{Void}, rts::SPrts)
+function sp_set_rts(port::Port, rts::SPrts)
     ret = ccall((:sp_set_rts, "libserialport"), SPReturn,
-                (Ref{Void}, SPrts), port, rts)
+                (Port, SPrts), port, rts)
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_get_config_rts(const struct sp_port_config *config, enum sp_rts *rts_ptr);
-function sp_get_config_rts(config::Ref{Void})
+function sp_get_config_rts(config::Config)
     rts = Ref{SPrts}()
     ret = ccall((:sp_get_config_rts, "libserialport"), SPReturn,
-                (Ref{Void}, Ref{SPrts}), config, rts)
+                (Config, Ref{SPrts}), config, rts)
     notify_on_error(ret)
     rts[]
 end
 
 # enum sp_return sp_set_config_rts(struct sp_port_config *config, enum sp_rts rts);
-function sp_set_config_rts(config::Ref{Void}, rts::SPrts)
+function sp_set_config_rts(config::Config, rts::SPrts)
     ret = ccall((:sp_set_config_rts, "libserialport"), SPReturn,
-                (Ref{Void}, SPrts), config, SPrts(rts))
+                (Config, SPrts), config, SPrts(rts))
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_set_cts(struct sp_port *port, enum sp_cts cts);
-function sp_set_cts(port::Ref{Void}, cts::SPcts)
+function sp_set_cts(port::Port, cts::SPcts)
     ret = ccall((:sp_set_cts, "libserialport"), SPReturn,
-                (Ref{Void}, SPcts), port, cts)
+                (Port, SPcts), port, cts)
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_get_config_cts(const struct sp_port_config *config, enum sp_cts *cts_ptr);
-function sp_get_config_cts(config::Ref{Void})
+function sp_get_config_cts(config::Config)
     cts = Ref{SPcts}()
     ret = ccall((:sp_get_config_cts, "libserialport"), SPReturn,
-                (Ref{Void}, Ref{SPcts}), config, cts)
+                (Config, Ref{SPcts}), config, cts)
     notify_on_error(ret)
     cts[]
 end
 
 # enum sp_return sp_set_config_cts(struct sp_port_config *config, enum sp_cts cts);
-function sp_set_config_cts(config::Ref{Void}, cts::SPcts)
+function sp_set_config_cts(config::Config, cts::SPcts)
     ret = ccall((:sp_set_config_cts, "libserialport"), SPReturn,
-                (Ref{Void}, SPcts), config, SPcts(cts))
+                (Config, SPcts), config, SPcts(cts))
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_set_dtr(struct sp_port *port, enum sp_dtr dtr);
-function sp_set_dtr(port::Ref{Void}, dtr::SPdtr)
+function sp_set_dtr(port::Port, dtr::SPdtr)
     ret = ccall((:sp_set_dtr, "libserialport"), SPReturn,
-                (Ref{Void}, SPdtr), port, dtr)
+                (Port, SPdtr), port, dtr)
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_get_config_dtr(const struct sp_port_config *config, enum sp_dtr *dtr_ptr);
-function sp_get_config_dtr(config::Ref{Void})
+function sp_get_config_dtr(config::Config)
     dtr = Ref{SPdtr}()
     ret = ccall((:sp_get_config_dtr, "libserialport"), SPReturn,
-                (Ref{Void}, Ref{SPdtr}), config, dtr)
+                (Config, Ref{SPdtr}), config, dtr)
     notify_on_error(ret)
     dtr[]
 end
 
 # enum sp_return sp_set_config_dtr(struct sp_port_config *config, enum sp_dtr dtr);
-function sp_set_config_dtr(config::Ref{Void}, dtr::SPdtr)
+function sp_set_config_dtr(config::Config, dtr::SPdtr)
     ret = ccall((:sp_set_config_dtr, "libserialport"), SPReturn,
-                (Ref{Void}, SPdtr), config, SPdtr(dtr))
+                (Config, SPdtr), config, SPdtr(dtr))
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_set_dsr(struct sp_port *port, enum sp_dsr dsr);
-function sp_set_dsr(port::Ref{Void}, dsr::SPdsr)
+function sp_set_dsr(port::Port, dsr::SPdsr)
     ret = ccall((:sp_set_dsr, "libserialport"), SPReturn,
-                (Ref{Void}, SPdsr), port, dsr)
+                (Port, SPdsr), port, dsr)
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_get_config_dsr(const struct sp_port_config *config, enum sp_dsr *dsr_ptr);
-function sp_get_config_dsr(config::Ref{Void})
+function sp_get_config_dsr(config::Config)
     dsr = Ref{SPdsr}()
     ret = ccall((:sp_get_config_dsr, "libserialport"), SPReturn,
-                (Ref{Void}, Ref{SPdsr}), config, dsr)
+                (Config, Ref{SPdsr}), config, dsr)
     notify_on_error(ret)
     dsr[]
 end
 
 # enum sp_return sp_set_config_dsr(struct sp_port_config *config, enum sp_dsr dsr);
-function sp_set_config_dsr(config::Ref{Void}, dsr::SPdsr)
+function sp_set_config_dsr(config::Config, dsr::SPdsr)
     ret = ccall((:sp_set_config_dsr, "libserialport"), SPReturn,
-                (Ref{Void}, SPdsr), config, SPdsr(dsr))
+                (Config, SPdsr), config, SPdsr(dsr))
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_set_xon_xoff(struct sp_port *port, enum sp_xonxoff xon_xoff);
-function sp_set_xon_xoff(port::Ref{Void}, xon_xoff::SPXonXoff)
+function sp_set_xon_xoff(port::Port, xon_xoff::SPXonXoff)
     ret = ccall((:sp_set_xon_xoff, "libserialport"), SPReturn,
-                (Ref{Void}, SPXonXoff), port, xon_xoff)
+                (Port, SPXonXoff), port, xon_xoff)
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_get_config_xon_xoff(const struct sp_port_config *config, enum sp_xonxoff *xon_xoff_ptr);
-function sp_get_config_xon_xoff(config::Ref{Void})
+function sp_get_config_xon_xoff(config::Config)
     xon_xoff = Ref{SPXonXoff}()
     ret = ccall((:sp_get_config_xon_xoff, "libserialport"), SPReturn,
-                (Ref{Void}, Ref{SPXonXoff}), config, xon_xoff)
+                (Config, Ref{SPXonXoff}), config, xon_xoff)
     notify_on_error(ret)
     xon_xoff[]
 end
 
 # enum sp_return sp_set_config_xon_xoff(struct sp_port_config *config, enum sp_xonxoff xon_xoff);
-function sp_set_config_xon_xoff(config::Ref{Void}, xon_xoff::SPXonXoff)
+function sp_set_config_xon_xoff(config::Config, xon_xoff::SPXonXoff)
     ret = ccall((:sp_set_config_xon_xoff, "libserialport"), SPReturn,
-                (Ref{Void}, SPXonXoff), config, SPXonXoff(xon_xoff))
+                (Config, SPXonXoff), config, SPXonXoff(xon_xoff))
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_set_config_flowcontrol(struct sp_port_config *config, enum sp_flowcontrol flowcontrol);
-function sp_set_config_flowcontrol(config::Ref{Void}, flowcontrol::SPFlowControl)
+function sp_set_config_flowcontrol(config::Config, flowcontrol::SPFlowControl)
     ret = ccall((:sp_set_config_flowcontrol, "libserialport"), SPReturn,
-                (Ref{Void}, SPFlowControl), config, flowcontrol)
+                (Config, SPFlowControl), config, flowcontrol)
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_set_flowcontrol(struct sp_port *port, enum sp_flowcontrol flowcontrol);
-function sp_set_flowcontrol(port::Ref{Void}, flowcontrol::SPFlowControl)
+function sp_set_flowcontrol(port::Port, flowcontrol::SPFlowControl)
     ret = ccall((:sp_set_flowcontrol, "libserialport"), SPReturn,
-                (Ref{Void}, SPFlowControl), port, flowcontrol)
+                (Port, SPFlowControl), port, flowcontrol)
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_blocking_read(struct sp_port *port, void *buf, size_t count, unsigned int timeout_ms);
-function sp_blocking_read(port::Ref{Void}, nbytes::Integer, timeout_ms::Integer)
+function sp_blocking_read(port::Port, nbytes::Integer, timeout_ms::Integer)
     buffer = Array(UInt8, nbytes)
 
     # If the read succeeds, the return value is the number of bytes read.
     ret = ccall((:sp_blocking_read, "libserialport"), SPReturn,
-                (Ref{Void}, Ptr{UInt8}, Csize_t, Cuint),
+                (Port, Ptr{UInt8}, Csize_t, Cuint),
                 port, buffer, sizeof(buffer), Cuint(timeout_ms))
     notify_on_error(ret)
 
@@ -539,12 +540,12 @@ function sp_blocking_read(port::Ref{Void}, nbytes::Integer, timeout_ms::Integer)
 end
 
 # enum sp_return sp_blocking_read_next(struct sp_port *port, void *buf, size_t count, unsigned int timeout_ms);
-function sp_blocking_read_next(port::Ref{Void}, nbytes::Integer, timeout_ms::Integer)
+function sp_blocking_read_next(port::Port, nbytes::Integer, timeout_ms::Integer)
     buffer = Array(UInt8, nbytes)
 
     # If the read succeeds, the return value is the number of bytes read.
     ret = ccall((:sp_blocking_read_next, "libserialport"), SPReturn,
-                (Ref{Void}, Ptr{UInt8}, Csize_t, Cuint),
+                (Port, Ptr{UInt8}, Csize_t, Cuint),
                 port, buffer, sizeof(buffer), Cuint(timeout_ms))
     notify_on_error(ret)
 
@@ -552,28 +553,28 @@ function sp_blocking_read_next(port::Ref{Void}, nbytes::Integer, timeout_ms::Int
 end
 
 # enum sp_return sp_nonblocking_read(struct sp_port *port, void *buf, size_t count);
-function sp_nonblocking_read(port::Ref{Void}, nbytes::Integer)
+function sp_nonblocking_read(port::Port, nbytes::Integer)
     buffer = Array(UInt8, nbytes)
     ret = ccall((:sp_nonblocking_read, "libserialport"), SPReturn,
-                (Ref{Void}, Ptr{UInt8}, Csize_t), port, buffer, sizeof(buffer))
+                (Port, Ptr{UInt8}, Csize_t), port, buffer, sizeof(buffer))
     notify_on_error(ret)
 
     return bytestring(pointer(buffer), Int(ret) + 1)
 end
 
 # enum sp_return sp_blocking_write(struct sp_port *port, const void *buf, size_t count, unsigned int timeout_ms);
-function sp_blocking_write(port::Ref{Void}, buffer::Array{UInt8}, timeout_ms::Integer)
+function sp_blocking_write(port::Port, buffer::Array{UInt8}, timeout_ms::Integer)
     ret = ccall((:sp_blocking_write, "libserialport"), SPReturn,
-                (Ref{Void}, Ptr{UInt8}, Csize_t, Cuint),
+                (Port, Ptr{UInt8}, Csize_t, Cuint),
                 port, pointer(buffer), sizeof(buffer), Cuint(timeout_ms))
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_nonblocking_write(struct sp_port *port, const void *buf, size_t count);
-function sp_nonblocking_write(port::Ref{Void}, buffer::Array{UInt8})
+function sp_nonblocking_write(port::Port, buffer::Array{UInt8})
     ret = ccall((:sp_nonblocking_write, "libserialport"), SPReturn,
-                (Ref{Void}, Ptr{UInt8}, Csize_t), port, pointer(buffer), sizeof(buffer))
+                (Port, Ptr{UInt8}, Csize_t), port, pointer(buffer), sizeof(buffer))
     notify_on_error(ret)
     ret
 end
@@ -582,8 +583,8 @@ end
 """
 Returns the number of bytes in the input buffer or an error code.
 """
-function sp_input_waiting(port::Ref{Void})
-    ret = ccall((:sp_input_waiting, "libserialport"), SPReturn, (Ref{Void},), port)
+function sp_input_waiting(port::Port)
+    ret = ccall((:sp_input_waiting, "libserialport"), SPReturn, (Port,), port)
     notify_on_error(ret)
     ret
 end
@@ -592,23 +593,23 @@ end
 """
 Returns the number of bytes in the output buffer or an error code.
 """
-function sp_output_waiting(port::Ref{Void})
-    ret = ccall((:sp_output_waiting, "libserialport"), SPReturn, (Ref{Void},), port)
+function sp_output_waiting(port::Port)
+    ret = ccall((:sp_output_waiting, "libserialport"), SPReturn, (Port,), port)
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_flush(struct sp_port *port, enum sp_buffer buffers);
-function sp_flush(port::Ref{Void}, buffers::SPBuffer)
+function sp_flush(port::Port, buffers::SPBuffer)
     ret = ccall((:sp_flush, "libserialport"), SPReturn,
-                (Ref{Void}, SPBuffer), port, buffers)
+                (Port, SPBuffer), port, buffers)
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_drain(struct sp_port *port);
-function sp_drain(port::Ref{Void})
-    ret = ccall((:sp_drain, "libserialport"), SPReturn, (Ref{Void},), port)
+function sp_drain(port::Port)
+    ret = ccall((:sp_drain, "libserialport"), SPReturn, (Port,), port)
     notify_on_error(ret)
     ret
 end
@@ -623,9 +624,9 @@ function sp_new_event_set()
 end
 
 # enum sp_return sp_add_port_events(struct sp_event_set *event_set, const struct sp_port *port, enum sp_event mask);
-function sp_add_port_events(event_set::Ref{SPEventSet}, port::Ref{Void}, mask::SPEvent)
+function sp_add_port_events(event_set::Ref{SPEventSet}, port::Port, mask::SPEvent)
     ret = ccall((:sp_add_port_events, "libserialport"), SPReturn,
-                (Ref{SPEventSet}, Ref{Void}, SPEvent), event_set, port, mask)
+                (Ref{SPEventSet}, Port, SPEvent), event_set, port, mask)
     notify_on_error(ret)
     ret
 end
@@ -647,23 +648,23 @@ function sp_free_event_set(event_set::Ref{SPEventSet})
 end
 
 # enum sp_return sp_get_signals(struct sp_port *port, enum sp_signal *signal_mask);
-function sp_get_signals(port::Ref{Void}, signal_mask::Ref{SPSignal})
+function sp_get_signals(port::Port, signal_mask::Ref{SPSignal})
     ret = ccall((:sp_get_signals, "libserialport"), SPReturn,
-                (Ref{Void}, Ref{SPSignal}), port, signal_mask)
+                (Port, Ref{SPSignal}), port, signal_mask)
     notify_on_error(ret)
     signal_mask[]
 end
 
 # enum sp_return sp_start_break(struct sp_port *port);
-function sp_start_break(port::Ref{Void})
-    ret = ccall((:sp_start_break, "libserialport"), SPReturn, (Ref{Void},), port)
+function sp_start_break(port::Port)
+    ret = ccall((:sp_start_break, "libserialport"), SPReturn, (Port,), port)
     notify_on_error(ret)
     ret
 end
 
 # enum sp_return sp_end_break(struct sp_port *port);
-function sp_end_break(port::Ref{Void})
-    ret = ccall((:sp_end_break, "libserialport"), SPReturn, (Ref{Void},), port)
+function sp_end_break(port::Port)
+    ret = ccall((:sp_end_break, "libserialport"), SPReturn, (Port,), port)
     notify_on_error(ret)
     ret
 end
