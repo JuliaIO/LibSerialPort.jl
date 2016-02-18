@@ -161,7 +161,14 @@ export
     sp_get_current_lib_version,
     sp_get_revision_lib_version,
     sp_get_age_lib_version,
-    sp_get_lib_version_string
+    sp_get_lib_version_string,
+
+    # Functions from high-level API
+    list_ports,
+    print_port_info,
+    set_speed,
+    set_frame,
+    set_flow_control
 
     include("wrap.jl")
     include("high-level-api.jl")
