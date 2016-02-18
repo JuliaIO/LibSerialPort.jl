@@ -1,6 +1,6 @@
 # `export LIBSERIALPORT_DEBUG=` to display debug info (`unset` to clear)
 
-include("libserialport.jl")
+using LibSerialPort
 
 """
 Print a list of currently visible ports, along with some basic info
@@ -124,8 +124,6 @@ function test_change_port_copy_method2(port)
     sp_close(port)
     sp_open(port2, SP_MODE_READ_WRITE)
 
-    # Beware of error that RTS & CTS flow control must be enabled together
-
     # Either
     # config2 = sp_new_config()
     # Or
@@ -208,7 +206,6 @@ function test_blocking_serial_loopback(port)
     toc()
 end
 
-
 function test_nonblocking_serial_loopback(port)
 
     println("\nTesting serial loopback with nonblocking write/read functions...")
@@ -265,7 +262,7 @@ function main()
     end
 
     port = sp_get_port_by_name(ARGS[1]) # e.g. "/dev/cu.wchusbserial1410"
-    baudrate = nargs >= 2 ? ARGS[2] : 9600
+    baudrate = nargs >= 2 ? parse(Int, ARGS[2]) : 9600
 
     print_version()
     list_ports()
@@ -274,7 +271,7 @@ function main()
 
     test_port_configuration(port)
 
-    sp_set_baudrate(port, parse(Int, baudrate))
+    sp_set_baudrate(port, baudrate)
 
     test_blocking_serial_loopback(port)
 
