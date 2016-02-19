@@ -168,7 +168,9 @@ export
     print_port_settings,
     set_speed,
     set_frame,
-    set_flow_control
+    set_flow_control,
+    seteof,
+    reseteof
 
     include("wrap.jl")
     include("high-level-api.jl")

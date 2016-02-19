@@ -1,9 +1,10 @@
 
 type SerialPort <: IO
     ref::Port
+    eof::Bool
 end
 
-SerialPort(portname::AbstractString) = SerialPort(sp_get_port_by_name(portname))
+SerialPort(portname::AbstractString) = SerialPort(sp_get_port_by_name(portname), false)
 
 set_speed(sp::SerialPort, bps::Integer) = sp_set_baudrate(sp.ref, bps)
 
@@ -143,9 +144,30 @@ function Base.write(sp::SerialPort, data::UTF8String)
     sp_drain(sp.ref)
 end
 
+function Base.write(sp::SerialPort, data::UInt8)
+    sp_nonblocking_write(sp.ref, [data])
+    sp_drain(sp.ref)
+end
+
+Base.write(sp::SerialPort, i::Int64) = Base.write(sp, "$i")
+Base.write(sp::SerialPort, f::Float32) = Base.write(sp, @sprintf("%.3f", f))
+Base.write(sp::SerialPort, f::Float64) = Base.write(sp, @sprintf("%.3f", f))
+
+Base.eof(sp::SerialPort) = sp.eof == true
+
+seteof(sp::SerialPort, state::Bool) = sp.eof = state
+reseteof(sp::SerialPort) = seteof(sp, false)
+
+# function unsafe_read(sp::SerialPort, p::Ptr{UInt8}, n::UInt)
+#     for i = 1:n
+#         unsafe_store!(p, read(sp, UInt8)::UInt8, i)
+#     end
+#     nothing
+# end
+
 function Base.read(sp::SerialPort, ::Type{UInt8})
     byte_array = sp_nonblocking_read(sp.ref, 1)
-    return (length(byte_array) > 0) ? byte_array[1] : UInt8(0)
+    return (length(byte_array) > 0) ? byte_array[1] : 0x00
 end
 
 Base.nb_available(sp::SerialPort) = Int(sp_input_waiting(sp.ref))
