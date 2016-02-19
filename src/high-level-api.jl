@@ -170,6 +170,27 @@ function Base.read(sp::SerialPort, ::Type{UInt8})
     return (length(byte_array) > 0) ? byte_array[1] : 0x00
 end
 
+function Base.read(sp::SerialPort, ::Type{Char})
+    byte_array = sp_nonblocking_read(sp.ref, 1)
+    return (length(byte_array) > 0) ? byte_array[1] : '\0'
+end
+
+function Base.readuntil(sp::SerialPort, delim::Char)
+    out = Char[]
+    while !eof(sp)
+        if nb_available(sp) > 0
+            c = read(sp, Char)
+            push!(out, c)
+            # c != '\0' && push!(out, c)
+            if c == delim
+                break
+            end
+        end
+    end
+    # str = join(out[out .!= '\0'])
+    return join(out)
+end
+
 Base.nb_available(sp::SerialPort) = Int(sp_input_waiting(sp.ref))
 
 function Base.readbytes(sp::SerialPort, nbytes::Integer)
@@ -178,15 +199,15 @@ end
 
 """
 Read everything in libserialport's input buffer, one byte at a time, until its
-is empty.
+is empty. Returns an ASCIIString.
 """
 function Base.readall(sp::SerialPort)
-    result = Vector{UInt8}()
-    while Int(sp_input_waiting(sp.ref)) > 0
-        push!(result, Base.readbytes(sp, 1)...)
+    result = Char[]
+    while Int(nb_available(sp)) > 0
+        byte = Base.readbytes(sp, 1)[1]
+        push!(result, byte)
     end
-    sp_flush(sp.ref, SP_BUF_INPUT)
-    return bytestring(result)
+    return join(result)
 end
 
 # function Base.readavailable(sp::SerialPort)
