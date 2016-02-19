@@ -55,7 +55,7 @@ function test_readline(sp::SerialPort)
     tic()
     for i = 1:100
         write(sp, "Test message $i\n")
-        received_message = readuntil(sp, '\n')
+        received_message = readuntil(sp, '\n') # same as readline(sp)
         print(received_message)
 
         # Trigger an EOF when done writing so readuntil doesn't hang forever
@@ -85,44 +85,3 @@ function main()
 end
 
 main()
-
-# function test_readline(sp::SerialPort)
-
-#     println("\n[TEST] Read any incoming data for ~1 second...")
-#     for i = 1:1000
-#         print(readall(sp))
-#         sleep(0.001)
-#     end
-#     println()
-
-#     flush(sp, buffer=SP_BUF_BOTH)
-
-#     print("\n\n[TEST] Serial loopback - ")
-#     println("Send 100 short messages and read whatever comes back...")
-
-#     tic()
-#     for i = 1:100
-#         write(sp, "Test message $i\n")
-
-#         # Send an EOF byte
-#         if i == 100
-#             write(sp, 0x04)
-#         end
-
-#         while true
-#             b = readbytes(sp, 1)
-#             b == 0x04 && break
-#             if b != 0
-#                 c = bytestring(b)
-#                 print(c)
-#                 c == "\n" && break
-#             end
-#         end
-#         # print(readall(sp))
-#     end
-
-#     println()
-#     toc()
-
-#     flush(sp, buffer=SP_BUF_BOTH)
-# end
