@@ -579,7 +579,15 @@ end
 function sp_blocking_write(port::Port, buffer::Array{UInt8}, timeout_ms::Integer)
     ret = ccall((:sp_blocking_write, "libserialport"), SPReturn,
                 (Port, Ptr{UInt8}, Csize_t, Cuint),
-                port, pointer(buffer), sizeof(buffer), Cuint(timeout_ms))
+                port, pointer(buffer), length(buffer), Cuint(timeout_ms))
+    handle_error(ret, loc())
+    ret
+end
+
+function sp_blocking_write(port::Port, buffer::Ptr{UInt8}, timeout_ms::Integer)
+    ret = ccall((:sp_blocking_write, "libserialport"), SPReturn,
+                (Port, Ptr{UInt8}, Csize_t, Cuint),
+                port, buffer, sizeof(buffer), Cuint(timeout_ms))
     handle_error(ret, loc())
     ret
 end
@@ -587,7 +595,14 @@ end
 # enum sp_return sp_nonblocking_write(struct sp_port *port, const void *buf, size_t count);
 function sp_nonblocking_write(port::Port, buffer::Array{UInt8})
     ret = ccall((:sp_nonblocking_write, "libserialport"), SPReturn,
-                (Port, Ptr{UInt8}, Csize_t), port, pointer(buffer), sizeof(buffer))
+                (Port, Ptr{UInt8}, Csize_t), port, pointer(buffer), length(buffer))
+    handle_error(ret, loc())
+    ret
+end
+
+function sp_nonblocking_write(port::Port, buffer::Ptr{UInt8})
+    ret = ccall((:sp_nonblocking_write, "libserialport"), SPReturn,
+                (Port, Ptr{UInt8}, Csize_t), port, buffer, sizeof(buffer))
     handle_error(ret, loc())
     ret
 end
