@@ -172,7 +172,14 @@ export
     seteof,
     reseteof
 
-    include("wrap.jl")
-    include("high-level-api.jl")
+const depsfile = joinpath(dirname(dirname(@__FILE__)), "deps", "deps.jl")
+if isfile(depsfile)
+    include(depsfile)
+else
+    error("LibSerialPort not properly installed. Please run Pkg.build(\"LibSerialPort\")")
+end
+
+include("wrap.jl")
+include("high-level-api.jl")
 
 end # LibSerialPort
