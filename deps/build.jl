@@ -24,7 +24,6 @@ provides(SimpleBuild,
             `./configure --prefix=$prefix`
             `make install`
         end
-    end), libserialport, installed_libpath=joinpath(prefix, "lib"))
-
+    end), libserialport)
 
 @BinDeps.install Dict(:libserialport => :libserialport)
