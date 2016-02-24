@@ -1,0 +1,2135 @@
+commit 348a6d353af8ac142f68fbf9fe0f4d070448d945
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sat Jan 9 01:00:29 2016 +0100
+
+    Doxyfile: Set version to 0.1.1.
+
+commit 3fcdc9f7d5aa9bbae3041d80ab50b83e9bef182d
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sat Jan 9 01:13:45 2016 +0100
+
+    Bump libtool version (not package version) to 1:0:1.
+    
+    The last release (0.1.0) had the libtool version (current:revision:age)
+    set to 0:0:0. Since this release doesn't change/remove any
+    interfaces (it does *add* new interfaces, though), 'current' and 'age'
+    are increased and 'revision' is set to 0, resulting in 1:0:1.
+    
+    http://www.gnu.org/software/libtool/manual/libtool.html#Updating-version-info
+    
+    Programs using libserialport don't need to be recompiled or relinked.
+
+commit 24a38c8094242cf4680d7f61508babdbb46bfdd5
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sat Jan 9 00:48:39 2016 +0100
+
+    NEWS: Last updates for the upcoming 0.1.1 release.
+
+commit aee7d69195e25fb9e7b250e85df0b50368ddc810
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Wed Jan 27 08:19:38 2016 +0100
+
+    Fix ERROR_SEM_TIMEOUT issue on Windows.
+    
+    The sp_blocking_write() call was incorrectly returning an error upon
+    ERROR_SEM_TIMEOUT. It now returns 0 instead.
+
+commit 888fb45d66aada134f36fa9129499ec180161c0a
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Jan 22 15:30:44 2016 +0100
+
+    Fix sp_blocking_read_next() implementation on Windows.
+    
+    A ReadFile() call needed to check the actual number of bytes read,
+    instead of assuming all requested bytes were read.
+
+commit 02c8a1424d06cb97061a7ebf96231bdb08673b01
+Author: Martino Facchin <m.facchin@arduino.cc>
+Date:   Wed Dec 16 19:07:49 2015 +0100
+
+    windows: Fix iSerial for composite devices.
+    
+    USB composite devices can contain an ACM serial interface.
+    On Windows, the correct iSerial descriptor field is assigned to the parent
+    (composite) device instead of to the actual serial interface. A bogus
+    value is returned if the serial interface is asked to provide the S/N.
+    This patch provides a fallback for this kind of device (tested on Android
+    with adb + cdc gadgets and on Arduino Zero Programming Port)
+
+commit aacba60dca204923c2be4ffbdd9e43cb795c4cce
+Author: Martino Facchin <m.facchin@arduino.cc>
+Date:   Fri Dec 18 12:40:58 2015 +0100
+
+    macosx: Fix port listing on ElCapitan.
+    
+    On OSX 10.11 (ElCapitan) the query for IOProviderClass fails to list ACM
+    devices as USB.
+    Add a fallback query using IOClass to correctly recognize these devices.
+    The fix has no effect on previous OSX versions (tested on Mavericks)
+
+commit 8062087ab346852563bf13eef38309c88d520bb7
+Author: Martin Ling <martin-git@earth.li>
+Date:   Tue Dec 29 02:36:04 2015 +0000
+
+    Change debug message to "Port not open" when a closed port is used.
+    
+    Fixes bug #710.
+
+commit 4d8195fe3f8b5d2a206b8c1c1edeb4e3e0208ccb
+Author: Wolfram Sang <wsa@the-dreams.de>
+Date:   Mon Dec 28 14:33:40 2015 +0100
+
+    libserialport_internal: use new macro to enable timeradd, etc.
+    
+    Since glibc 2.20, the usage of _BSD_SOURCE is deprecated. Fix it like
+    described here:
+    
+    https://sourceware.org/glibc/wiki/Release/2.20#Deprecation_of__BSD_SOURCE_and__SVID_SOURCE_feature_macros
+    
+    This fixes bug #716.
+    
+    Signed-off-by: Wolfram Sang <wsa@the-dreams.de>
+
+commit ae2c5825e79ab5b38a8ca53941df6d73679a52e6
+Author: Martin Ling <martin-git@earth.li>
+Date:   Tue Dec 8 20:08:49 2015 +0000
+
+    windows: Handle ERROR_IO_PENDING from ReadFile in sp_nonblocking_read().
+    
+    This fixes bug #707.
+
+commit 127d8d0ce7901d87b636efb8f865e80d3d2f08b4
+Author: Martin Ling <martin-git@earth.li>
+Date:   Tue Oct 13 15:04:03 2015 +0100
+
+    sp_wait: Avoid overflow of timeout parameter to poll().
+
+commit 1a584c45b02456ebcb197ba801b0ceae810e84e3
+Author: Daniel Elstner <daniel.kitta@gmail.com>
+Date:   Sun Sep 13 20:04:31 2015 +0200
+
+    Build: Include config.h first in all source files
+
+commit 962143bc5c3a9a6e130cc1273ab465238c178d70
+Author: Daniel Elstner <daniel.kitta@gmail.com>
+Date:   Thu Sep 10 22:03:07 2015 +0200
+
+    Build: Use GNUMAKEFLAGS and $@
+
+commit c37c9f348d015f1fcec1d8597458418bf1300565
+Author: Daniel Elstner <daniel.kitta@gmail.com>
+Date:   Thu Aug 27 11:46:06 2015 +0200
+
+    autogen.sh: Create autostuff/ dir if it does not exist
+
+commit 07f61c713133654cab842107570d9e75c23c89c7
+Author: Daniel Elstner <daniel.kitta@gmail.com>
+Date:   Wed Aug 26 22:49:40 2015 +0200
+
+    configure: Enable largefile support on 32-bit systems
+
+commit 87f4a6f0214fbb83ec5147d1d7effff954d21414
+Author: Daniel Elstner <daniel.kitta@gmail.com>
+Date:   Wed Aug 26 22:01:03 2015 +0200
+
+    Clean up .gitignore
+
+commit f1c916ede191ec398cbe53d7f978078311c25785
+Author: Daniel Elstner <daniel.kitta@gmail.com>
+Date:   Wed Aug 26 21:42:32 2015 +0200
+
+    Build: Clean up configure.ac and Makefile.am
+    
+    Among other things, rename some config defines so we can take
+    advantage of standard Autoconf macros.
+
+commit ef08a6d52bf273e832691ff8121c5e5da37554af
+Author: Daniel Elstner <daniel.kitta@gmail.com>
+Date:   Wed Aug 26 19:46:43 2015 +0200
+
+    Build: Reduce autogen.sh to trivial stub
+    
+    Use autoreconf instead of invoking the various Auto tools
+    separately. Get rid of the Darwin-specific guesswork -- it does
+    not make sense to handle this at the level of libserialport.
+    
+    People should set up their ACLOCAL_PATH themselves as appropriate
+    for their own system; just as they already need to set up various
+    other paths.
+
+commit f77bb46df5d883527da8b7eb4a5328ea7e990dbb
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun May 31 13:07:20 2015 +0100
+
+    Update copyright notices.
+
+commit d931da1042f225bdc1a13cb7bc94501dce69a11e
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun May 31 12:32:21 2015 +0100
+
+    Update AUTHORS file.
+
+commit e2b7ba1214a5e16f767975098ae406bbd5aa3d6a
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sat May 30 22:04:56 2015 +0200
+
+    NEWS: Update for the upcoming 0.1.1 release.
+
+commit 56fe6e320780ad3fdae6a059a0a8379d850c7e35
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat May 30 21:03:38 2015 +0100
+
+    doc: Provided channel is binary, not necessarily 8-bit.
+
+commit 6b8eee06823c3ba843c10ea2c6c19be517d34512
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed May 27 11:21:56 2015 +0100
+
+    Fix possible use of uninitialised variable in poll() setup.
+
+commit 49fd7b1bc249a122e4f27c5d383d7789eac61da3
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed May 27 10:53:46 2015 +0100
+
+    doc: Additional introductory text.
+
+commit deef6e528cabe1858c2c3c5fa45f789f3d701366
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun May 24 13:47:38 2015 +0100
+
+    doc: Expanded introductory text.
+
+commit ec4b55ae25c368e30a5db6ab6cb33bb6abeca46c
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun May 24 13:47:09 2015 +0100
+
+    doc: Additional notes on sp_last_error_{code,message}.
+
+commit 46d8b0a039965cf68fb27a3b88b3c23a1e34d912
+Author: silverbuddy <silver.buddy@yandex.ru>
+Date:   Wed May 20 15:51:47 2015 +0300
+
+    Handle the case when /sys/class/tty/ entries are not symlinks.
+    
+    For example:
+    
+    $ uname -a
+    Linux RT-N66U 2.6.22.19 #1 Thu Feb 12 20:33:36 CST 2015 mips GNU/Linux
+    
+    $ ls -lF /sys/class/tty/
+    drwxr-xr-x    2 foo  root             0 May 18 18:12 ttyACM0/
+    
+    $ ls -lF /sys/class/tty/ttyACM0/
+    -r--r--r--    1 foo  root          4096 May 18 18:12 dev
+    lrwxrwxrwx    1 foo  root             0 May 18 18:12 device -> ../../../devices/pci0000:00/0000:00:04.1/usb1/1-1/1-1.1/1-1.1:1.0/
+    lrwxrwxrwx    1 foo  root             0 May 18 18:12 subsystem -> ../../../class/tty/
+    -rw-r--r--    1 foo  root          4096 May 18 18:12 uevent
+
+commit e5c2630eeed1825889dfe7cf0aaeb734b047ea74
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu May 7 10:07:55 2015 +0100
+
+    Add new sp_blocking_read_next() function.
+
+commit 0188a545c75b1012054efef41b8fb465ca90a37a
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu May 7 10:06:33 2015 +0100
+
+    windows: Always check and set ReadTotalTimeoutMultiplier.
+    
+    This is not currently touched, but will be by the upcoming
+    sp_blocking_read_next() function.
+
+commit 76222ee5786427210f9596988c473193d41089b0
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu May 7 10:04:11 2015 +0100
+
+    posix: Make sure blocking operations can't time out without trying.
+
+commit c3cee38c3b27071347811d742fec3a95ab8746a5
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu May 7 09:41:41 2015 +0100
+
+    posix: Consistent debug output when blocking operations time out.
+
+commit 772c586133ec5e069233bac08a0bb0e86b36a6e8
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu May 7 09:41:02 2015 +0100
+
+    posix: Move FD_ZERO() and FD_SET() calls outside loops.
+
+commit 27911925c11b01943e2a569ebb71fe259c387329
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu May 7 09:19:47 2015 +0100
+
+    windows: Always check return value of GetOverlappedResult().
+
+commit bbe566fe1c02b97469f57e35d7b6b5cfcf0ee9fa
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu May 7 00:09:49 2015 +0100
+
+    windows: Restructure if/else blocks with unnecessary indentation.
+
+commit 8ebfaf896690c8be6832ccb32780c2b83630b357
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed May 6 20:18:37 2015 +0100
+
+    windows: restart_wait_if_needed(): Inline receive buffer check.
+    
+    This removes all the debug spam arising from calling sp_input_waiting().
+
+commit 21ae5ce1970c4a1b27461d65468c2fb4ffa7d726
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed May 6 20:15:46 2015 +0100
+
+    windows: restart_wait_if_needed(): Skip buffer check if no bytes read.
+
+commit 94a314a806f69343ca7280982be230bcf28d1c2c
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed May 6 20:11:17 2015 +0100
+
+    windows: Refactor duplicated code into a static function.
+
+commit 27a58c0521dab37ba32264cd58a8354bc9a37382
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed May 6 16:40:41 2015 +0100
+
+    windows: Avoid unnecessary calls to SetCommTimeouts().
+    
+    This fixes bug #586.
+
+commit 9a0c4bbdbea521433372fec48cee9d43328da268
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed May 6 16:12:27 2015 +0100
+
+    windows: Strip CR/LF from end of system error messages.
+    
+    This fixes bug #585.
+
+commit 480d750c59b23f7c6b6dd5c5dd32f697a0783221
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Apr 23 22:23:14 2015 +0100
+
+    doc: correct structure name in sp_get_port_handle() documentation.
+
+commit ff6da776e809d75594aa45baf3bb39c7f4ba7d8c
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sat May 2 21:20:30 2015 +0200
+
+    libserialport.h.in: Fix/update some API docs.
+
+commit 6392641545bb9ea1ff908f29da3184dde6a0139b
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sat May 2 21:18:36 2015 +0200
+
+    sp_list_ports(): Actually set list_ptr NULL as documented.
+
+commit 6aad5bdd474f7d41e06ba4dc094f7db50f0f94cd
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sat May 2 21:10:21 2015 +0200
+
+    Fix a potential segfault in sp_get_config_*().
+
+commit 5f64c28551d7ee7dbecf5215cb75d63c3cf8303b
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Thu Apr 30 22:38:58 2015 +0200
+
+    Fix a potential segfault in sp_get_port_handle().
+
+commit eb50b1aca66e01d7d7e06a867be85860597a8be1
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sun Apr 19 19:33:22 2015 +0200
+
+    windows.c: Constify a few function parameters.
+
+commit 9eb9f07130243f0cf5f2ce6a6ae295001eda1c8b
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sun Apr 19 19:18:05 2015 +0200
+
+    sp_get_port_usb_vid_pid(): Document that usb_vid/usb_pid can be NULL.
+
+commit 1b91c6eadbcbd2356441920c11c9385083b93e91
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sun Apr 19 18:53:26 2015 +0200
+
+    Rename timeout to timeout_ms for clarity in a few places.
+
+commit 025c264448de771ceb130d4d01aacbb9ca8453ea
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sun Apr 19 18:36:58 2015 +0200
+
+    autotools: Don't set/override "user variables".
+    
+    This fixes bug #577.
+
+commit a630a469f656ab9280f7f205eeca5064cde999d0
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sun Apr 19 18:33:47 2015 +0200
+
+    Makefile.am: Simplify LDFLAGS handling a bit.
+
+commit f14809393ace8e5f9a664975f34b701d1e35d2fa
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sun Apr 19 19:00:52 2015 +0200
+
+    Constify the sp_get_port_description() parameter.
+
+commit ad036cc8efcdcae5d2b8727996108c38c4915d2b
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sun Apr 19 18:28:10 2015 +0200
+
+    Constify the sp_get_port_transport() parameter.
+
+commit 3dd4a2ae39a83f269272ee51698fc9d4e333bcd1
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sun Apr 19 18:21:19 2015 +0200
+
+    configure.ac: Drop no longer needed SP_PKGLIBS.
+
+commit 35578b063e6899fad72f479d9004a54a66dd851a
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sat Apr 18 23:48:29 2015 +0200
+
+    Various Doxygen comment updates and fixes.
+    
+     - Add some missing @param lines.
+    
+     - Add [in], [out], or [in,out] markers for @param tags.
+    
+     - Add explicit "Must not be NULL" comments for parameters where
+       the caller should not pass in a NULL.
+
+commit e4f44cf5f22c40ec7daedc895458426de8340dff
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Thu Apr 16 01:05:04 2015 +0200
+
+    libserialport.h.in: Drop unneeded <windows.h> #include.
+    
+    This is not needed and would pollute the namespace of every
+    libserialport user on Windows.
+
+commit 13efecf888bc4a8e6afb80f32763a3e4c8e796d3
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Thu Apr 16 00:53:50 2015 +0200
+
+    libserialport.h.in: Add @since tags for new enums.
+
+commit 3f2f48fc0101fe11dd6b3270474c1c2c9ed21e34
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Thu Apr 16 00:47:21 2015 +0200
+
+    Set package version to 0.1.1, use "@since 0.1.1" Doxygen tags.
+    
+    The next release will not contain any backwards-incompatible
+    API or ABI changes, thus changing the package version to 0.1.1.
+
+commit 777347a6bdea22744132af94f515c3c4b0d9ee41
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Thu Apr 16 00:40:49 2015 +0200
+
+    windows: Drop no longer needed -luuid.
+    
+    Also, use SP_LIBS in Makefile.am.
+    
+    This is build-tested using a native MinGW-w64 based toolchain
+    as well as a MinGW-w64 based cross-compile setup.
+
+commit 8c6de591a520de2b87671ea66f1887305b68325f
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Wed Apr 15 21:40:32 2015 +0200
+
+    configure.ac: Minor whitespace cosmetics.
+
+commit 1ff591d7b34cdbe4bfcd8f004b141e4f41082870
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Wed Apr 15 21:20:18 2015 +0200
+
+    Doxyfile: Update to Doxygen 1.8.8 template.
+    
+    (by running 'doxygen -u')
+
+commit 5ca38cdfe07f5c8b92564c2934e65cda5cae9a8e
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Wed Apr 15 21:15:04 2015 +0200
+
+    configure.ac: Add #include guard to config.h.
+
+commit 613c48f19198f53a8241114d89958c720fbc924a
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sat Apr 11 21:03:53 2015 +0200
+
+    Fix a compiler warning when -Wshadow is used.
+    
+        CC       serialport.lo
+      In file included from ../serialport.c:25:0:
+      ../serialport.c: In function 'get_config':
+      ../libserialport_internal.h:227:25: warning: declaration of 'ret' shadows a previous local [-Wshadow]
+       #define TRY(x) do { int ret = x; if (ret != SP_OK) RETURN_CODEVAL(ret); } while (0)
+                               ^
+      ../serialport.c:1566:3: note: in expansion of macro 'TRY'
+         TRY(get_baudrate(port->fd, &config->baudrate));
+         ^
+      ../serialport.c:1543:6: warning: shadowed declaration is here [-Wshadow]
+        int ret = get_flow(port->fd, data);
+            ^
+    
+    Also, add -Wshadow to the list of default compiler options.
+
+commit b3e619c8b2d11c8d719a0d7714cfc024b45c5339
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Tue Apr 7 00:04:43 2015 +0200
+
+    autogen.sh: Drop obsolete MinGW/MSYS items.
+    
+    For Windows builds (which require MinGW-w64) we currently support:
+    
+     - cross-builds using MXE (mxe.cc) and possibly other cross-compile setups
+    
+     - native builds using MSYS2 (sf.net/projects/msys2/)
+    
+    Neither of those require explicitly specifying ACLOCAL_DIR.
+
+commit f11a67ed5f5c99fc47e66c9c5cc730b91356c488
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Mon Apr 6 20:25:42 2015 +0200
+
+    README: Refer to MSYS2 only.
+    
+    The "old" MSYS related to the "old" and unsupported MinGW (from
+    mingw.org) may or may not work properly, so only refer to MSYS2 which
+    we currently recommend and which has been tested.
+
+commit 144a598f190bbfe5244d6fb1192c7a1fae2cbbef
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Mon Apr 6 18:51:17 2015 +0200
+
+    Minor Doxygen improvements and fixes.
+
+commit 3cb7aa98c2271081b80b0a2df7fc02be03e2a1bf
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sat Apr 4 18:10:18 2015 +0200
+
+    configure.ac: Use $host_os instead of $target_os.
+    
+    $build and $build_os refer to the machine on which the software is
+    built, $host and $host_os refer to the machine for which the software
+    is (cross-)built.
+    
+    The variables $target and $target_os (despite the confusing names)
+    are only relevant in the context of building cross-compilers.
+
+commit cd71af4b931d9773f698c792124a1c2a044d4772
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Apr 3 22:18:56 2015 +0200
+
+    README: Add link to online API docs.
+
+commit a24671ade992c9cc1bfd2bd5092281aca3b75605
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Apr 3 22:17:57 2015 +0200
+
+    README: Mention FreeBSD port enumeration support.
+
+commit 1cda3e3dfce5f698bf6da13b9d861303c681cbde
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Apr 3 22:04:20 2015 +0200
+
+    configure.ac: Add -Wmissing-prototypes.
+
+commit 23e7fa372a0a48d8f764de93d485af4c1316b124
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Apr 3 22:03:26 2015 +0200
+
+    Fix two compiler warnings on platforms without enumeration support.
+    
+      serialport.c: In function 'sp_list_ports':
+      serialport.c:326:6: warning: unused variable 'ret' [-Wunused-variable]
+        int ret;
+            ^
+      serialport.c:325:19: warning: unused variable 'list' [-Wunused-variable]
+        struct sp_port **list;
+                         ^
+
+commit ac323d80e0baaf6968c316dbcb2e5ffe4739cb2e
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Apr 3 22:02:00 2015 +0200
+
+    add_handle(): Fix a realloc() related issue.
+
+commit e019e72ec0bb04cb52d6b14810485ea8d96a97ee
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Apr 3 17:45:04 2015 +0200
+
+    Fix a compiler warning.
+    
+    This fixes the following scan-build warning:
+    
+      serialport.c: In function 'sp_list_ports':
+      serialport.c:354:1: warning: control reaches end of non-void function [-Wreturn-type]
+
+commit b344a40bb2c4ba82b3c51e7fb893d872a6302089
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Apr 3 17:29:52 2015 +0200
+
+    Fix indentation of a switch().
+
+commit 948f63f0fd0530c8653aa801f7e3d8a2cf2b12b2
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Apr 3 17:17:49 2015 +0200
+
+    add_handle(): Fix a memory leak.
+    
+    This fixes the following scan-build warning:
+    
+      serialport.c:1170:3: warning: Potential leak of memory pointed to by 'new_handles'
+                      RETURN_ERROR(SP_ERR_MEM, "Mask array realloc() failed");
+                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+commit 5122d608492d43d48f00e1fc13817f69eaa2a8b8
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Apr 3 16:58:43 2015 +0200
+
+    Use libtool's -no-undefined option on all platforms.
+
+commit 8d12e620f255ef44da8d0c7ee810a7b3bcaf8807
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Apr 1 00:24:27 2015 +0100
+
+    Clarify sp_list_ports() code.
+    
+    This also fixes the following scan-build warning:
+    
+      serialport.c:335:15: warning: Result of 'malloc' is converted to a
+      pointer of type 'struct sp_port *', which is incompatible with sizeof
+      operand type 'struct sp_port **'
+              if (!(list = malloc(sizeof(struct sp_port **))))
+                           ^~~~~~ ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+commit 34442106efcf0621f5bc2f77aab771407d9ae5c2
+Author: Martin Ling <martin-git@earth.li>
+Date:   Fri Mar 27 22:43:14 2015 +0000
+
+    windows: Set fAbortOnError=FALSE.
+    
+    Since we're not handling and clearing receive errors (framing, parity and
+    overrun), we should turn them off to avoid crashing out with
+    ERROR_OPERATION_ABORTED in various calls if they occur. Invalid data
+    will then simply not end up in the buffer. This is consistent with our
+    current behaviour on posix/termios systems.
+    
+    It might be nice to be able to inform calling code about receive errors, but I
+    can't see a good way to do this in a cross-platform way at the moment.
+    
+    This fixes (parts of) bug #341.
+
+commit 47fcf8ec8522d94f698b6c5a94deb30478f7ee26
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Mar 25 18:03:17 2015 +0000
+
+    windows: Revise management of WaitCommEvent() operations.
+    
+    This fixes (at least parts of) bug #341.
+
+commit 6c6aebe78c91e92895c425decf1f4f5e3ce0ec53
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Wed Mar 25 23:38:04 2015 +0100
+
+    Make std_baudrates[] static (only used in one file).
+
+commit dc422c04af5c63e31de6af2eedcebbfc961ee9e2
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Wed Mar 25 20:28:48 2015 +0100
+
+    Various cosmetic and consistency fixes.
+
+commit 2b40f8145448dc0ef85ab95b779b83dac939837c
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Wed Mar 25 20:29:41 2015 +0100
+
+    libserialport_internal.h: Add #include guard.
+
+commit cfa5af67fd2107c1f5c0a666826087214cb1ea4a
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Wed Mar 25 20:13:57 2015 +0100
+
+    Fix some typos.
+
+commit 64155cba8aa1f009cbdda45becebc5f6fef52868
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Wed Mar 25 14:52:54 2015 +0100
+
+    linux_termios.h: Add missing #include of "config.h".
+
+commit 7c081505e5ccdfc6178855d65499121ef1e58e53
+Author: Martin Ling <martin-git@earth.li>
+Date:   Tue Mar 24 23:15:32 2015 +0000
+
+    Generate a config.h rather than passing defines on command line.
+    
+    Fixes bug #553.
+
+commit 7c1101dc083533c36df135e78f8e9174b4caf08d
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Feb 20 18:57:08 2015 +0100
+
+    Fix misleading snprintf() arguments.
+
+commit ea17bfca3d955fdf976ec13a0d6c3bb6a9f3b9e9
+Author: Uffe Jakobsen <uffe@uffe.org>
+Date:   Mon Feb 16 23:07:00 2015 +0100
+
+    If present, add usb_serial to description for better identification
+
+commit 54975208913f8f3f316173280a753a7322033575
+Author: Uffe Jakobsen <uffe@uffe.org>
+Date:   Mon Feb 16 14:13:01 2015 +0100
+
+    Handle enumeration of native UART ports on FreeBSD
+
+commit ccd512d51c94a4307e3f8e4975b3387e5bcb8715
+Author: Uffe Jakobsen <uffe@uffe.org>
+Date:   Tue Jan 13 23:14:54 2015 +0100
+
+    Implement FreeBSD OS-specific serial port detection and query
+
+commit f446cfbf652292f1167544078306cadb5f75ba3b
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Sep 24 15:30:39 2014 +0100
+
+    windows: Fix restart of RX/error wait operation after reads.
+    
+    This fixes bug #421.
+
+commit e31f2c6b8b8f2b7e554df911cc9a3482b99632b4
+Author: Boris Gjenero <boris.gjenero@gmail.com>
+Date:   Fri Dec 5 18:38:43 2014 +0100
+
+    Fix free() of uninitialized pointer.
+    
+    Explicitly set port->usb_path to NULL, otherwise a free(port->usb_path)
+    can happen where port->usb_path is uninitialized.
+    
+    This closes bug #512.
+
+commit b328a48b0fd8ce51f400b5e06bc1e2ab52e3c9ae
+Author: Aurelien Jacobs <aurel@gnuage.org>
+Date:   Thu Nov 27 17:41:23 2014 +0100
+
+    windows: Properly handle return value of SetupDiOpenDevRegKey().
+    
+    This fixes bug #499.
+
+commit 59182fbbbf79b31552f84f875485bfaee1a34270
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Sep 24 20:04:39 2014 +0100
+
+    linux: Check for BOTHER macro at configure time.
+    
+    This fixes bug #363.
+
+commit ad7498553c7951ae5a559bd25512297be253696c
+Author: Janne Huttunen <jahuttun@gmail.com>
+Date:   Sat Oct 11 12:13:41 2014 +0300
+
+    Flush only the requested buffers
+    
+    Fix the sp_flush() so that it flushes only the requested buffers
+    also in unix.
+
+commit d66bbceaa7f86262bc8e758e7a665fcce7340f01
+Author: Bert Vermeulen <bert@biot.com>
+Date:   Sun Oct 5 02:38:35 2014 +0200
+
+    Fix typos.
+
+commit 78940e69219b6d9aee747bac0677b738531a089d
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Sep 24 20:53:03 2014 +0100
+
+    windows: Fix compile issues with multiply or not defined GUIDs.
+    
+    This fixes bug #416.
+
+commit 6c444ade550dcd1d911261a0e508f6fc1b17c973
+Author: Aurelien Jacobs <aurel@gnuage.org>
+Date:   Wed Sep 24 12:47:58 2014 +0200
+
+    windows: Indentation (cosmetics only).
+
+commit 7aeb6736bdc64fcbb4ab682fe8b2110bfa77d5cd
+Author: Aurelien Jacobs <aurel@gnuage.org>
+Date:   Wed Sep 24 12:44:40 2014 +0200
+
+    windows: Fix various memory leaks.
+    
+    This fixes bug #419.
+
+commit 276ef1b92fe0a885c4e2156feeefb29ad67fc0c4
+Author: Aurelien Jacobs <aurel@gnuage.org>
+Date:   Sat Sep 20 21:24:31 2014 +0200
+
+    Add SP_MODE_READ_WRITE enum value.
+
+commit eb82be98a7d5ac52dcafb27e3d3107b4741e4cbf
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sun Sep 7 19:31:23 2014 +0200
+
+    README: Add URL to the libserialport website.
+
+commit a46ee5b4d79311fe304c59ce115ebf3b725a295c
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sun Sep 7 19:27:02 2014 +0200
+
+    README: Mention that only MinGW-w64 works (but not MinGW).
+
+commit da8730199a215c9ccd938202fb55ac9e3f58a0b2
+Author: Michael B. Trausch <mbt@fortifiedtechsystems.com>
+Date:   Sat Sep 6 21:39:40 2014 -0400
+
+    windows: -no-undefined is required to make a DLL.
+
+commit 6692d8c13f8829ae83fae33e9fdee9172e2ac1df
+Author: Michael B. Trausch <mbt@fortifiedtechsystems.com>
+Date:   Sat Sep 6 21:34:03 2014 -0400
+
+    windows: Add -lsetupapi when building for WIN32.
+
+commit d179da05c028e30c5323b318e6f171d68f3a38ce
+Author: Michael B. Trausch <mbt@fortifiedtechsystems.com>
+Date:   Sat Sep 6 20:23:16 2014 -0400
+
+    windows: Include proper GUID defining header to fix build.
+    
+    The initguid.h header must appear early or it does not have
+    an effect, at least on cross-build from Linux.
+
+commit 653cef3ab1a71a76c8c5a503af6ce74b731ecc42
+Author: Aurelien Jacobs <aurel@gnuage.org>
+Date:   Thu Sep 4 20:13:55 2014 +0200
+
+    linux: remove readlinkat() dependency
+
+commit 546e9ae5c5b2fd488bb4267c0dfa57cdc751fb88
+Author: Aurelien Jacobs <aurel@gnuage.org>
+Date:   Thu Sep 4 20:13:55 2014 +0200
+
+    linux_termios: fix return types to actually match returned values
+    
+    This fixes the following warning :
+    
+    linux_termios.c: In function 'get_termios_get_ioctl':
+    linux_termios.c:42:2: warning: overflow in implicit constant conversion [-Woverflow]
+      return TCGETS2;
+      ^
+    
+    This fixes bug #396.
+
+commit 23ef3bf125ead21c0cc4c49d70dd0b8877d8a5fe
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Wed Aug 27 14:56:19 2014 +0200
+
+    Fix Mac OS X build (untested).
+
+commit d38c7d2c705a114bfe3204215c682da2e68d77db
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Wed Aug 27 14:53:19 2014 +0200
+
+    Fix Windows build.
+
+commit 0666ccc7ca446ce2960630e2707389852c812284
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Aug 24 14:08:00 2014 +0100
+
+    linux: Fix warning by marking vid, pid variables unsigned.
+
+commit 7f450f46bda085943df503d9d74ed1c8f9d42e7f
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Aug 24 14:00:43 2014 +0100
+
+    Compile with -pedantic.
+
+commit c51b846eee030002cc2d3b8faac1c373de02e10f
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Aug 24 13:34:33 2014 +0100
+
+    linux: Define feature macros to get required functions.
+    
+    This is needed to build with -std=c99.
+
+commit 7890cef6cf4f8496888f2a86593f9eff55244456
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Aug 24 13:59:32 2014 +0100
+
+    Revise debug macros to work in strict C99.
+
+commit 9caa2e86aa14e347b0a274ac023d02582a217bc8
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Aug 24 13:30:34 2014 +0100
+
+    Specialise RETURN_VALUE macro into RETURN_{INT,STRING,POINTER}.
+    
+    This avoids the need to pass the required format string on every
+    call and also eliminates the need for the non-standard typeof() call.
+
+commit 79a800463795e4114bc2f8d719c7f6d0cab49164
+Author: Antti Nykanen <aon@umetronics.com>
+Date:   Sun Aug 24 12:03:15 2014 +0300
+
+    libserialport.h.in: remove trailing commas in enum definitions
+    
+    This makes it easier to use libserialport on projects that build with
+    the GCC -pedantic flag enabled.
+
+commit 942a6d349eeab57367acd1f569118a9f1721b204
+Author: Bert Vermeulen <bert@biot.com>
+Date:   Wed Aug 20 23:38:24 2014 +0200
+
+    Bump package version to 0.2.0.
+
+commit f3ccf157cb6183c95365e3ba1791dc247150e872
+Author: Aurelien Jacobs <aurel@gnuage.org>
+Date:   Wed Aug 20 17:40:22 2014 +0200
+
+    Rename sp_get_signals() parameter to avoid name clash with Qt headers.
+
+commit 900904638b0fd241d99bece8befb7ec1ff56d38b
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Tue Aug 5 18:34:16 2014 +0200
+
+    configure.ac: We no longer need to set WINVER explicitly.
+    
+    Since we now require MinGW-w64, we no longer have to set WINVER manually,
+    since MinGW-w64 defaults to WINVER=0x0502 (which corresponds to
+    Windows Server 2003 SP1 / Windows XP SP2 apparently, which is fine for us).
+
+commit 34906a229bc1c7a92586cdbd71aa992314aa082f
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Tue Aug 5 18:31:40 2014 +0200
+
+    windows.c: Remove MinGW workarounds, require MinGW-w64 instead.
+    
+    We're switching from MinGW (i686-pc-mingw32.static in MXE)...
+    
+      http://mingw.org/
+    
+    ...to MinGW-w64 (i686-w64-mingw32.static in MXE):
+    
+      http://mingw-w64.sourceforge.net/
+    
+    The latter is a fork which nowadays seems to be more active and also to
+    have a more complete set of win32 API headers and libs.
+    
+    History:
+    http://sourceforge.net/p/mingw-w64/wiki2/History/
+    
+    This closes bug #393.
+
+commit 8eb18f7b5a459cde640f307ce46248851fdaec42
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Thu Jul 31 23:14:35 2014 +0200
+
+    windows.c: Define a bunch of stuff that's not in MinGW, yet.
+    
+    Without these defineѕ the build fails with various (many) compile errors.
+
+commit 9a8d04bca6bab617793c0b077f115a19d8e68d65
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Thu Jul 31 23:11:40 2014 +0200
+
+    configure.ac: MinGW build fix (setting WINVER=0x0501).
+    
+    Without this the build fails with:
+    
+      windows.c:40:43: error: 'WC_NO_BEST_FIT_CHARS' undeclared (first use in
+      this function)
+
+commit 5a8810e2b2e0ccd2567306469f7fc668337af415
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Thu Jul 31 23:09:24 2014 +0200
+
+    serialport.c: Fix an 'unused variable' compiler warning.
+
+commit 12056e2f75c01a8512d046ce5d8ed9d72e7cf22b
+Author: Marcus Comstedt <marcus@mc.pp.se>
+Date:   Fri Jul 4 00:04:31 2014 +0200
+
+    Avoid use of struct serial_struct on systems which don't have it (Android)
+    
+    This fixes bug #376.
+
+commit 5bd33b7c8be499b970192d144409bec7072fc701
+Author: Marcus Comstedt <marcus@mc.pp.se>
+Date:   Fri Jul 4 11:55:04 2014 +0200
+
+    Don't use readlinkat if it does not exist
+    
+    This fixes bug #377.
+
+commit 970f279ae4767819a816573ae354813d37d5091d
+Author: Aurelien Jacobs <aurel@gnuage.org>
+Date:   Mon Jun 16 00:40:37 2014 +0200
+
+    Introduce SP_API/SP_PRIV to mark visibility of functions.
+
+commit e4ce975a54c60cda6615e4829ae1408adaec8fcf
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Jun 14 12:25:18 2014 +0100
+
+    Fix build for platforms without enumeration & port metadata support.
+
+commit 48a4076f692ffe34026c37815580a32b2f70592b
+Author: Aurelien Jacobs <aurel@gnuage.org>
+Date:   Fri Jun 13 23:52:16 2014 +0200
+
+    Move list_ports() implementations to OS-specific files.
+
+commit 235269990bd62a906af871c34839ebb922eecb45
+Author: Aurelien Jacobs <aurel@gnuage.org>
+Date:   Fri Jun 13 23:47:45 2014 +0200
+
+    Fix missing variable on macosx.
+
+commit e59ecb3359d02ec549acc230f1a7db118b67bb8a
+Author: Bert Vermeulen <bert@biot.com>
+Date:   Wed Jun 11 20:39:09 2014 +0200
+
+    Ignore build leftovers.
+
+commit 65172beffe8d9c4aa4b72782a9b76a4972be3c69
+Author: Aurelien Jacobs <aurel@gnuage.org>
+Date:   Wed Jun 11 17:21:51 2014 +0200
+
+    Check bus:address and vid:pid validity.
+
+commit e33dcf90a0b0e510eb990c657eab88243d0ac5fd
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Jun 11 15:10:29 2014 +0100
+
+    Tidy up and split most OS-specific code to separate files.
+
+commit a93fb468885de8775f1d200625dac114d3050b1d
+Author: Aurelien Jacobs <aurel@gnuage.org>
+Date:   Fri May 30 22:49:04 2014 +0200
+
+    Add new APIs to get some USB descriptor details for USB serial ports.
+
+commit 98cac5d63e047a633ac1078950840688c1d5234f
+Author: Aurelien Jacobs <aurel@gnuage.org>
+Date:   Sat May 31 00:48:54 2014 +0200
+
+    Remove the udev dependency and parse the /sys hierarchy instead.
+
+commit 073c86bd070a4a5d55c9971ad779a0da32835b17
+Author: Aurelien Jacobs <aurel@gnuage.org>
+Date:   Fri May 30 23:40:45 2014 +0200
+
+    Simplify Mac OS implementation of sp_list_ports().
+
+commit f095f8416453582c95f362434b5e00b26969f658
+Author: Aurelien Jacobs <aurel@gnuage.org>
+Date:   Tue Jun 10 22:16:16 2014 +0200
+
+    Remove useless declaration.
+
+commit da2ede60e441566b074d512ad70b51b5751834ae
+Author: Aurelien Jacobs <aurel@gnuage.org>
+Date:   Tue Jun 10 22:12:21 2014 +0200
+
+    Remove duplicated include.
+
+commit 8edf649cafb84f8ca00b49412fd93829174438cb
+Author: Aurelien Jacobs <aurel@gnuage.org>
+Date:   Mon Jun 2 12:07:50 2014 +0200
+
+    Add format string support to RETURN_ERROR() and RETURN_FAIL().
+
+commit 41a6f287186a337a3c95d235b291e0ceaf61562e
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Tue May 6 20:49:11 2014 +0200
+
+    NEWS: Bump date.
+
+commit 67765669d53eb1e6512547ce455cd1d65a585209
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sun Apr 13 19:51:01 2014 +0200
+
+    NEWS: Update for upcoming 0.1.0 release.
+
+commit 9fb991348dab69e93af6955eeec82502642dbb50
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Mon May 5 02:01:22 2014 +0200
+
+    configure.ac: Add 'check-news' automake option.
+    
+    This warns if the NEWS file hasn't been updated before a release.
+
+commit 1652aa869f3ed77ccbf44db0685d41f848e2fb0b
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sun May 4 21:06:31 2014 +0200
+
+    Add Doxygen @since tags to all public API functions.
+
+commit c01b8cae0c57d83aab78bd7cd20506755b80df05
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sun May 4 17:56:49 2014 +0200
+
+    doxygen: Updated Doxyfile to doxygen 1.8.6.
+
+commit 60db41b9c5879dda64411e913e779e042f7ccbaf
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sun Apr 13 19:50:38 2014 +0200
+
+    Add the usual AUTHORS file.
+
+commit 6c4b27a8b88f032939294346e8e04eca5fb4d0e9
+Merge: 524b0e1 e48f0ec
+Author: Martin Ling <martin-github@earth.li>
+Date:   Sat Mar 22 07:14:49 2014 +0000
+
+    Merge pull request #1 from silverbuddy/master
+    
+    Win32 issues
+
+commit e48f0ece0fc4164de01ab4fa11a1c2452ea39466
+Author: silverbuddy <silverbuddy@users.noreply.github.com>
+Date:   Fri Mar 21 21:49:22 2014 +0400
+
+    Fix malloc size (Win32)
+
+commit 904ac164bf355dc87f6928cb132dc24ac1774188
+Author: silverbuddy <silverbuddy@users.noreply.github.com>
+Date:   Fri Mar 21 21:43:19 2014 +0400
+
+    Fix compilation (Win32 UNICODE)
+
+commit 524b0e1454ad80c2f9c5840137324ab31941e589
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Wed Mar 12 19:30:55 2014 +0100
+
+    Add runtime version querying functions.
+    
+    This fixes bug #282.
+
+commit 3ceb8aecff49c9fc0df66274c7be3545979f8bea
+Author: Martin Ling <martin-git@earth.li>
+Date:   Fri Jan 3 13:44:14 2014 +0100
+
+    linux_termios.c: fix check for termios speed fields.
+
+commit 5cea279a85e16d20247d911b060b6aff8186003a
+Author: Martin Ling <martin-git@earth.li>
+Date:   Fri Jan 3 13:38:06 2014 +0100
+
+    linux: Speed fields may not be present in kernel termios structures.
+
+commit bd791fe121ccbaa3d3176b5fb64a92eef48f1183
+Author: Martin Ling <martin-git@earth.li>
+Date:   Fri Jan 3 12:16:41 2014 +0100
+
+    Remove need to include linux_termios.h on non-Linux.
+
+commit 27e231ff35ae02954b40bd81d015ab2eafbd87f2
+Author: Martin Ling <martin-git@earth.li>
+Date:   Fri Jan 3 11:52:53 2014 +0100
+
+    Only build linux_termios.c on Linux.
+
+commit 8814faa3b69668decb4917b6542be127e954b450
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Dec 27 02:44:42 2013 +0100
+
+    Makefile.am: Add Doxyfile to the generated tarball.
+
+commit deaf0a63513aa275fb1acf901537382535f3be02
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Dec 27 02:39:29 2013 +0100
+
+    Doxygen: Fix a warning / incorrect parameter name.
+
+commit 104f093dba21da6e88b3c6d3349c489a5ac51be8
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Dec 27 02:39:06 2013 +0100
+
+    Makefile.am: Fix 'make doc' for out-of-tree builds.
+
+commit 7c3a1ee32aeae98f526120bcce51dfca00e3f16f
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Dec 27 02:28:10 2013 +0100
+
+    configure.ac: Cosmetics, fix typo.
+
+commit 6f1186aa827861cd862a555b18dcd8b715b65ced
+Author: Martin Ling <martin-git@earth.li>
+Date:   Fri Dec 20 16:02:57 2013 +0000
+
+    Add API for waiting on port events.
+
+commit 2dcf83088840579c156d0b328f19675ed4c18f98
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Dec 18 15:59:58 2013 +0000
+
+    Remove various unused code in configure.ac.
+
+commit f15a2349e28b2775e89a06df4f0fb3f3c70060e9
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Tue Dec 17 22:36:35 2013 +0100
+
+    Doxyfile: Update to Doxygen 1.8.5 config file.
+    
+    This is done via "doxygen -u".
+
+commit 0a1ab8bf8f4c76c809c63ff26d0aa4a5af418728
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Tue Dec 17 22:31:12 2013 +0100
+
+    Minor Doxygen updates/fixes.
+
+commit 1a2a1544d73ed288732b409eef95502228e1ed0a
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Tue Dec 17 22:17:16 2013 +0100
+
+    win32: Add missing ClearCommError() error handling/reporting.
+
+commit 537942c9edb37ebfc88d8b06fd330e8492d36bee
+Author: Martin Ling <martin-git@earth.li>
+Date:   Tue Dec 17 17:19:55 2013 +0000
+
+    Windows: clear errors after port open.
+
+commit 950faaa94adf538b7381566faf5737a88d2768e5
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Dec 8 14:41:53 2013 +0000
+
+    Remove obsolete comment.
+
+commit 9af8cff38fe7aab2e93f5b0f28debeb4d65a4aaa
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Dec 7 20:18:27 2013 +0000
+
+    Remove stray periods from debug messages.
+
+commit 64d996216e5cea58192d7842e4b364e19fd3d698
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Dec 7 20:16:38 2013 +0000
+
+    Windows nonblocking write: Dont't return if async I/O finishes immediately.
+
+commit 1622ef60b032522edfecca46bd23ec1bf4b0ee64
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Dec 7 16:50:27 2013 +0000
+
+    Check return value of GetOverlappedResult().
+
+commit 7c1eff54fd240441fb617dcd315117909cf847dd
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Dec 7 16:26:48 2013 +0000
+
+    Make RETURN_VALUE macro side effect safe.
+
+commit 33fd8804b8a81da4cc3ffcf43ded2288381aad49
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Dec 5 20:24:05 2013 +0000
+
+    Fix building for Android.
+
+commit 397d89de3acc260d6246a3bfa3b59cee53aafe31
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Dec 5 20:18:32 2013 +0000
+
+    Make libudev optional.
+
+commit 6c8716e9dabb5aece68eec87bbf4e322ff92e6a2
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Sun Dec 1 18:04:24 2013 +0100
+
+    TIOCINQ/TIOCOUTQ is not available everywhere.
+    
+    E.g. on NetBSD TIOCINQ is not available, but FIONREAD seems to
+    do pretty much the same thing.
+
+commit 2c827b218813f2663fc3fb09d2ad61f50c4ec1ff
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Nov 27 14:31:54 2013 +0000
+
+    Handle EINTR from tcdrain() in sp_drain().
+
+commit b87deb7c70b739ffac312112950c4481f6f4666d
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Nov 27 14:12:12 2013 +0000
+
+    Clarify documentation regarding signals and EINTR.
+
+commit 859874648ee98385a9d8be76182157a40eca69c0
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Nov 27 14:12:04 2013 +0000
+
+    Fix error in documentation.
+
+commit 2007ce5e143185d297a9fbf907c286da44f89e7c
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Nov 27 13:18:29 2013 +0000
+
+    Document EINTR handling.
+
+commit 63a17c64ae5222a218600ecb4d9f320a91e74cc9
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Nov 27 12:42:27 2013 +0000
+
+    Handle EINTR by repeating the call.
+
+commit 1b34204261800897b46957bccd353470ef793a76
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Nov 27 11:11:55 2013 +0000
+
+    Fix conversion of timeout to struct timeval.
+
+commit 3353c22f326c0b5d2db4360b70554b2f00f94cf7
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Nov 27 02:55:18 2013 +0000
+
+    Add sp_input_waiting() and sp_output_waiting() functions.
+
+commit e3dcf9068e8b0e5d6b21a0203bfa963a8e0711d2
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 25 22:12:10 2013 +0000
+
+    New API and implementation for blocking and non-blocking I/O.
+
+commit 8fbf876dfd7dba622c1150cd886a30357374c5f4
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Nov 27 01:16:51 2013 +0000
+
+    Set VMIN = 1, not zero which forces non-blocking reads.
+
+commit afb518f04aeab35d385bdbd77137a92045312b96
+Author: Martin Ling <martin-git@earth.li>
+Date:   Tue Nov 26 15:26:18 2013 +0000
+
+    Return SP_ERR_SUPP on attempt to set mark/space parity without CMSPAR.
+
+commit 00d8c56d91993fe8e575d0d4be9a6b25983d6557
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Tue Nov 26 16:12:20 2013 +0100
+
+    Minor cosmetics.
+
+commit dd7742fb15e32d457ea6a10a683bc349a8e6da6b
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Tue Nov 26 08:29:18 2013 +0100
+
+    Use "sp: " as prefix for debug logs (nicer/shorter).
+
+commit c3e0509275d9991495789a3c3ab1cbbe605edeac
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Tue Nov 26 08:12:15 2013 +0100
+
+    Fix the build on NetBSD/OpenBSD/FreeBSD, possibly others.
+    
+    Various termios flags used in sp_open() are Linux-specific (or even
+    specific to certain architectures / drivers) and not available on all
+    OSes (and/or versions or kernels thereof).
+    
+    Thus, #ifdef out flags that we know might not be available everywhere.
+
+commit bccc7c9fa0f00b762392438bea16d4672a984526
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 25 18:30:34 2013 +0000
+
+    Set some sane defaults in sp_open() on Windows too.
+
+commit 3f5c06d06712465cf76f1fe5b21aae5ea39e23f7
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 25 18:21:49 2013 +0000
+
+    Apply termios setting changes immediately.
+
+commit e432ce60065f9d073dca5d639a4fc179de566639
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 25 18:05:58 2013 +0000
+
+    Support mark/space parity settings.
+
+commit b251be4b261f37483571ca999a14bafbfffecd43
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 25 17:55:37 2013 +0000
+
+    Turn off all the fancy termios features.
+
+commit 0765af56440614d73c26944f811720d3a7124f29
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 25 15:21:19 2013 +0000
+
+    Windows nonblocking write: 1 byte at a time to know when buffer fills.
+
+commit a3cb91f5e1fc79ac089dc18299f5fe21026cafb0
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 25 11:47:19 2013 +0000
+
+    Implement non-blocking I/O on Windows.
+
+commit aac4d7f292e011e73a1bc04d089a43af5a40a1cf
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 25 11:34:42 2013 +0000
+
+    Fix SET_FAIL macro.
+
+commit 33d5ff47b59c4a0d35a6794daf7733406b4f2080
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 25 10:23:13 2013 +0000
+
+    Handle -EAGAIN in non-blocking reads on Unix, and return 0 from sp_read().
+
+commit 0ba3e49b45999e159dd8f9bda5abc1710d69eefb
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Nov 23 21:21:18 2013 +0000
+
+    Fix bug in debug message generation in sp_flush().
+
+commit 59131d602894f5e2f8776fa9f4736d360f67579f
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Nov 23 20:55:18 2013 +0000
+
+    Initialise structure in sp_new_config().
+
+commit 35ff018b49f28ea27b461f6353b862615d5d4a97
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Nov 23 20:45:09 2013 +0000
+
+    Add generator program for configuration accessor headers.
+
+commit 9b1502efcee2d9b531320e759908e2b804fa909c
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Nov 23 20:41:01 2013 +0000
+
+    Make configuration structure opaque.
+
+commit 0151b15710ae685314c5f123e6796da606643f0c
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Nov 23 18:23:45 2013 +0000
+
+    Clarify documentation.
+
+commit 3c126654b3d92584d0a9cd4e13f1cee764146ca6
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Nov 23 17:50:45 2013 +0000
+
+    Add sp_get_port_handle() function.
+
+commit 1c5aae9dc58995d202e30c356dcf25a8c1827558
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Nov 23 17:11:19 2013 +0000
+
+    Make port structure opaque.
+
+commit 70cd37def2518cfa4c1170b16c94527b196a72a8
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Nov 23 12:04:21 2013 +0000
+
+    Add back previously deleted sp_get_config function.
+
+commit a6cda1e8c71f08eee9bdeb862e26d7d4b943e997
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Nov 23 11:59:42 2013 +0000
+
+    Fix swapped DCD & RI signals on Windows.
+
+commit 6b93ede4194fddb0a319fae9cce8bd2e8cea9982
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Nov 23 11:57:17 2013 +0000
+
+    Return SP_ERR_SUPP from sp_list_ports() on unsupported platforms.
+
+commit 64690702cb0ee633211efbf83ec950063dc3149e
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Nov 23 11:49:35 2013 +0000
+
+    Generate debug output when returning using TRY() macro.
+
+commit dec10e31d02f644399d1204c95d50ce61f2ae655
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Nov 23 11:39:59 2013 +0000
+
+    Additional argument checking.
+
+commit ea667be751d42100f5927b4ab49a02c9d207250d
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Nov 23 01:08:57 2013 +0000
+
+    Add additional debug messages.
+
+commit c33efc482e4717af368e22748142f959ac727243
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Nov 23 00:26:44 2013 +0000
+
+    Add debug output for all entry and exit points.
+
+commit 92f756f8c1073908710df059b8350b7650c2ddc3
+Author: Martin Ling <martin-git@earth.li>
+Date:   Fri Nov 22 22:44:19 2013 +0000
+
+    Add debug macros.
+
+commit 863b35e69cbad5dce9f9f0547968730de8789256
+Author: Martin Ling <martin-git@earth.li>
+Date:   Fri Nov 22 22:41:03 2013 +0000
+
+    Add API for and default handler for debug messages.
+
+commit 71c8a9b906198155c2f494c4eef33b36577a1c2f
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Nov 22 22:37:15 2013 +0100
+
+    serialport.c: Add missing linux_termios.h #include.
+    
+    This is safe to include (at the moment) on all non-win32 OSes, since it
+    doesn't contain anything OS-specific.
+
+commit f36c639545ef04bf2340a09a34d3457719a3dcf4
+Author: Martin Ling <martin-git@earth.li>
+Date:   Fri Nov 22 20:27:39 2013 +0000
+
+    Remove dupliate/redundant return value documentation.
+
+commit 6aabf62a90915a94c8415ba4e29da96c05b0526b
+Author: Martin Ling <martin-git@earth.li>
+Date:   Fri Nov 22 20:12:39 2013 +0000
+
+    Use new SP_ERR_SUPP error to indicate unsupported operations.
+
+commit 6a1d6318e5f518e0677339894d9c122fd4a55875
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Nov 22 20:13:17 2013 +0100
+
+    Makefile.am: Add missing linux_termios.h.
+    
+    If the file is not listed in SOURCES, it won't end up in the tarball.
+    
+    Thanks to Dan Horák for the report.
+
+commit 68ec29db5e728695590fbcfac19ef783d32c3ec5
+Author: Martin Ling <martin-git@earth.li>
+Date:   Fri Nov 22 19:00:24 2013 +0000
+
+    Check for termiox support at runtime.
+
+commit 8d43110ad72dbc729651101b7cd218a5a7441437
+Author: Martin Ling <martin-git@earth.li>
+Date:   Fri Nov 22 18:43:41 2013 +0000
+
+    Fix memory leaks.
+
+commit 7de20e391530026e9c7bce986dc5d212a48673e8
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Nov 22 16:18:46 2013 +0100
+
+    Use common 3-digit package version number.
+
+commit 1d5d2a166f582e06aa2848fe9ca9c33f85acd45d
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Nov 22 16:07:32 2013 +0100
+
+    Temporarily disable USE_TERMIOX code (breaks the lib).
+    
+    On some systems the use of the code enabled by USE_TERMIOX leads to a
+    non-working sp_open() which breaks all functionality provided by the lib.
+    
+    Thus, temporarily disable that code until the details are investigated.
+    
+    This has been tested with a serial port DMM and the OLS logic analyzer
+    on an x86 64bit Linux system with kernel version 3.11. The code compiles
+    fine but doesn't work at runtime. The configure output included:
+    
+    checking for struct termios2... yes
+    checking for struct termiox... yes
+    
+    The root cause for the problem is that the ioctl(fd, TCGETX, data) call in
+    get_flow() returns -1 ("Invalid argument"), which in turn lets sp_open()
+    return SP_ERR_FAIL.
+
+commit 24abdb680fa5ab99b2e58b0196082c111f5baabc
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Nov 22 15:53:34 2013 +0100
+
+    Minor cosmetics.
+
+commit 8645feda604fadd077990dcbf90d687464fa9900
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Nov 22 11:59:12 2013 +0100
+
+    Add missing #include guards.
+
+commit da21834e42bc58065de0871f49fffefa605d4c5b
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Nov 22 11:56:40 2013 +0100
+
+    Fix the build on non-Linux platforms.
+
+commit d2ac0e3bbe4d402353a5d31e143915c02a366713
+Author: Bert Vermeulen <bert@biot.com>
+Date:   Fri Nov 22 02:23:17 2013 +0100
+
+    Ignore linux_termios leftovers.
+
+commit 82f424e6cd5a911cfb1102f9d078436f9c0351c2
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Nov 21 17:22:16 2013 +0000
+
+    Fix to sp_flush() on Unix.
+
+commit 3f099f4fe8d17e8acc43a04e38d7b6aacc9c6057
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Nov 20 19:11:39 2013 +0000
+
+    Add missing @param port entries to documentation.
+
+commit 8cf7c6978f9fa9c7ec706440080c10755f357b5c
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Nov 20 18:56:35 2013 +0000
+
+    Add sp_get_signals() function.
+
+commit 90cc3ee62b267ba5009fddd72f63b411ad466faa
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Nov 20 18:11:17 2013 +0000
+
+    Add sp_start_break() and sp_end_break() functions.
+
+commit 69a3739ca07a87d56e376a02f3bc1f0a0a9b64e7
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Nov 20 17:30:50 2013 +0000
+
+    Add sp_drain() function.
+
+commit ea34fba89980174892ef239ca752484055297f69
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Nov 20 19:13:12 2013 +0000
+
+    Add missing @param port entry to documentation.
+
+commit fd8fd11a4e60a06b0d15f2c31df18752ee2d3563
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Nov 20 17:22:50 2013 +0000
+
+    Make sp_flush take an option for what to flush.
+
+commit a036341bdf97dda25f715056a1c5a6a8b8be73af
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Nov 20 15:54:10 2013 +0000
+
+    Use a more logical set of SP_MODE_* flags.
+
+commit 20e63a77b58073e2dacdd85857a4f78b807a055c
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed Nov 20 19:56:11 2013 +0000
+
+    Define SP_PARITY_* more logically.
+
+commit 70518e4fddf921fddf9af36f1b7aebeb9cd70a67
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Nov 21 11:52:54 2013 +0000
+
+    Document this madness.
+
+commit 40978c2b4182d09b197a0218cc107e49509747ad
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Nov 21 11:52:41 2013 +0000
+
+    Support non-standard flow control modes on Linux.
+
+commit 7a6d2196e043a7de86a5675f9fffa0ff0ec33e72
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Nov 21 00:35:51 2013 +0000
+
+    Support custom baudrates on Linux.
+
+commit 31b3a8f5b52aa90cf3795679da626255fd21c67a
+Author: Matthias Heidbrink <m-sourcetree@heidbrink.biz>
+Date:   Wed Nov 20 14:21:07 2013 +0100
+
+    Added support for non-standard baud rates for Apple.
+
+commit e29b93a572d68ba18b40a948ffc17934f0a1146c
+Author: Martin Ling <martin-git@earth.li>
+Date:   Tue Nov 19 20:46:52 2013 +0000
+
+    Retrieve XON/XOFF setting on Unix.
+
+commit cf9d365ce06a033c5aca4641740ad347162026be
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Tue Nov 19 19:55:02 2013 +0100
+
+    Doxygen cosmetics.
+
+commit 626d280fd3d4a12910a38041bf98bb2e962f3dcc
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Tue Nov 19 19:37:03 2013 +0100
+
+    Consistently use the "@" notation for Doxygen tags.
+
+commit eac329d26be4e01824abaf97856b7d30a19bbadf
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Tue Nov 19 19:31:23 2013 +0100
+
+    Cosmetics, whitespace, consistency fixes.
+
+commit 705bdc69470f98693afd065e6fd48bbc34872d6d
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Tue Nov 19 19:20:50 2013 +0100
+
+    get_config(): Add a quickfix for xon_xoff.
+    
+    The config->xon_xoff variable is not filled correctly with data read
+    from the current serial port config. Without this, the value of the
+    variable will be bogus and some code that depends on the variable will fail.
+    
+    Note: This is just a temporary quickfix, not a proper final solution.
+
+commit 4b448bc5421c602cb2649990e4e67cdb905d1d9a
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Tue Nov 19 17:58:48 2013 +0100
+
+    .gitignore: Add libserialport.h.
+
+commit 23922313b38239ee0965f88055e3c8b2bf342136
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Tue Nov 19 12:32:01 2013 +0100
+
+    set_config(): Add missing CS5 handling.
+
+commit c85d0a28de3bd50ff4237cbd44db28a9f449944f
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Tue Nov 19 12:30:55 2013 +0100
+
+    Fix minor Doxygen warning.
+
+commit c200f5c1449bd3a82f166f8243e08a41530db3d1
+Author: Martin Ling <martin-git@earth.li>
+Date:   Tue Nov 19 03:14:09 2013 +0000
+
+    Clarify usage of -1 in configuration API.
+
+commit 091e75fedcefd97c531ab778462aec2fddc5c1de
+Author: Martin Ling <martin-git@earth.li>
+Date:   Tue Nov 19 03:02:45 2013 +0000
+
+    Group functions for documentation.
+
+commit eb6ed20f5193475fe0535920e9631137d61aa8b7
+Author: Martin Ling <martin-git@earth.li>
+Date:   Tue Nov 19 02:36:22 2013 +0000
+
+    Use named enums instead of ints for clearer documentation.
+
+commit cd5f52812dfbf1f0ec4f72af9a35af2ef02b985a
+Author: Martin Ling <martin-git@earth.li>
+Date:   Tue Nov 19 02:11:34 2013 +0000
+
+    Add doxygen documentation.
+
+commit bf2cbd652f9b520dcd3de9c98f000b85de00dba6
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 18 22:07:09 2013 +0000
+
+    Mark config argument to sp_set_config as const.
+
+commit 823690ae3e7c31cab9f14e7efe5402a49380b443
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 18 20:08:25 2013 +0000
+
+    Additional argument checking for config functions.
+
+commit 8f189c4c0f0b8fdf528688c9204c2e3a4e507659
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 18 20:04:54 2013 +0000
+
+    Remove sp_ prefix from private port data structure.
+
+commit 348e23ccbb785427a31a10b71db9cb70a5d70cf0
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 18 20:02:30 2013 +0000
+
+    Tidy up static functions.
+
+commit 8f471c669fb183ceaed529a773e71a67cc7fe4b7
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 18 20:00:15 2013 +0000
+
+    Make sure OS handles are set correctly for unopened / closed ports.
+
+commit c6754b4517d7c9764a887ee3078a3693bfa5c571
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 18 19:55:43 2013 +0000
+
+    Get Xon/Xoff status on Windows.
+
+commit e33ab9aaf2a405de8dd765a2a360b6ca44acc6c3
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 18 19:52:37 2013 +0000
+
+    Refactor port configuration code.
+
+commit 067417af4fd8b619ed5ede2184cb450e35dc3ecd
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Nov 16 20:55:53 2013 +0000
+
+    Add sp_get_config() function.
+
+commit 7e6fb0152c1adf7cba42b866332127dc97f1e64b
+Author: Martin Ling <martin-git@earth.li>
+Date:   Fri Nov 15 00:20:01 2013 +0000
+
+    Update documentation.
+
+commit a33d84f6a0a30feebdb559162d00a936a468a887
+Author: Martin Ling <martin-git@earth.li>
+Date:   Fri Nov 15 00:12:50 2013 +0000
+
+    Remove disused flowcontrol field from sp_port_config.
+
+commit da2748bfb3b852551459604b04eece3aa8feb4fa
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Nov 14 23:24:51 2013 +0000
+
+    Eliminate lengthy switch/case blocks for baudrates.
+
+commit 18fc2dd12bdc4965f705d3bd6d1ebfda3abdbe80
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Nov 14 22:43:03 2013 +0000
+
+    Add sp_set_flowcontrol helper function.
+
+commit 824dcb45618146cac9103e313e30290f749940d3
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Nov 14 22:27:51 2013 +0000
+
+    Store control bits in sp_port_data on Unix.
+
+commit e96d8bd288cb6a63e287ef0e8e0f2426e8bb38a3
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Nov 14 22:05:22 2013 +0000
+
+    Split up prototypes in include file for clarity.
+
+commit 9069c2fbb2f4b9f07e1bf9729e61044c65e09027
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Nov 14 22:01:11 2013 +0000
+
+    Add functions for setting individual port parameters.
+
+commit 9cb98459a847c667d3a14677c8c57a54048e9e16
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Nov 14 21:43:07 2013 +0000
+
+    Apply sane termios settings at port open time.
+
+commit 80186526b28fdd306148155cb9d4b2e78637783e
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Nov 14 21:39:56 2013 +0000
+
+    Add prototypes for config helper functions.
+
+commit 9f90173cbd7b3c79f51b4e9729bcbd91a5c30a71
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Nov 14 21:27:06 2013 +0000
+
+    Retrieve current control line settings in start_config.
+
+commit d514a26f8167a3c3006f8b8c9ff3a4a836bcdd24
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Nov 14 21:12:17 2013 +0000
+
+    New API for serial control lines.
+
+commit cbf628c7fe04cee7fb5b27f057ff065deea450b1
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Nov 14 20:30:26 2013 +0000
+
+    Move cfset{i,o}speed() calls to set_baudrate().
+
+commit a46f0960a2329b149213ce7252f5ecf25b8bd691
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Nov 14 19:45:42 2013 +0000
+
+    Use negative values in sp_port_config to retain existing settings.
+
+commit d1202734fb67690997f5a74c236f4f1f7d1d2256
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Nov 14 18:41:28 2013 +0000
+
+    Replace sp_set_params with sp_set_config, which takes a struct.
+
+commit 728f6de510c1a52a52a0deccbdf3dc5a10e2500c
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Fri Nov 15 11:36:14 2013 +0100
+
+    Use new project URL.
+
+commit e4bffe06c2fc62c9bbc681c4faf83d3a7ac7b880
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Thu Nov 14 22:09:14 2013 +0100
+
+    pkg-config file: Use Requires.private to fix static build.
+    
+    Any libs needed when building static binaries must be listed in the
+    'Requires.private' field of the installed pkg-config file libserialport.pc.
+    
+    Currently, this is libudev (but only when building on/for Linux).
+
+commit baba075903320faffb5ae3c85169d7e72ba6330f
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Thu Nov 14 22:16:11 2013 +0100
+
+    libserialport.h: Add package/lib version macros.
+    
+    These can be used by frontends e.g. for conditional compilation, or
+    simply for printing, logging to debug output, and so on.
+
+commit a3d4a56e1538be7353160061ee74e6d3a16d13da
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Thu Nov 14 22:01:08 2013 +0100
+
+    configure.ac: Drop unneeded AC_MSG_ERROR.
+    
+    The default behaviour of PKG_CHECK_MODULES is to abort with an error
+    anyway, but it will also print a more usable error message and hints
+    for the user about how to use PKG_CONFIG_PATH and so on.
+
+commit 5ef8a1ed7fbd45aad65298d5a6c39056ed1a4fa3
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Thu Nov 14 21:58:03 2013 +0100
+
+    libserialport: Allow C++ frontends to use the lib easily.
+
+commit f92f1f0c20ca6ec520d43702ec5f51ca245d7ec9
+Author: Uwe Hermann <uwe@hermann-uwe.de>
+Date:   Thu Nov 14 17:33:53 2013 +0100
+
+    Minor cosmetics, typos, and so on.
+
+commit 8094e4a0ce07551d8df5fb9c94602d24e601bc5b
+Author: Martin Ling <martin-git@earth.li>
+Date:   Thu Nov 14 13:09:52 2013 +0000
+
+    Divide sp_set_params into separate helper functions.
+
+commit 767c5ba80e7a1a20a6198701abfe9673d94eebe5
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 4 14:08:03 2013 +0000
+
+    Include <stdio.h> on Windows for sprintf, used in sp_open.
+
+commit d1d566f27f7896a2685651a43d8ffadeb2fb3a83
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 4 14:02:51 2013 +0000
+
+    Support 6-bit data on Unix.
+
+commit e4cc1a537a4508544bc27b072644e01feafd4e28
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 4 14:02:41 2013 +0000
+
+    Set data bits on Windows.
+
+commit 32b5ac05b4046261896729f7eb0e0c5100de98f9
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 4 13:42:55 2013 +0000
+
+    Add sp_copy_port() function.
+
+commit 99945a1fb53bf4b4d11e7bb54e097c57ea2a230e
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 4 13:08:09 2013 +0000
+
+    On Windows, prefix port names with '\\.\' to work with ports above COM9.
+
+commit f6a1fb65ea9ccd285bf641a928e2421f347a76bc
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 4 12:53:12 2013 +0000
+
+    Rename header to libserialport.h.
+
+commit d9573bad9adba41607514c803e2b1fce3c8d79ec
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 4 02:16:21 2013 +0000
+
+    Fix enumeration on Windows.
+
+commit 0d34b4519cbdf65b4bbaa2eff6894d27a6ffaeba
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Nov 4 00:00:05 2013 +0000
+
+    Fix enumeration on OS X.
+
+commit c45eb4bee2533fc4ac65375c12ba8ed369f61379
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Nov 3 23:12:03 2013 +0000
+
+    Update documentation.
+
+commit f9796bcb869e25c1a75e000150d7371fcec648f6
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Nov 3 22:40:39 2013 +0000
+
+    Remove outdated inline documentation, README is now authoritative.
+
+commit b9a462bb47d8db62c118bed932e490ffe5b38a57
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Nov 3 22:38:50 2013 +0000
+
+    Clarify return values of sp_get_port_by_name() and sp_list_ports().
+
+commit 25ab82f6c061a92077aa1c2f62a2ceb3de02fdb5
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Nov 3 22:34:17 2013 +0000
+
+    Clarify documentation for sp_read() and sp_write().
+
+commit 016193288478dd146b8aec2f8d14945ccd4bd2aa
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Nov 3 22:30:46 2013 +0000
+
+    Update documentation.
+
+commit e3b2f7a4e3c1315d51d6a91eec7dde44ec0a623b
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Nov 3 22:27:59 2013 +0000
+
+    Add sp_free_port() function.
+
+commit 77f262c4f93264bf48b0832399528a557314eb5e
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Nov 3 22:15:54 2013 +0000
+
+    Make sp_list_ports and sp_get_port_by_name return int.
+
+commit d4babed247a917219709f5bb50241d54e1a037be
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Nov 3 21:35:46 2013 +0000
+
+    Add sp_get_port_by_name() function.
+
+commit 5919c9134abff82adeed3941fde27fed65d01dcb
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Nov 3 21:30:43 2013 +0000
+
+    Port name string length now no longer needs to be passed around.
+
+commit 8b532d9c1e91bb3e956a31b06f43b386bf7b7b68
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Nov 3 21:22:21 2013 +0000
+
+    Handle conversion of unicode names to char * on Windows.
+
+commit d54e90047b0ef2ddf8aef2ff2ed14b84829671a0
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Nov 3 21:17:21 2013 +0000
+
+    Identify ports by sp_port structure, not name.
+
+commit 24c1a4bb053e517a55eb0f6355b8f362659d4caf
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Nov 3 20:50:01 2013 +0000
+
+    Always return an empty port list unless allocation fails.
+
+commit e9a2f9c9d35624148b4715e80c2dc2ac0387ee6b
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Nov 3 20:21:36 2013 +0000
+
+    Add SP_ERR_MEM failure code.
+
+commit 1ebf4347e087d10ea7f9bd916c8bdc426ffd4b5e
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Nov 2 19:14:36 2013 +0000
+
+    Fix building on OSX and Linux.
+
+commit bdfb5b8c0893654b69d2149010c154c19b51c575
+Author: Martin Ling <martin-git@earth.li>
+Date:   Mon Oct 28 01:32:06 2013 +0000
+
+    Rename "name" to "value" to be more consistent with Windows terminology.
+
+commit ac74fdafca3200577b4d55b086a32a652282b267
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Oct 27 17:24:12 2013 +0000
+
+    Add enum values for flow control settings.
+
+commit 0a16d4def93aa348fdd480222168d8e66afd1784
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Oct 27 17:19:39 2013 +0000
+
+    Add documentation.
+
+commit e8ffaee986f4e77ce1d949971e1d9b8acc2fc831
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Oct 27 15:42:08 2013 +0000
+
+    Add include guard.
+
+commit 4b97c9fc26b3eaca7609c6c475c0d1f803294b26
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Oct 27 12:51:55 2013 +0000
+
+    Ignore non-existant serial8250 ports on Linux.
+
+commit 08fe0bdbdb1a3e10bc7e2b07b317e271ce99049a
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Oct 27 12:09:37 2013 +0000
+
+    On Linux, skip virtual ttys that have no parent device.
+
+commit 8683177b9d2a17ff40df49e0f90ce818a0b5e209
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Oct 27 11:29:25 2013 +0000
+
+    Minor changes to port flags on Unix, to remain in sync with libsigrok.
+
+commit db2794cea96bcf2f953bc5da5071043e2dd665ce
+Author: Martin Ling <martin-git@earth.li>
+Date:   Wed May 8 02:55:43 2013 +0100
+
+    Fix list append.
+
+commit 68ab64ccdcb6c0a845dce417c18a74fcf284f9d2
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Apr 28 12:36:02 2013 +0100
+
+    Document enumeration functions.
+
+commit 3b63f34dcbf612a9cdd54d0963187f4348951cb5
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Apr 28 11:56:06 2013 +0100
+
+    Add serial enumeration code.
+
+commit d22b213120f232db9bb5f448d78219f1e1634cd7
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Apr 28 00:50:30 2013 +0100
+
+    Add .gitignore for build outputs.
+
+commit 0662f2bb88079a49ed6329e960aa57dabec5ba34
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Apr 28 00:32:08 2013 +0100
+
+    Add build system.
+
+commit 64eec30d22f1b821a021bfd4a8d54e169e84731b
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Apr 28 00:17:46 2013 +0100
+
+    Avoid unused variable warning on non-Windows platforms.
+
+commit 954e81adaf8548cf9e11064e8862041cdb49df3f
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sun Apr 28 00:15:09 2013 +0100
+
+    Remove unused glob.h include.
+
+commit 74510d4b59f755dc2db687e0e321eed25181cc37
+Author: Martin Ling <martin-git@earth.li>
+Date:   Sat Apr 27 23:35:45 2013 +0100
+
+    Initial version. Builds for Linux and Windows.
