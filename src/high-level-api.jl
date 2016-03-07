@@ -4,11 +4,21 @@ type SerialPort <: IO
     eof::Bool
 end
 
+"""
+Constructor
+"""
 SerialPort(portname::AbstractString) = SerialPort(sp_get_port_by_name(portname), false)
 
+"""
+Set connection speed in bits per second. The library will return an error if bps
+is not a valid/supported value.
+"""
 set_speed(sp::SerialPort, bps::Integer) = sp_set_baudrate(sp.ref, bps)
 
-# https://en.wikipedia.org/wiki/Universal_asynchronous_receiver/transmitter#Data_framing
+"""
+Configure packet framing. Defaults to the most common "8N1" scheme.
+https://en.wikipedia.org/wiki/Universal_asynchronous_receiver/transmitter#Data_framing
+"""
 function set_frame(sp::SerialPort;
     ndatabits::Integer=8,
     parity::SPParity=SP_PARITY_NONE,
@@ -19,6 +29,10 @@ function set_frame(sp::SerialPort;
     sp_set_stopbits(sp.ref, nstopbits)
 end
 
+"""
+Configure flow control settings. Many systems don't support all options.
+If an unsupported option is requested, the library will return SP_ERR_SUPP.
+"""
 function set_flow_control(sp::SerialPort;
     rts::SPrts=SP_RTS_OFF,
     cts::SPcts=SP_CTS_IGNORE,
@@ -63,7 +77,7 @@ function print_port_metadata(sp::SerialPort; show_config::Bool=true)
     print_port_metadata(sp.ref, show_config=show_config)
 end
 
-function print_port_metadata(port::Port; show_config::Bool=true)
+function print_port_metadata(port::LibSerialPort.Port; show_config::Bool=true)
     println("\nPort name:\t",       sp_get_port_name(port))
     println("Manufacturer:\t",      sp_get_port_usb_manufacturer(port))
     println("Product:\t",           sp_get_port_usb_product(port))
@@ -117,6 +131,22 @@ function Base.open(sp::SerialPort; mode::SPMode=SP_MODE_READ_WRITE)
     return sp
 end
 
+"""
+Convenience method with keyword args for common settings
+"""
+function Base.open(portname::AbstractString;
+                   mode::SPMode=SP_MODE_READ_WRITE,
+                   bps::Integer=9600,
+                   ndatabits::Integer=8,
+                   parity::SPParity=SP_PARITY_NONE,
+                   nstopbits::Integer=1)
+    sp = SerialPort(sp_get_port_by_name(portname), false)
+    sp_open(sp.ref, mode)
+    set_speed(sp, bps)
+    set_frame(sp, ndatabits, parity, nstopbits)
+    return sp
+end
+
 function Base.close(sp::SerialPort; delete::Bool=false)
 
     # Flush first, as is done in other close() methods in Base
@@ -150,6 +180,8 @@ function Base.write(sp::SerialPort, data::UInt8)
 end
 
 Base.write(sp::SerialPort, i::Int64) = Base.write(sp, "$i")
+
+# TODO user-controlled precision. @sprintf doesn't support interpolation
 Base.write(sp::SerialPort, f::Float32) = Base.write(sp, @sprintf("%.3f", f))
 Base.write(sp::SerialPort, f::Float64) = Base.write(sp, @sprintf("%.3f", f))
 
@@ -157,13 +189,6 @@ Base.eof(sp::SerialPort) = sp.eof == true
 
 seteof(sp::SerialPort, state::Bool) = sp.eof = state
 reseteof(sp::SerialPort) = seteof(sp, false)
-
-# function unsafe_read(sp::SerialPort, p::Ptr{UInt8}, n::UInt)
-#     for i = 1:n
-#         unsafe_store!(p, read(sp, UInt8)::UInt8, i)
-#     end
-#     nothing
-# end
 
 function Base.read(sp::SerialPort, ::Type{UInt8})
     byte_array = sp_nonblocking_read(sp.ref, 1)
@@ -181,13 +206,11 @@ function Base.readuntil(sp::SerialPort, delim::Char)
         if nb_available(sp) > 0
             c = read(sp, Char)
             push!(out, c)
-            # c != '\0' && push!(out, c)
             if c == delim
                 break
             end
         end
     end
-    # str = join(out[out .!= '\0'])
     return join(out)
 end
 
@@ -198,7 +221,7 @@ function Base.readbytes(sp::SerialPort, nbytes::Integer)
 end
 
 """
-Read everything in libserialport's input buffer, one byte at a time, until its
+Read everything in libserialport's input buffer, one byte at a time, until it
 is empty. Returns an ASCIIString.
 """
 function Base.readall(sp::SerialPort)
