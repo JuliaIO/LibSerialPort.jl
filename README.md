@@ -6,13 +6,17 @@
 
 This package is not yet registered. Get it via
 
-    Pkg.clone("https://github.com/andrewadare/LibSerialPort.jl.git")
+    julia> Pkg.clone("https://github.com/andrewadare/LibSerialPort.jl.git")
 
-For a system-wide installation of the library, follow the simple [build instructions](http://sigrok.org/wiki/Libserialport), or download and build using BinDeps as follows:
+For a system-wide installation of the library, follow the simple [build instructions](http://sigrok.org/wiki/Libserialport), or download and build using `Pkg.build`:
 
-    Pkg.build("LibSerialPort")
+    julia> Pkg.build("LibSerialPort")
 
-(This only works on Unix-like systems, for now). If installation was successful, try doing
+(This only works on Unix-like systems, for now). If installation through the package system succeeded, then
+
+    julia> readdir(joinpath(Pkg.dir("LibSerialPort"), "deps/usr/lib"))
+
+should list your new library. Type
 
     using LibSerialPort
     list_ports()
@@ -22,7 +26,3 @@ to get a list of ports detected on your system.
 # Using the package
 
 Further documentation is forthcoming, but for now, the tests directory contains some useful examples.
-
-# Troubleshooting
-
-If the libserialport shared library was built correctly with `Pkg.build`, but you receive an error that the library could not be loaded, one option is to add the `lib` directory to your `(DY)LD_LIBRARY_PATH`.
