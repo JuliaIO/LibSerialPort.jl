@@ -1,0 +1,5 @@
+# Ignore everything in deps
+deps/*
+
+# except
+!deps/build.jl
