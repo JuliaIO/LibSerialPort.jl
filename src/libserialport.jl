@@ -172,9 +172,18 @@ export
     seteof,
     reseteof
 
-const depsfile = joinpath(dirname(dirname(@__FILE__)), "deps", "deps.jl")
+const depsdir = joinpath(dirname(dirname(@__FILE__)), "deps")
+const depsfile = joinpath(depsdir, "deps.jl")
 if isfile(depsfile)
     include(depsfile)
+
+    # This is supposed to address runtime linking problems.
+    # Exporting environment variables like (DY)LD_LIBRARY_PATH works,
+    # but this is a more self-contained and portable solution.
+    libdir = joinpath(depsdir, "usr/lib")
+    if !in(libdir, Libdl.DL_LOAD_PATH)
+        push!(Libdl.DL_LOAD_PATH, libdir)
+    end
 else
     error("LibSerialPort not properly installed. Please run Pkg.build(\"LibSerialPort\")")
 end
