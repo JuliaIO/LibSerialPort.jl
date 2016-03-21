@@ -134,16 +134,16 @@ end
 """
 Convenience method with keyword args for common settings
 """
-function Base.open(portname::AbstractString;
+function Base.open(portname::AbstractString,
+                   bps::Integer;
                    mode::SPMode=SP_MODE_READ_WRITE,
-                   bps::Integer=9600,
                    ndatabits::Integer=8,
                    parity::SPParity=SP_PARITY_NONE,
                    nstopbits::Integer=1)
     sp = SerialPort(sp_get_port_by_name(portname), false)
     sp_open(sp.ref, mode)
     set_speed(sp, bps)
-    set_frame(sp, ndatabits, parity, nstopbits)
+    set_frame(sp, ndatabits=ndatabits, parity=parity, nstopbits=nstopbits)
     return sp
 end
 
