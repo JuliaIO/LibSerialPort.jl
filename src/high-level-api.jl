@@ -234,47 +234,6 @@ function Base.readuntil(sp::SerialPort, delim::Char, timeout_ms::Integer)
     return takebuf_string(out)
 end
 
-"""
-Read until the specified delimiting byte (e.g. '\n') is encountered, or until
-timeout_ms has elapsed, whichever comes first.
-"""
-function readuntil(sp::SerialPort, delim::Char, timeout_ms::Integer)
-    # TODO: this is in Base (io.jl) - is it also needed here?
-    # if delim < Char(0x80)
-    #     return String(readuntil(sp, delim % UInt8))
-    # end
-
-    start_time = time_ns()
-    out = IOBuffer()
-    while !eof(sp)
-        if (time_ns() - start_time)/1e6 > timeout_ms
-            break
-        end
-        if nb_available(sp) > 0
-            c = read(sp, Char)
-            write(out, c)
-            if c == delim
-                break
-            end
-        end
-    end
-    return takebuf_string(out)
-end
-
-# function Base.readuntil(sp::SerialPort, delim::Char)
-#     out = Char[]
-#     while !eof(sp)
-#         if nb_available(sp) > 0
-#             c = read(sp, Char)
-#             push!(out, c)
-#             if c == delim
-#                 break
-#             end
-#         end
-#     end
-#     return join(out)
-# end
-
 Base.nb_available(sp::SerialPort) = Int(sp_input_waiting(sp.ref))
 
 function Base.readbytes(sp::SerialPort, nbytes::Integer)
