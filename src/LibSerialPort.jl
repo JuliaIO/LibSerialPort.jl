@@ -164,6 +164,7 @@ export
 
     # Functions from high-level API
     list_ports,
+    open_serial_port,
     print_port_metadata,
     print_port_settings,
     set_speed,

@@ -147,6 +147,18 @@ function Base.open(portname::AbstractString,
     return sp
 end
 
+"""
+Create and configure a SerialPort object.
+Example: `open_serial_port("/dev/ttyACM0", 115200)`
+"""
+function open_serial_port(port_address::AbstractString, speed::Integer)
+    sp = SerialPort(port_address)
+    open(sp)
+    set_speed(sp, speed)
+    set_frame(sp, ndatabits=8, parity=SP_PARITY_NONE, nstopbits=1)
+    return sp
+end
+
 function Base.close(sp::SerialPort; delete::Bool=false)
 
     # Flush first, as is done in other close() methods in Base
@@ -164,12 +176,7 @@ function Base.flush(sp::SerialPort; buffer::SPBuffer=SP_BUF_BOTH)
     sp_flush(sp.ref, buffer)
 end
 
-function Base.write(sp::SerialPort, data::ASCIIString)
-    sp_nonblocking_write(sp.ref, Array{UInt8}(data))
-    sp_drain(sp.ref)
-end
-
-function Base.write(sp::SerialPort, data::UTF8String)
+function Base.write(sp::SerialPort, data::String)
     sp_nonblocking_write(sp.ref, Array{UInt8}(data))
     sp_drain(sp.ref)
 end
@@ -181,7 +188,7 @@ end
 
 Base.write(sp::SerialPort, i::Int64) = Base.write(sp, "$i")
 
-# TODO user-controlled precision. @sprintf doesn't support interpolation
+# TODO user-controlled precision. How to do string interpolation in macros?
 Base.write(sp::SerialPort, f::Float32) = Base.write(sp, @sprintf("%.3f", f))
 Base.write(sp::SerialPort, f::Float64) = Base.write(sp, @sprintf("%.3f", f))
 
@@ -200,19 +207,46 @@ function Base.read(sp::SerialPort, ::Type{Char})
     return (length(byte_array) > 0) ? byte_array[1] : '\0'
 end
 
-function Base.readuntil(sp::SerialPort, delim::Char)
-    out = Char[]
+"""
+Read until the specified delimiting byte (e.g. '\n') is encountered, or until
+timeout_ms has elapsed, whichever comes first.
+"""
+function readuntil(sp::SerialPort, delim::Char, timeout_ms::Integer)
+    # TODO: this is in Base (io.jl) - is it also needed here?
+    # if delim < Char(0x80)
+    #     return String(readuntil(sp, delim % UInt8))
+    # end
+
+    start_time = time_ns()
+    out = IOBuffer()
     while !eof(sp)
+        if (time_ns() - start_time)/1e6 > timeout_ms
+            break
+        end
         if nb_available(sp) > 0
             c = read(sp, Char)
-            push!(out, c)
+            write(out, c)
             if c == delim
                 break
             end
         end
     end
-    return join(out)
+    return takebuf_string(out)
 end
+
+# function Base.readuntil(sp::SerialPort, delim::Char)
+#     out = Char[]
+#     while !eof(sp)
+#         if nb_available(sp) > 0
+#             c = read(sp, Char)
+#             push!(out, c)
+#             if c == delim
+#                 break
+#             end
+#         end
+#     end
+#     return join(out)
+# end
 
 Base.nb_available(sp::SerialPort) = Int(sp_input_waiting(sp.ref))
 
