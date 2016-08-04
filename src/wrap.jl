@@ -166,13 +166,13 @@ end
 # char *sp_get_port_name(const struct sp_port *port);
 function sp_get_port_name(port::Port)
     cname = ccall((:sp_get_port_name, "libserialport"), Ptr{UInt8}, (Port,), port)
-    name = cname != C_NULL ? bytestring(cname) : ""
+    name = cname != C_NULL ? unsafe_string(cname) : ""
 end
 
 # char *sp_get_port_description(const struct sp_port *port);
 function sp_get_port_description(port::Port)
     d = ccall((:sp_get_port_description, "libserialport"), Ptr{UInt8}, (Port,), port)
-    desc = d != C_NULL ? bytestring(d) : ""
+    desc = d != C_NULL ? unsafe_string(d) : ""
 end
 
 # enum sp_transport sp_get_port_transport(const struct sp_port *port);
@@ -226,28 +226,28 @@ end
 function sp_get_port_usb_manufacturer(port::Port)
     m = ccall((:sp_get_port_usb_manufacturer, "libserialport"),
               Ptr{UInt8}, (Port,), port)
-    manufacturer = (m != C_NULL) ? bytestring(m) : ""
+    manufacturer = (m != C_NULL) ? unsafe_string(m) : ""
 end
 
 # char *sp_get_port_usb_product(const struct sp_port *port);
 function sp_get_port_usb_product(port::Port)
     p = ccall((:sp_get_port_usb_product, "libserialport"),
               Ptr{UInt8}, (Port,), port)
-    product = (p != C_NULL) ? bytestring(p) : ""
+    product = (p != C_NULL) ? unsafe_string(p) : ""
 end
 
 # char *sp_get_port_usb_serial(const struct sp_port *port);
 function sp_get_port_usb_serial(port::Port)
     s = ccall((:sp_get_port_usb_serial, "libserialport"),
               Ptr{UInt8}, (Port,), port)
-    serial = (s != C_NULL) ? bytestring(s) : ""
+    serial = (s != C_NULL) ? unsafe_string(s) : ""
 end
 
 # char *sp_get_port_bluetooth_address(const struct sp_port *port);
 function sp_get_port_bluetooth_address(port::Port)
     a = ccall((:sp_get_port_bluetooth_address, "libserialport"),
               Ptr{UInt8}, (Port,), port)
-    address = (a != C_NULL) ? bytestring(a) : ""
+    address = (a != C_NULL) ? unsafe_string(a) : ""
 end
 
 # enum sp_return sp_get_port_handle(const struct sp_port *port, void *result_ptr);
@@ -705,7 +705,7 @@ end
 # char *sp_last_error_message(void);
 function sp_last_error_message()
     msg = ccall((:sp_last_error_message, "libserialport"), Ptr{UInt8}, ())
-    msg_jl = bytestring(msg)
+    msg_jl = unsafe_string(msg)
     _sp_free_error_message(msg)
     return msg_jl
 end
@@ -738,7 +738,7 @@ end
 # const char *sp_get_package_version_string(void);
 function sp_get_package_version_string()
     ver = ccall((:sp_get_package_version_string, "libserialport"), Ptr{UInt8}, ())
-    bytestring(ver)
+    unsafe_string(ver)
 end
 
 # int sp_get_current_lib_version(void);
@@ -759,5 +759,5 @@ end
 # const char *sp_get_lib_version_string(void);
 function sp_get_lib_version_string()
     ver = ccall((:sp_get_lib_version_string, "libserialport"), Ptr{UInt8}, ())
-    bytestring(ver)
+    unsafe_string(ver)
 end

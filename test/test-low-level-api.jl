@@ -117,7 +117,7 @@ function test_blocking_serial_loopback(port::LibSerialPort.Port,
 
     println("\nTesting serial loopback with blocking write/read functions...")
     println()
-    data = bytestring(sp_blocking_read(port, 1024, 2000))
+    data = unsafe_string(sp_blocking_read(port, 1024, 2000))
     println(data)
     sp_drain(port)
     sp_flush(port, SP_BUF_BOTH)
@@ -127,7 +127,7 @@ function test_blocking_serial_loopback(port::LibSerialPort.Port,
         sp_blocking_write(port, Array{UInt8}("Test message $i\n"), write_timeout_ms)
         sp_drain(port)
         sp_flush(port, SP_BUF_OUTPUT)
-        data = bytestring(sp_blocking_read(port, 128, read_timeout_ms))
+        data = unsafe_string(sp_blocking_read(port, 128, read_timeout_ms))
         print(data)
         sp_flush(port, SP_BUF_INPUT)
     end
@@ -138,7 +138,7 @@ function test_nonblocking_serial_loopback(port::LibSerialPort.Port)
 
     println("\n[TEST] Read any incoming data for ~1 second...")
     for i = 1:1000
-        print(bytestring(sp_nonblocking_read(port, 1024)))
+        print(unsafe_string(sp_nonblocking_read(port, 1024)))
         sleep(0.001)
     end
 
@@ -150,12 +150,12 @@ function test_nonblocking_serial_loopback(port::LibSerialPort.Port)
     for i = 1:100
         sp_nonblocking_write(port, Array{UInt8}("Test message $i\n"))
         sp_drain(port)
-        print(bytestring(sp_nonblocking_read(port, 256)))
+        print(unsafe_string(sp_nonblocking_read(port, 256)))
     end
 
     # Read and print any remaining data for ~50 ms
     for i = 1:50
-        print(bytestring(sp_nonblocking_read(port, 256)))
+        print(unsafe_string(sp_nonblocking_read(port, 256)))
         sleep(0.001)
     end
 
