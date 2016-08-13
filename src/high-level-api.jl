@@ -212,11 +212,6 @@ Read until the specified delimiting byte (e.g. '\n') is encountered, or until
 timeout_ms has elapsed, whichever comes first.
 """
 function Base.readuntil(sp::SerialPort, delim::Char, timeout_ms::Integer)
-    # TODO: this is in Base (io.jl) - is it also needed here?
-    # if delim < Char(0x80)
-    #     return String(readuntil(sp, delim % UInt8))
-    # end
-
     start_time = time_ns()
     out = IOBuffer()
     while !eof(sp)
@@ -242,7 +237,7 @@ end
 
 """
 Read everything in libserialport's input buffer, one byte at a time, until it
-is empty. Returns an ASCIIString.
+is empty. Returns a Char array.
 """
 function Base.readall(sp::SerialPort)
     result = Char[]
@@ -252,12 +247,3 @@ function Base.readall(sp::SerialPort)
     end
     return join(result)
 end
-
-# function Base.readavailable(sp::SerialPort)
-
-#     while Base.eof(sp) == false
-#         # Block if no data is available
-#     end
-
-#     return Base.readall(sp)
-# end
