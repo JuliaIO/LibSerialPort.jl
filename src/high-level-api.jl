@@ -239,7 +239,7 @@ end
 Read everything in libserialport's input buffer, one byte at a time, until it
 is empty. Returns a Char array.
 """
-function Base.readall(sp::SerialPort)
+function Base.readstring(sp::SerialPort)
     result = Char[]
     while Int(nb_available(sp)) > 0
         byte = Base.readbytes(sp, 1)[1]
