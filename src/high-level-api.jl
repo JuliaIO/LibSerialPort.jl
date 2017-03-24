@@ -56,7 +56,7 @@ Print a list of currently visible ports, along with some basic info
 function list_ports(;nports_guess=64)
     ports = sp_list_ports()
 
-    for port in pointer_to_array(ports, nports_guess, false)
+    for port in unsafe_wrap(Array, ports, nports_guess, false)
         port == C_NULL && return
 
         println(sp_get_port_name(port))
