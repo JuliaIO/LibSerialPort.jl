@@ -70,10 +70,15 @@ function test_readline(sp::SerialPort)
 end
 
 function main()
-    sp = SerialPort("/dev/cu.wchusbserial1410")
-    open(sp)
-    set_speed(sp, 19200)
-    set_frame(sp, ndatabits=8, parity=SP_PARITY_NONE, nstopbits=1)
+
+    if length(ARGS) != 2
+        println("Usage: $(basename(@__FILE__)) port baudrate")
+        println("Available ports:")
+        list_ports()
+        return
+    end
+
+    sp = open(ARGS[1], parse(Int, ARGS[2]))
 
     print_port_metadata(sp)
     print_port_settings(sp)
