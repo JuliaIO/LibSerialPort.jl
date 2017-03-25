@@ -544,8 +544,7 @@ function sp_blocking_read(port::Port, nbytes::Integer, timeout_ms::Integer)
                 port, buffer, Csize_t(nbytes), Cuint(timeout_ms))
     handle_error(ret, loc())
 
-    nb = Int(ret)
-    return nb > 0 ? buffer[1:nb] : Vector{UInt8}()
+    return Int(ret), buffer
 end
 
 # enum sp_return sp_blocking_read_next(struct sp_port *port, void *buf, size_t count, unsigned int timeout_ms);
@@ -558,8 +557,7 @@ function sp_blocking_read_next(port::Port, nbytes::Integer, timeout_ms::Integer)
                 port, buffer, Csize_t(nbytes), Cuint(timeout_ms))
     handle_error(ret, loc())
 
-    nb = Int(ret)
-    return nb > 0 ? buffer[1:nb] : Vector{UInt8}()
+    return Int(ret), buffer
 end
 
 # enum sp_return sp_nonblocking_read(struct sp_port *port, void *buf, size_t count);
@@ -571,8 +569,7 @@ function sp_nonblocking_read(port::Port, nbytes::Integer)
                 (Port, Ptr{UInt8}, Csize_t), port, buffer, Csize_t(nbytes))
     handle_error(ret, loc())
 
-    nb = Int(ret)
-    return nb > 0 ? buffer[1:nb] : Vector{UInt8}()
+    return Int(ret), buffer
 end
 
 # enum sp_return sp_blocking_write(struct sp_port *port, const void *buf, size_t count, unsigned int timeout_ms);
