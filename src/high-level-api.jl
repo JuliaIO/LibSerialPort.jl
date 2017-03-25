@@ -198,13 +198,13 @@ seteof(sp::SerialPort, state::Bool) = sp.eof = state
 reseteof(sp::SerialPort) = seteof(sp, false)
 
 function Base.read(sp::SerialPort, ::Type{UInt8})
-    byte_array = sp_nonblocking_read(sp.ref, 1)
-    return (length(byte_array) > 0) ? UInt8(byte_array[1]) : 0x00
+    nbytes_read, bytes = sp_nonblocking_read(sp.ref, 1)
+    return (nbytes_read == 1) ? UInt8(bytes[1]) : 0x00
 end
 
 function Base.read(sp::SerialPort, ::Type{Char})
-    byte_array = sp_nonblocking_read(sp.ref, 1)
-    return (length(byte_array) > 0) ? Char(byte_array[1]) : '\0'
+    nbytes_read, bytes = sp_nonblocking_read(sp.ref, 1)
+    return (nbytes_read == 1) ? Char(bytes[1]) : '\0'
 end
 
 """
@@ -232,7 +232,8 @@ end
 Base.nb_available(sp::SerialPort) = Int(sp_input_waiting(sp.ref))
 
 function Base.readbytes(sp::SerialPort, nbytes::Integer)
-    sp_nonblocking_read(sp.ref, nbytes)
+    nbytes_read, bytes = sp_nonblocking_read(sp.ref, nbytes)
+    return bytes
 end
 
 """
