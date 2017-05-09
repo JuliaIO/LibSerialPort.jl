@@ -324,14 +324,24 @@ function Base.read(sp::SerialPort, T::Union{Type{UInt8},Type{Char}})
 end
 
 """
-`readuntil(sp::SerialPort,delim::Char,timeout_ms::Integer)`
+`readuntil(sp::SerialPort,delim::Union{Char,AbstractString,Vector{Char}},timeout_ms::Integer)`
 
 Read until the specified delimiting byte (e.g. `'\\n'`) is encountered, or until
 timeout_ms has elapsed, whichever comes first.
 """
 function Base.readuntil(sp::SerialPort, delim::Char, timeout_ms::Integer)
+    return readuntil(sp,[delim],timeout_ms)
+end
+
+
+function Base.readuntil(sp::SerialPort, delim::AbstractString, timeout_ms::Integer)
+    return readuntil(sp,convert(Vector{Char},delim),timeout_ms)
+end
+
+function Base.readuntil(sp::SerialPort, delim::Vector{Char}, timeout_ms::Integer)
     start_time = time_ns()
     out = IOBuffer()
+    lastchars = zeros(Char,length(delim))
     while !eof(sp)
         if (time_ns() - start_time)/1e6 > timeout_ms
             break
@@ -339,7 +349,9 @@ function Base.readuntil(sp::SerialPort, delim::Char, timeout_ms::Integer)
         if nb_available(sp) > 0
             c = read(sp, Char)
             write(out, c)
-            if c == delim
+	    lastchars = circshift(lastchars,-1)
+	    lastchars[end] = c
+            if lastchars == delim
                 break
             end
         end
