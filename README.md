@@ -7,7 +7,7 @@ Apart from a very few non-essential functions, the entire library API (about 75 
 
 # Dependencies
 
-[BinDeps.jl](https://github.com/JuliaLang/BinDeps.jl) is the required, as well as standard tools for building the C library (make, gcc/clang, etc).
+[BinDeps.jl](https://github.com/JuliaLang/BinDeps.jl) is required, as well as standard tools for building the C library (make, gcc/clang, etc).
 
 
 # Installation
