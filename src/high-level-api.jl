@@ -17,7 +17,7 @@ SerialPort(portname::AbstractString) = SerialPort(sp_get_port_by_name(portname),
 Set connection speed of `sp` in bits per second. The library will return an
 error if bps is not a valid/supported value.
 """
-function set_speed(sp::SerialPort, bps::Integer) 
+function set_speed(sp::SerialPort, bps::Integer)
      sp_set_baudrate(sp.ref, bps)
      return nothing
 end
@@ -31,7 +31,7 @@ for more details.
 
 `ndatabits` is the number of data bits which is `8` in the common "8N1" sceme.
 
-The `parity` is set to none in the "8N1" sceme and can take the values: 
+The `parity` is set to none in the "8N1" sceme and can take the values:
 `SP_PARITY_NONE`, `SP_PARITY_ODD`, `SP_PARITY_EVEN`, `SP_PARITY_MARK` and
 `SP_PARITY_SPACE`.
 
@@ -57,7 +57,7 @@ If an unsupported option is requested, the library will return SP_ERR_SUPP.
 `rts` can take the values: `SP_RTS_OFF`, `SP_RTS_ON` and `SP_RTS_FLOW_CONTROL`
 and defaults to `SP_RTS_OFF`.
 
-`cts` can take the values: `SP_CTS_IGNORE` and `SP_CTS_FLOW_CONTROL`. Its 
+`cts` can take the values: `SP_CTS_IGNORE` and `SP_CTS_FLOW_CONTROL`. Its
 default is `SP_CTS_IGNORE`.
 
 `dtr` can take the values: `SP_DTR_OFF`, `SP_DTR_ON`, and `SP_DTR_FLOW_CONTROL`
@@ -113,7 +113,7 @@ end
 """
 `print_port_metadata(sp::SerialPort [,show_config::Bool])
 
-Print info found for this port. 
+Print info found for this port.
 Note: port should be open to obtain a valid FD/handle before accessing fields.
 
 `show_config` is `true` by default and prints out the current port settings.
@@ -194,7 +194,7 @@ end
 
 construct, configure and open a `SerialPort` object.
 
-For a detailes on the posssible setting see `?set_flow_control` and `?set_frame`.
+For a details on the posssible setting see `?set_flow_control` and `?set_frame`.
 """
 function Base.open(portname::AbstractString,
                    bps::Integer;
@@ -224,9 +224,8 @@ end
 """
 close(sp::SerialPort [, delete::Bool])
 
-Close the serial port `sp`.
-
-TODO: What is `delete` for?
+Close the serial port `sp`. The optional `delete` keyword argument triggers
+a call to `sp_free_port` in the C library if set to `true` (default = false).
 """
 function Base.close(sp::SerialPort; delete::Bool=false)
 
@@ -244,7 +243,7 @@ end
 """
 `flush(sp::SerialPort [, buffer::SPBuffer])`
 
-Flush `buffer` of serial port `sp`. 
+Flush `buffer` of serial port `sp`.
 
 `buffer` can take the values: `SP_BUF_INPUT`, `SP_BUF_OUTPUT`, and
 `SP_BUF_BOTH`.
@@ -282,7 +281,7 @@ Base.write(sp::SerialPort, i::Integer) = Base.write(sp, "$i")
 `write(sp::SerialPort, f::AbstractFloat, format::AbstractString)`
 
 Write formated string representation of `f` to `sp`. By default the string is
-formated using `format="%.3f"`. For details on the format consult the 
+formated using `format="%.3f"`. For details on the format consult the
 documentation of the C library function `sprintf`.
 """
 Base.write(sp::SerialPort, f::AbstractFloat, format::AbstractString="%.3f") = Base.write(sp, eval(:@sprintf($format, $f)))
@@ -299,7 +298,7 @@ Base.eof(sp::SerialPort) = sp.eof
 
 Set EOF of `sp` to `state`
 """
-function seteof(sp::SerialPort, state::Bool) 
+function seteof(sp::SerialPort, state::Bool)
     sp.eof = state
     return nothing
 end
