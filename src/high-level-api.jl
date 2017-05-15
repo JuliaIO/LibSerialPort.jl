@@ -190,7 +190,7 @@ end
 
 """
 `open(portname::AbstractString,baudrate::Integer [,mode::SPMode,
-	ndatabits::Integer,parity::SPParity,nstopbits::Integer])`
+    ndatabits::Integer,parity::SPParity,nstopbits::Integer])`
 
 construct, configure and open a `SerialPort` object.
 
@@ -336,8 +336,8 @@ function Base.readuntil(sp::SerialPort, delim::Vector{Char}, timeout_ms::Integer
         if nb_available(sp) > 0
             c = read(sp, Char)
             write(out, c)
-    	    lastchars = circshift(lastchars,-1)
-    	    lastchars[end] = c
+            lastchars = circshift(lastchars,-1)
+            lastchars[end] = c
             if lastchars == delim
                 break
             end
