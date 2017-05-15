@@ -17,7 +17,7 @@ SerialPort(portname::AbstractString) = SerialPort(sp_get_port_by_name(portname),
 Set connection speed of `sp` in bits per second. The library will return an
 error if bps is not a valid/supported value.
 """
-function set_speed(sp::SerialPort, bps::Integer) 
+function set_speed(sp::SerialPort, bps::Integer)
      sp_set_baudrate(sp.ref, bps)
      return nothing
 end
@@ -31,7 +31,7 @@ for more details.
 
 `ndatabits` is the number of data bits which is `8` in the common "8N1" sceme.
 
-The `parity` is set to none in the "8N1" sceme and can take the values: 
+The `parity` is set to none in the "8N1" sceme and can take the values:
 `SP_PARITY_NONE`, `SP_PARITY_ODD`, `SP_PARITY_EVEN`, `SP_PARITY_MARK` and
 `SP_PARITY_SPACE`.
 
@@ -57,7 +57,7 @@ If an unsupported option is requested, the library will return SP_ERR_SUPP.
 `rts` can take the values: `SP_RTS_OFF`, `SP_RTS_ON` and `SP_RTS_FLOW_CONTROL`
 and defaults to `SP_RTS_OFF`.
 
-`cts` can take the values: `SP_CTS_IGNORE` and `SP_CTS_FLOW_CONTROL`. Its 
+`cts` can take the values: `SP_CTS_IGNORE` and `SP_CTS_FLOW_CONTROL`. Its
 default is `SP_CTS_IGNORE`.
 
 `dtr` can take the values: `SP_DTR_OFF`, `SP_DTR_ON`, and `SP_DTR_FLOW_CONTROL`
@@ -113,7 +113,7 @@ end
 """
 `print_port_metadata(sp::SerialPort [,show_config::Bool])
 
-Print info found for this port. 
+Print info found for this port.
 Note: port should be open to obtain a valid FD/handle before accessing fields.
 
 `show_config` is `true` by default and prints out the current port settings.
@@ -244,7 +244,7 @@ end
 """
 `flush(sp::SerialPort [, buffer::SPBuffer])`
 
-Flush `buffer` of serial port `sp`. 
+Flush `buffer` of serial port `sp`.
 
 `buffer` can take the values: `SP_BUF_INPUT`, `SP_BUF_OUTPUT`, and
 `SP_BUF_BOTH`.
@@ -254,21 +254,35 @@ function Base.flush(sp::SerialPort; buffer::SPBuffer=SP_BUF_BOTH)
 end
 
 """
-`write(sp::SerialPort, data::Union{String,Array{Char},Array{UInt8}})`
+`write(sp::SerialPort, data::String)`
+`write(sp::SerialPort, data::Array{Char})`
+`write(sp::SerialPort, data::Array{UInt8})`
 
 Write sequence of Bytes to `sp`.
 """
-function Base.write(sp::SerialPort, data::Union{String,Array{Char},Array{UInt8}})
+function Base.write(sp::SerialPort, data::Array{UInt8})
+    sp_nonblocking_write(sp.ref, data)
+    return sp_drain(sp.ref)
+end
+
+function Base.write(sp::SerialPort, data::Array{Char})
+    sp_nonblocking_write(sp.ref, data)
+    return sp_drain(sp.ref)
+end
+
+function Base.write(sp::SerialPort, data::String)
     sp_nonblocking_write(sp.ref, convert(Array{UInt8},data))
     return sp_drain(sp.ref)
 end
 
 """
 `write(sp::SerialPort, data::UInt8)`
+`write(sp::SerialPort, data::Char)`
 
 Write single Byte to `sp`
 """
-Base.write(sp::SerialPort, data::Union{Char,UInt8}) = write(sp, [data])
+Base.write(sp::SerialPort, data::Char) = write(sp, [data])
+Base.write(sp::SerialPort, data::UInt8) = write(sp, [data])
 
 """
 `write(sp::SerialPort, i::Integer)`
@@ -282,7 +296,7 @@ Base.write(sp::SerialPort, i::Integer) = Base.write(sp, "$i")
 `write(sp::SerialPort, f::AbstractFloat, format::AbstractString)`
 
 Write formated string representation of `f` to `sp`. By default the string is
-formated using `format="%.3f"`. For details on the format consult the 
+formated using `format="%.3f"`. For details on the format consult the
 documentation of the C library function `sprintf`.
 """
 Base.write(sp::SerialPort, f::AbstractFloat, format::AbstractString="%.3f") = Base.write(sp, eval(:@sprintf($format, $f)))
@@ -299,7 +313,7 @@ Base.eof(sp::SerialPort) = sp.eof
 
 Set EOF of `sp` to `state`
 """
-function seteof(sp::SerialPort, state::Bool) 
+function seteof(sp::SerialPort, state::Bool)
     sp.eof = state
     return nothing
 end
@@ -312,15 +326,21 @@ Reset EOF of `sp` to `false`
 reseteof(sp::SerialPort) = seteof(sp, false)
 
 """
-`read(sp::SerialPort, T::Union{Type{UInt8},Type{Char}})`
+`read(sp::SerialPort, T::Type{UInt8})`
+`read(sp::SerialPort, T::Type{Char})`
 
 Read a single Byte from the specified port and return it represented as `T`.
 `T` might be either `Char or `UInt8`. if no Byte is availible in the port
 buffer return zero.
 """
-function Base.read(sp::SerialPort, T::Union{Type{UInt8},Type{Char}})
+function Base.read(sp::SerialPort, readType::Type{Char})
     nbytes_read, bytes = sp_nonblocking_read(sp.ref, 1)
-    return (nbytes_read == 1) ? convert(T,bytes[1]) : zero(T)
+    return (nbytes_read == 1) ? convert(readType,bytes[1]) : readType(0)
+end
+
+function Base.read(sp::SerialPort, readType::Type{UInt8})
+    nbytes_read, bytes = sp_nonblocking_read(sp.ref, 1)
+    return (nbytes_read == 1) ? convert(readType,bytes[1]) : readType(0)
 end
 
 """
@@ -329,19 +349,19 @@ end
 Read until the specified delimiting byte (e.g. `'\\n'`) is encountered, or until
 timeout_ms has elapsed, whichever comes first.
 """
-function Base.readuntil(sp::SerialPort, delim::Char, timeout_ms::Integer)
+function Base.readuntil(sp::SerialPort, delim::Char, timeout_ms::Real)
     return readuntil(sp,[delim],timeout_ms)
 end
 
 
-function Base.readuntil(sp::SerialPort, delim::AbstractString, timeout_ms::Integer)
+function Base.readuntil(sp::SerialPort, delim::AbstractString, timeout_ms::Real)
     return readuntil(sp,convert(Vector{Char},delim),timeout_ms)
 end
 
-function Base.readuntil(sp::SerialPort, delim::Vector{Char}, timeout_ms::Integer)
+function Base.readuntil(sp::SerialPort, delim::Vector{Char}, timeout_ms::Real)
     start_time = time_ns()
     out = IOBuffer()
-    lastchars = zeros(Char,length(delim))
+    lastchars = Char[0 for i=1:length(delim)]
     while !eof(sp)
         if (time_ns() - start_time)/1e6 > timeout_ms
             break
