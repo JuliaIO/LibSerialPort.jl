@@ -4,6 +4,12 @@
 
 Apart from a very few non-essential functions, the entire library API (about 75 functions) is wrapped using `ccall`. In addition, a higher-level interface is also provided that follows Julia's IO stream interface (note: subject to change soon).
 
+
+# Dependencies
+
+[BinDeps.jl](https://github.com/JuliaLang/BinDeps.jl) is the required, as well as standard tools for building the C library (make, gcc/clang, etc).
+
+
 # Installation
 
 This package is not in the Julia package registry. Our plan is to merge it into [SerialPorts.jl](https://github.com/JuliaIO/SerialPorts.jl). For now, it can be cloned via
