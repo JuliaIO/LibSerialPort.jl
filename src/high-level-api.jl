@@ -189,12 +189,12 @@ function Base.open(sp::SerialPort; mode::SPMode=SP_MODE_READ_WRITE)
 end
 
 """
-`open(portname::AbstractString,boudrate::Integer [,mode::SPMode,
-	ndatabits::Integer,parity::SPParity,nstopbits::Integer])`
+`open(portname::AbstractString,baudrate::Integer [,mode::SPMode,
+    ndatabits::Integer,parity::SPParity,nstopbits::Integer])`
 
 construct, configure and open a `SerialPort` object.
 
-For a detailes on the posssible setting see `?set_flow_control` and `?set_frame`.
+For details on posssible settings see `?set_flow_control` and `?set_frame`.
 """
 function Base.open(portname::AbstractString,
                    bps::Integer;
@@ -210,23 +210,10 @@ function Base.open(portname::AbstractString,
 end
 
 """
-Create and configure a SerialPort object.
-Example: `open_serial_port("/dev/ttyACM0", 115200)`
-"""
-function open_serial_port(port_address::AbstractString, speed::Integer)
-    sp = SerialPort(port_address)
-    open(sp)
-    set_speed(sp, speed)
-    set_frame(sp, ndatabits=8, parity=SP_PARITY_NONE, nstopbits=1)
-    return sp
-end
-
-"""
 close(sp::SerialPort [, delete::Bool])
 
-Close the serial port `sp`.
-
-TODO: What is `delete` for?
+Close the serial port `sp`. The optional `delete` keyword argument triggers
+a call to `sp_free_port` in the C library if set to `true` (default = false).
 """
 function Base.close(sp::SerialPort; delete::Bool=false)
 
@@ -295,7 +282,7 @@ Base.write(sp::SerialPort, i::Integer) = Base.write(sp, "$i")
 `write(sp::SerialPort, f::AbstractFloat)`
 `write(sp::SerialPort, f::AbstractFloat, format::AbstractString)`
 
-Write formated string representation of `f` to `sp`. By default the string is
+Write formatted string representation of `f` to `sp`. By default the string is
 formated using `format="%.3f"`. For details on the format consult the
 documentation of the C library function `sprintf`.
 """
@@ -369,8 +356,8 @@ function Base.readuntil(sp::SerialPort, delim::Vector{Char}, timeout_ms::Real)
         if nb_available(sp) > 0
             c = read(sp, Char)
             write(out, c)
-	    lastchars = circshift(lastchars,-1)
-	    lastchars[end] = c
+            lastchars = circshift(lastchars,-1)
+            lastchars[end] = c
             if lastchars == delim
                 break
             end
