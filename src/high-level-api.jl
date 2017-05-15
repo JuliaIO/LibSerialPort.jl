@@ -189,12 +189,12 @@ function Base.open(sp::SerialPort; mode::SPMode=SP_MODE_READ_WRITE)
 end
 
 """
-`open(portname::AbstractString,boudrate::Integer [,mode::SPMode,
+`open(portname::AbstractString,baudrate::Integer [,mode::SPMode,
 	ndatabits::Integer,parity::SPParity,nstopbits::Integer])`
 
 construct, configure and open a `SerialPort` object.
 
-For a details on the posssible setting see `?set_flow_control` and `?set_frame`.
+For details on posssible settings see `?set_flow_control` and `?set_frame`.
 """
 function Base.open(portname::AbstractString,
                    bps::Integer;
@@ -206,18 +206,6 @@ function Base.open(portname::AbstractString,
     sp_open(sp.ref, mode)
     set_speed(sp, bps)
     set_frame(sp, ndatabits=ndatabits, parity=parity, nstopbits=nstopbits)
-    return sp
-end
-
-"""
-Create and configure a SerialPort object.
-Example: `open_serial_port("/dev/ttyACM0", 115200)`
-"""
-function open_serial_port(port_address::AbstractString, speed::Integer)
-    sp = SerialPort(port_address)
-    open(sp)
-    set_speed(sp, speed)
-    set_frame(sp, ndatabits=8, parity=SP_PARITY_NONE, nstopbits=1)
     return sp
 end
 
@@ -280,7 +268,7 @@ Base.write(sp::SerialPort, i::Integer) = Base.write(sp, "$i")
 `write(sp::SerialPort, f::AbstractFloat)`
 `write(sp::SerialPort, f::AbstractFloat, format::AbstractString)`
 
-Write formated string representation of `f` to `sp`. By default the string is
+Write formatted string representation of `f` to `sp`. By default the string is
 formated using `format="%.3f"`. For details on the format consult the
 documentation of the C library function `sprintf`.
 """
@@ -319,7 +307,7 @@ buffer return zero.
 """
 function Base.read(sp::SerialPort, T::Union{Type{UInt8},Type{Char}})
     nbytes_read, bytes = sp_nonblocking_read(sp.ref, 1)
-    return (nbytes_read == 1) ? convert(T,bytes[1]) : zero(T)
+    return (nbytes_read == 1) ? convert(T, bytes[1]) : zero(T)
 end
 
 """
@@ -348,8 +336,8 @@ function Base.readuntil(sp::SerialPort, delim::Vector{Char}, timeout_ms::Integer
         if nb_available(sp) > 0
             c = read(sp, Char)
             write(out, c)
-	    lastchars = circshift(lastchars,-1)
-	    lastchars[end] = c
+    	    lastchars = circshift(lastchars,-1)
+    	    lastchars[end] = c
             if lastchars == delim
                 break
             end
