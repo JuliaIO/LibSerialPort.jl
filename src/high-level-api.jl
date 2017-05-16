@@ -210,6 +210,20 @@ function Base.open(portname::AbstractString,
 end
 
 """
+`open_serial_port(port_address::AbstractString, baudrate::Integer)`
+
+Create and configure a SerialPort object with the standard 8N1 settings
+and specified `baudrate`. Example: `open_serial_port("/dev/ttyACM0", 115200)`
+"""
+function open_serial_port(port_address::AbstractString, baudrate::Integer)
+    sp = SerialPort(port_address)
+    open(sp)
+    set_speed(sp, baudrate)
+    set_frame(sp, ndatabits=8, parity=SP_PARITY_NONE, nstopbits=1)
+    return sp
+end
+
+"""
 close(sp::SerialPort [, delete::Bool])
 
 Close the serial port `sp`. The optional `delete` keyword argument triggers
