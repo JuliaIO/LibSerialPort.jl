@@ -12,8 +12,12 @@ function serial_loop(sp::SerialPort)
 
     while true
         # Poll for new data without blocking
-        @async input_line = readline(STDIN)
-        @async mcu_message = readline(sp)
+        @async input_line = readline(STDIN, chomp=false)
+        @async mcu_message *= readstring(sp)
+
+        # Alternative read method:
+        # Requires setting a timeout and may cause bottlenecks
+        # @async mcu_message = readuntil(sp, "\r\n", 50)
 
         contains(input_line, "\e") && quit()
 
@@ -24,9 +28,12 @@ function serial_loop(sp::SerialPort)
         end
 
         # Print message from device
-        if endswith(mcu_message, '\n')
-            print(mcu_message)
-            mcu_message = ""
+        if contains(mcu_message, "\r\n")
+            lines = split(mcu_message, "\r\n")
+            while length(lines) > 1
+                println(shift!(lines))
+            end
+            mcu_message = lines[1]
         end
 
         # Give the queued tasks a chance to run
