@@ -210,6 +210,20 @@ function Base.open(portname::AbstractString,
 end
 
 """
+`open_serial_port(port_address::AbstractString, baudrate::Integer)`
+
+Create and configure a SerialPort object with the standard 8N1 settings
+and specified `baudrate`. Example: `open_serial_port("/dev/ttyACM0", 115200)`
+"""
+function open_serial_port(port_address::AbstractString, baudrate::Integer)
+    sp = SerialPort(port_address)
+    open(sp)
+    set_speed(sp, baudrate)
+    set_frame(sp, ndatabits=8, parity=SP_PARITY_NONE, nstopbits=1)
+    return sp
+end
+
+"""
 close(sp::SerialPort [, delete::Bool])
 
 Close the serial port `sp`. The optional `delete` keyword argument triggers
@@ -241,21 +255,35 @@ function Base.flush(sp::SerialPort; buffer::SPBuffer=SP_BUF_BOTH)
 end
 
 """
-`write(sp::SerialPort, data::Union{String,Array{Char},Array{UInt8}})`
+`write(sp::SerialPort, data::String)`
+`write(sp::SerialPort, data::Array{Char})`
+`write(sp::SerialPort, data::Array{UInt8})`
 
 Write sequence of Bytes to `sp`.
 """
-function Base.write(sp::SerialPort, data::Union{String,Array{Char},Array{UInt8}})
+function Base.write(sp::SerialPort, data::Array{UInt8})
+    sp_nonblocking_write(sp.ref, data)
+    return sp_drain(sp.ref)
+end
+
+function Base.write(sp::SerialPort, data::Array{Char})
+    sp_nonblocking_write(sp.ref, data)
+    return sp_drain(sp.ref)
+end
+
+function Base.write(sp::SerialPort, data::String)
     sp_nonblocking_write(sp.ref, convert(Array{UInt8},data))
     return sp_drain(sp.ref)
 end
 
 """
 `write(sp::SerialPort, data::UInt8)`
+`write(sp::SerialPort, data::Char)`
 
 Write single Byte to `sp`
 """
-Base.write(sp::SerialPort, data::Union{Char,UInt8}) = write(sp, [data])
+Base.write(sp::SerialPort, data::Char) = write(sp, [data])
+Base.write(sp::SerialPort, data::UInt8) = write(sp, [data])
 
 """
 `write(sp::SerialPort, i::Integer)`
@@ -299,15 +327,21 @@ Reset EOF of `sp` to `false`
 reseteof(sp::SerialPort) = seteof(sp, false)
 
 """
-`read(sp::SerialPort, T::Union{Type{UInt8},Type{Char}})`
+`read(sp::SerialPort, T::Type{UInt8})`
+`read(sp::SerialPort, T::Type{Char})`
 
 Read a single Byte from the specified port and return it represented as `T`.
 `T` might be either `Char or `UInt8`. if no Byte is availible in the port
 buffer return zero.
 """
-function Base.read(sp::SerialPort, T::Union{Type{UInt8},Type{Char}})
+function Base.read(sp::SerialPort, readType::Type{Char})
     nbytes_read, bytes = sp_nonblocking_read(sp.ref, 1)
-    return (nbytes_read == 1) ? convert(T, bytes[1]) : zero(T)
+    return (nbytes_read == 1) ? convert(readType,bytes[1]) : readType(0)
+end
+
+function Base.read(sp::SerialPort, readType::Type{UInt8})
+    nbytes_read, bytes = sp_nonblocking_read(sp.ref, 1)
+    return (nbytes_read == 1) ? convert(readType,bytes[1]) : readType(0)
 end
 
 """
@@ -316,19 +350,19 @@ end
 Read until the specified delimiting byte (e.g. `'\\n'`) is encountered, or until
 timeout_ms has elapsed, whichever comes first.
 """
-function Base.readuntil(sp::SerialPort, delim::Char, timeout_ms::Integer)
+function Base.readuntil(sp::SerialPort, delim::Char, timeout_ms::Real)
     return readuntil(sp,[delim],timeout_ms)
 end
 
 
-function Base.readuntil(sp::SerialPort, delim::AbstractString, timeout_ms::Integer)
+function Base.readuntil(sp::SerialPort, delim::AbstractString, timeout_ms::Real)
     return readuntil(sp,convert(Vector{Char},delim),timeout_ms)
 end
 
-function Base.readuntil(sp::SerialPort, delim::Vector{Char}, timeout_ms::Integer)
+function Base.readuntil(sp::SerialPort, delim::Vector{Char}, timeout_ms::Real)
     start_time = time_ns()
     out = IOBuffer()
-    lastchars = zeros(Char,length(delim))
+    lastchars = Char[0 for i=1:length(delim)]
     while !eof(sp)
         if (time_ns() - start_time)/1e6 > timeout_ms
             break
