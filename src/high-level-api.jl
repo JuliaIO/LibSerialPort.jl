@@ -377,7 +377,7 @@ function Base.readuntil(sp::SerialPort, delim::Vector{Char}, timeout_ms::Real)
             end
         end
     end
-    return takebuf_string(out)
+    return String(take!(out))
 end
 
 """
@@ -388,12 +388,12 @@ Gets the number of bytes waiting in the input buffer.
 Base.nb_available(sp::SerialPort) = Int(sp_input_waiting(sp.ref))
 
 """
-`readbytes(sp::SerialPort,nbytes::Integer)`
+`readbytes!(sp::SerialPort,nbytes::Integer)`
 
 Read `nbytes` from the specified serial port `sp`, without blocking. Returns
 a `UInt8` `Array`.
 """
-function Base.readbytes(sp::SerialPort, nbytes::Integer)
+function Base.readbytes!(sp::SerialPort, nbytes::Integer)
     nbytes_read, bytes = sp_nonblocking_read(sp.ref, nbytes)
     return bytes
 end
@@ -407,7 +407,7 @@ a time, until it is empty. Returns a `Char` array.
 function Base.readstring(sp::SerialPort)
     result = Char[]
     while Int(nb_available(sp)) > 0
-        byte = Base.readbytes(sp, 1)[1]
+        byte = readbytes!(sp, 1)[1]
         push!(result, byte)
     end
     return join(result)
