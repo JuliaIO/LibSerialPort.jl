@@ -7,9 +7,7 @@ const src_uri = "http://sigrok.org/download/source/libserialport/libserialport-"
 
 @BinDeps.setup
 
-deps = [
-    libserialport = library_dependency("libserialport", aliases = ["serialport", "libserialport.0"])
-]
+libserialport = library_dependency("libserialport", aliases = ["serialport", "libserialport.0"])
 
 provides(Sources, Dict(URI(src_uri) => libserialport))
 
