@@ -1,11 +1,11 @@
-type SPPort end
-type SPConfig end
-type SPEventSet end
+struct SPPort end
+struct SPConfig end
+struct SPEventSet end
 
-typealias Port    Ref{SPPort}
-typealias PortP   Ref{Ptr{SPPort}}
-typealias Config  Ref{SPConfig}
-typealias ConfigP Ref{Ptr{SPConfig}}
+const Port = Ref{SPPort}
+const PortP = Ref{Ptr{SPPort}}
+const Config = Ref{SPConfig}
+const ConfigP = Ref{Ptr{SPConfig}}
 
 @enum(SPReturn,
     SP_OK = 0,
