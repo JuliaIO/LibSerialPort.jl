@@ -1,5 +1,5 @@
 
-type SerialPort <: IO
+mutable struct SerialPort <: IO
     ref::Port
     eof::Bool
 end
