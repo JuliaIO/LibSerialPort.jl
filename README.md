@@ -20,8 +20,7 @@ To install the C library, do `Pkg.build`:
 
     julia> Pkg.build("LibSerialPort")
 
-On Unix-like systems, this `libserialport` will be built from source. On Windows a pre-built
-shared library is downloaded and installed into the package directory. Alternatively, follow the [build instructions](http://sigrok.org/wiki/Libserialport) for a system-wide build. If installation through the package system succeeded, then
+On Unix-like systems, this `libserialport` will be built from source. On Windows a pre-built shared library is downloaded and installed into the package directory. Alternatively, follow the [build instructions](http://sigrok.org/wiki/Libserialport) for a system-wide build. If installation through the package system succeeded, then
 
     julia> readdir(joinpath(Pkg.dir("LibSerialPort"), "deps/usr/lib"))
 
@@ -33,3 +32,5 @@ should list your new library. Type
 to get a list of ports detected on your system.
 
 There is currently no documentation, but the examples/ and tests/ directories contain some examples.
+
+Note that on Windows, returning an OS-level port handle is not yet supported.
