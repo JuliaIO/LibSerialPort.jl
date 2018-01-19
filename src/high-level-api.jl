@@ -276,6 +276,8 @@ function Base.write(sp::SerialPort, data::Array{UInt8})
     return nb
 end
 
+Base.write(sp::SerialPort, data::Array{Char}) = write(sp, convert(Array{UInt8},data))
+
 Base.write(sp::SerialPort, data::String) = write(sp, convert(Array{UInt8},data))
 
 """
