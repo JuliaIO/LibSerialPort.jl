@@ -298,14 +298,14 @@ Write string representation of signed integer `i` to `sp`.
 Base.write(sp::SerialPort, i::Signed) = Base.write(sp, "$i")
 
 """
-`write(sp::SerialPort, f::AbstractFloat)`
-`write(sp::SerialPort, f::AbstractFloat, format::AbstractString)`
+`write(sp::SerialPort, f::Union{Float16, Float32, Float64})`
+`write(sp::SerialPort, f::Union{Float16, Float32, Float64}, format::AbstractString)`
 
 Write formatted string representation of `f` to `sp`. By default the string is
 formated using `format="%.3f"`. For details on the format consult the
 documentation of the C library function `sprintf`.
 """
-Base.write(sp::SerialPort, f::AbstractFloat, format::AbstractString="%.3f") = Base.write(sp, eval(:@sprintf($format, $f)))
+Base.write(sp::SerialPort, f::Union{Float16, Float32, Float64}, format::AbstractString="%.3f") = Base.write(sp, eval(:@sprintf($format, $f)))
 
 """
 `eof(sp::SerialPort)`
