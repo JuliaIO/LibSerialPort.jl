@@ -291,11 +291,11 @@ Base.write(sp::SerialPort, data::Char) = write(sp, [data])
 Base.write(sp::SerialPort, data::UInt8) = write(sp, [data])
 
 """
-`write(sp::SerialPort, i::Union{Int128, Int16, Int32, Int64})`
+`write(sp::SerialPort, i::Signed)`
 
 Write string representation of signed integer `i` to `sp`.
 """
-Base.write(sp::SerialPort, i::Union{Int128, Int16, Int32, Int64}) = Base.write(sp, "$i")
+Base.write(sp::SerialPort, i::Signed) = Base.write(sp, "$i")
 
 """
 `write(sp::SerialPort, f::AbstractFloat)`
