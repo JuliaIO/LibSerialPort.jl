@@ -276,10 +276,7 @@ function Base.write(sp::SerialPort, data::Array{UInt8})
     return nb
 end
 
-function Base.write(sp::SerialPort, data::String)
-    sp_nonblocking_write(sp.ref, convert(Array{UInt8},data))
-    return sp_drain(sp.ref)
-end
+Base.write(sp::SerialPort, data::String) = write(sp, convert(Array{UInt8},data))
 
 """
 `write(sp::SerialPort, data::UInt8)`
