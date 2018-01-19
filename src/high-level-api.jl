@@ -262,8 +262,19 @@ end
 Write sequence of Bytes to `sp`.
 """
 function Base.write(sp::SerialPort, data::Array{UInt8})
-    sp_nonblocking_write(sp.ref, data)
-    return sp_drain(sp.ref)
+    nb::Int = 0;
+    while nb < length(data)
+        ret::SPReturn = sp_nonblocking_write(sp.ref, data[nb+1:end])
+        if ret < SP_OK
+            break;
+        end
+        nb = nb + Int(ret)
+    end
+    ret = sp_output_waiting(sp.ref)
+    if ret > SP_OK
+        ret = sp_drain(sp.ref)
+    end
+    return nb
 end
 
 function Base.write(sp::SerialPort, data::Array{Char})
