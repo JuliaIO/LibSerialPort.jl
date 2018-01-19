@@ -256,6 +256,7 @@ end
 
 """
 `write(sp::SerialPort, data::String)`
+`write(sp::SerialPort, data::Array{Char})`
 `write(sp::SerialPort, data::Array{UInt8})`
 
 Write sequence of Bytes to `sp`.
