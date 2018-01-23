@@ -251,6 +251,7 @@ function Base.close(sp::SerialPort)
         sp_flush(sp.ref, SP_BUF_BOTH)
 
         sp_close(sp.ref)
+        sp.open = false
     end
     return sp
 end
