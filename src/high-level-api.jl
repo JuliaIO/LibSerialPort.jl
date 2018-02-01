@@ -1,7 +1,13 @@
 
-type SerialPort <: IO
+mutable struct SerialPort <: IO
     ref::Port
     eof::Bool
+    open::Bool
+    function SerialPort(ref, eof, open)
+        sp = new(ref, eof, open)
+        finalizer(sp, destroy!)
+        return sp
+    end
 end
 
 """
@@ -9,7 +15,17 @@ end
 
 Constructor for the `SerialPort` object.
 """
-SerialPort(portname::AbstractString) = SerialPort(sp_get_port_by_name(portname), false)
+SerialPort(portname::AbstractString) = SerialPort(sp_get_port_by_name(portname), false, false)
+
+"""
+`destroy!(sp::SerialPort)`
+
+Destructor for the `SerialPort` object.
+"""
+function destroy!(sp::SerialPort)
+    close(sp)
+    sp_free_port(sp.ref)
+end
 
 """
 `set_speed(sp::SerialPort,bps::Integer)`
@@ -185,6 +201,7 @@ Open the serial port `sp`.
 """
 function Base.open(sp::SerialPort; mode::SPMode=SP_MODE_READ_WRITE)
     sp_open(sp.ref, mode)
+    sp.open = true
     return sp
 end
 
@@ -202,7 +219,7 @@ function Base.open(portname::AbstractString,
                    ndatabits::Integer=8,
                    parity::SPParity=SP_PARITY_NONE,
                    nstopbits::Integer=1)
-    sp = SerialPort(sp_get_port_by_name(portname), false)
+    sp = SerialPort(sp_get_port_by_name(portname), false, true)
     sp_open(sp.ref, mode)
     set_speed(sp, bps)
     set_frame(sp, ndatabits=ndatabits, parity=parity, nstopbits=nstopbits)
@@ -224,20 +241,17 @@ function open_serial_port(port_address::AbstractString, baudrate::Integer)
 end
 
 """
-close(sp::SerialPort [, delete::Bool])
+close(sp::SerialPort)
 
-Close the serial port `sp`. The optional `delete` keyword argument triggers
-a call to `sp_free_port` in the C library if set to `true` (default = false).
+Close the serial port `sp`.
 """
-function Base.close(sp::SerialPort; delete::Bool=false)
+function Base.close(sp::SerialPort)
+    if sp.open
+        # Flush first, as is done in other close() methods in Base
+        sp_flush(sp.ref, SP_BUF_BOTH)
 
-    # Flush first, as is done in other close() methods in Base
-    sp_flush(sp.ref, SP_BUF_BOTH)
-
-    sp_close(sp.ref)
-
-    if delete
-        sp_free_port(sp.ref)
+        sp_close(sp.ref)
+        sp.open = false
     end
     return sp
 end
