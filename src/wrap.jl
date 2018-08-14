@@ -606,6 +606,13 @@ function sp_nonblocking_write(port::Port, buffer::Ptr{UInt8})
     ret
 end
 
+function sp_nonblocking_write(port::Port, buffer::String)
+    ret = ccall((:sp_nonblocking_write, libserialport), SPReturn,
+                (Port, Ptr{UInt8}, Csize_t), port, buffer, sizeof(buffer))
+    handle_error(ret, loc())
+    ret
+end
+
 # enum sp_return sp_input_waiting(struct sp_port *port);
 """
 Returns the number of bytes in the input buffer or an error code.
