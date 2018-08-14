@@ -181,8 +181,8 @@ if isfile(depsfile)
     # Exporting environment variables like (DY)LD_LIBRARY_PATH works,
     # but this is a more self-contained and portable solution.
     libdir = joinpath(depsdir, "usr/lib")
-    if !in(libdir, Libdl.DL_LOAD_PATH)
-        push!(Libdl.DL_LOAD_PATH, libdir)
+    if !in(libdir, DL_LOAD_PATH)
+        push!(DL_LOAD_PATH, libdir)
     end
 else
     error("LibSerialPort not properly installed. Please run Pkg.build(\"LibSerialPort\")")
