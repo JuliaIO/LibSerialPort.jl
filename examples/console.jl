@@ -12,14 +12,14 @@ function serial_loop(sp::SerialPort)
 
     while true
         # Poll for new data without blocking
-        @async input_line = readline(STDIN, chomp=false)
+        @async input_line = readline(keep=true)
         @async mcu_message *= readstring(sp)
 
         # Alternative read method:
         # Requires setting a timeout and may cause bottlenecks
         # @async mcu_message = readuntil(sp, "\r\n", 50)
 
-        occursin(input_line, "\e") && quit()
+        occursin(input_line, "\e") && exit()
 
         # Send user input to device
         if endswith(input_line, '\n')
