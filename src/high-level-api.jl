@@ -286,7 +286,8 @@ function Base.write(sp::SerialPort, data::Array{Char})
 end
 
 function Base.write(sp::SerialPort, data::String)
-    sp_nonblocking_write(sp.ref, convert(Array{UInt8},data))
+    # sp_nonblocking_write(sp.ref, convert(Array{UInt8},data))
+    sp_nonblocking_write(sp.ref, data)
     return sp_drain(sp.ref)
 end
 
@@ -416,7 +417,7 @@ end
 `readstring(sp::SerialPort)`
 
 Read everything from the specified serial ports `sp` input buffer, one byte at
-a time, until it is empty. Returns a `Char` array.
+a time, until it is empty. Returns a `String`.
 """
 function Base.readstring(sp::SerialPort)
     result = Char[]
@@ -424,5 +425,5 @@ function Base.readstring(sp::SerialPort)
         byte = readbytes!(sp, 1)[1]
         push!(result, byte)
     end
-    return join(result)
+    return String(join(result))
 end
