@@ -5,7 +5,7 @@ mutable struct SerialPort <: IO
     open::Bool
     function SerialPort(ref, eof, open)
         sp = new(ref, eof, open)
-        finalizer(sp, destroy!)
+        finalizer(destroy!, sp)
         return sp
     end
 end
