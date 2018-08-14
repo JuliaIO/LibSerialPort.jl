@@ -19,7 +19,7 @@ function serial_loop(sp::SerialPort)
         # Requires setting a timeout and may cause bottlenecks
         # @async mcu_message = readuntil(sp, "\r\n", 50)
 
-        occursin(input_line, "\e") && exit()
+        occursin("\e", input_line) && exit()
 
         # Send user input to device
         if endswith(input_line, '\n')
@@ -28,10 +28,10 @@ function serial_loop(sp::SerialPort)
         end
 
         # Print message from device
-        if occursin(mcu_message, "\r\n")
+        if occursin("\r\n", mcu_message)
             lines = split(mcu_message, "\r\n")
             while length(lines) > 1
-                println(shift!(lines))
+                println(popfirst!(lines))
             end
             mcu_message = lines[1]
         end
