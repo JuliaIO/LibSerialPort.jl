@@ -15,7 +15,6 @@ function test_nonblocking_serial_loopback(sp::SerialPort)
     print("\n\n[TEST] Serial loopback - ")
     println("Send 100 short messages and read whatever comes back...")
 
-    tic()
     for i = 1:100
         write(sp, "Test message $i\n")
         print(readstring(sp))
@@ -33,7 +32,6 @@ function test_nonblocking_serial_loopback(sp::SerialPort)
     end
 
     println()
-    toc()
 
     flush(sp, buffer=SP_BUF_BOTH)
 end
@@ -52,11 +50,11 @@ function test_readline(sp::SerialPort)
     print("\n\n[TEST] Serial loopback - ")
     println("Send 100 short messages and read whatever comes back...")
 
-    tic()
     for i = 1:100
         write(sp, "Test message $i\n")
+        sleep(0.001)
         received_message = readuntil(sp, '\n') # same as readline(sp)
-        print(received_message)
+        println(chomp(received_message))
 
         # Trigger an EOF when done writing so readuntil doesn't hang forever
         if i == 100
@@ -64,7 +62,6 @@ function test_readline(sp::SerialPort)
         end
     end
     reseteof(sp)
-    toc()
 
     flush(sp, buffer=SP_BUF_BOTH)
 end
@@ -86,7 +83,7 @@ function main()
     test_nonblocking_serial_loopback(sp)
     test_readline(sp)
 
-    close(sp, delete=true)
+    close(sp)
 end
 
 main()
