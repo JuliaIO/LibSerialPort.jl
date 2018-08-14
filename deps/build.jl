@@ -1,4 +1,5 @@
 using BinDeps
+using Libdl
 
 const version = "0.1.1"
 const src_uri = "http://sigrok.org/download/source/libserialport/libserialport-" * version * ".tar.gz"
