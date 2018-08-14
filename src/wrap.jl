@@ -7,81 +7,94 @@ const PortP = Ref{Ptr{SPPort}}
 const Config = Ref{SPConfig}
 const ConfigP = Ref{Ptr{SPConfig}}
 
-@enum(SPReturn,
-    SP_OK = 0,
-    SP_ERR_ARG = -1,
-    SP_ERR_FAIL = -2,
-    SP_ERR_MEM = -3,
-    SP_ERR_SUPP = -4)
+@enum SPReturn begin
+    SP_OK = 0
+    SP_ERR_ARG = -1
+    SP_ERR_FAIL = -2
+    SP_ERR_MEM = -3
+    SP_ERR_SUPP = -4
+end
 
-@enum(SPMode,
-    SP_MODE_READ = 1,
-    SP_MODE_WRITE = 2,
-    SP_MODE_READ_WRITE = 3)
+@enum SPMode begin
+    SP_MODE_READ = 1
+    SP_MODE_WRITE = 2
+    SP_MODE_READ_WRITE = 3
+end
 
-@enum(SPEvent,
-    SP_EVENT_RX_READY = 1,
-    SP_EVENT_TX_READY = 2,
-    SP_EVENT_ERROR = 4)
+@enum SPEvent begin
+    SP_EVENT_RX_READY = 1
+    SP_EVENT_TX_READY = 2
+    SP_EVENT_ERROR = 4
+end
 
-@enum(SPBuffer,
-    SP_BUF_INPUT = 1,
-    SP_BUF_OUTPUT = 2,
-    SP_BUF_BOTH = 3)
+@enum SPBuffer begin
+    SP_BUF_INPUT = 1
+    SP_BUF_OUTPUT = 2
+    SP_BUF_BOTH = 3
+end
 
-@enum(SPParity,
-    SP_PARITY_INVALID = -1,
-    SP_PARITY_NONE = 0,
-    SP_PARITY_ODD = 1,
-    SP_PARITY_EVEN = 2,
-    SP_PARITY_MARK = 3,
-    SP_PARITY_SPACE = 4)
+@enum SPParity begin
+    SP_PARITY_INVALID = -1
+    SP_PARITY_NONE = 0
+    SP_PARITY_ODD = 1
+    SP_PARITY_EVEN = 2
+    SP_PARITY_MARK = 3
+    SP_PARITY_SPACE = 4
+end
 
-@enum(SPrts,
-    SP_RTS_INVALID = -1,
-    SP_RTS_OFF = 0,
-    SP_RTS_ON = 1,
-    SP_RTS_FLOW_CONTROL = 2)
+@enum SPrts begin
+    SP_RTS_INVALID = -1
+    SP_RTS_OFF = 0
+    SP_RTS_ON = 1
+    SP_RTS_FLOW_CONTROL = 2
+end
 
-@enum(SPcts,
-    SP_CTS_INVALID = -1,
-    SP_CTS_IGNORE = 0,
-    SP_CTS_FLOW_CONTROL = 1)
+@enum SPcts begin
+    SP_CTS_INVALID = -1
+    SP_CTS_IGNORE = 0
+    SP_CTS_FLOW_CONTROL = 1
+end
 
-@enum(SPdtr,
-    SP_DTR_INVALID = -1,
-    SP_DTR_OFF = 0,
-    SP_DTR_ON = 1,
-    SP_DTR_FLOW_CONTROL = 2)
+@enum SPdtr begin
+    SP_DTR_INVALID = -1
+    SP_DTR_OFF = 0
+    SP_DTR_ON = 1
+    SP_DTR_FLOW_CONTROL = 2
+end
 
-@enum(SPdsr,
-    SP_DSR_INVALID = -1,
-    SP_DSR_IGNORE = 0,
-    SP_DSR_FLOW_CONTROL = 1)
+@enum SPdsr begin
+    SP_DSR_INVALID = -1
+    SP_DSR_IGNORE = 0
+    SP_DSR_FLOW_CONTROL = 1
+end
 
-@enum(SPXonXoff,
-    SP_XONXOFF_INVALID = -1,
-    SP_XONXOFF_DISABLED = 0,
-    SP_XONXOFF_IN = 1,
-    SP_XONXOFF_OUT = 2,
-    SP_XONXOFF_INOUT = 3)
+@enum SPXonXoff begin
+    SP_XONXOFF_INVALID = -1
+    SP_XONXOFF_DISABLED = 0
+    SP_XONXOFF_IN = 1
+    SP_XONXOFF_OUT = 2
+    SP_XONXOFF_INOUT = 3
+end
 
-@enum(SPFlowControl,
-    SP_FLOWCONTROL_NONE = 0,
-    SP_FLOWCONTROL_XONXOFF = 1,
-    SP_FLOWCONTROL_RTSCTS = 2,
-    SP_FLOWCONTROL_DTRDSR = 3)
+@enum SPFlowControl begin
+    SP_FLOWCONTROL_NONE = 0
+    SP_FLOWCONTROL_XONXOFF = 1
+    SP_FLOWCONTROL_RTSCTS = 2
+    SP_FLOWCONTROL_DTRDSR = 3
+end
 
-@enum(SPSignal,
-    SP_SIG_CTS = 1,
-    SP_SIG_DSR = 2,
-    SP_SIG_DCD = 4,
-    SP_SIG_RI = 8)
+@enum SPSignal begin
+    SP_SIG_CTS = 1
+    SP_SIG_DSR = 2
+    SP_SIG_DCD = 4
+    SP_SIG_RI = 8
+end
 
-@enum(SPTransport,
-    SP_TRANSPORT_NATIVE,
-    SP_TRANSPORT_USB,
-    SP_TRANSPORT_BLUETOOTH)
+@enum SPTransport begin
+    SP_TRANSPORT_NATIVE
+    SP_TRANSPORT_USB
+    SP_TRANSPORT_BLUETOOTH
+end
 
 function handle_error(ret::SPReturn, location::AbstractString)
     ret >= SP_OK && return
