@@ -123,7 +123,7 @@ end
 
 # void sp_free_port(struct sp_port *port);
 function sp_free_port(port::Port)
-    ccall((:sp_free_port, libserialport), Void, (Port,), port)
+    ccall((:sp_free_port, libserialport), Nothing, (Port,), port)
 end
 
 # enum sp_return sp_list_ports(struct sp_port ***list_ptr);
@@ -146,7 +146,7 @@ end
 
 # void sp_free_port_list(struct sp_port **ports);
 function sp_free_port_list(ports::PortP)
-    ccall((:sp_free_port_list, libserialport), Void, (PortP,), ports)
+    ccall((:sp_free_port_list, libserialport), Nothing, (PortP,), ports)
 end
 
 # enum sp_return sp_open(struct sp_port *port, enum sp_mode flags);
@@ -275,7 +275,7 @@ end
 
 # void sp_free_config(struct sp_port_config *config);
 function sp_free_config(config::Config)
-    ccall((:sp_free_config, libserialport), Void, (Config,), config)
+    ccall((:sp_free_config, libserialport), Nothing, (Config,), config)
 end
 
 function sp_get_config(port::Port)
@@ -711,7 +711,7 @@ end
 
 # void sp_free_error_message(char *message);
 function _sp_free_error_message(message::Ptr{UInt8})
-    ccall((:sp_free_error_message, libserialport), Void, (Ptr{UInt8},), message)
+    ccall((:sp_free_error_message, libserialport), Nothing, (Ptr{UInt8},), message)
 end
 
 # Due to ccall's incomplete variadic argument support, the following two
