@@ -9,7 +9,7 @@ const win64_bin_uri = "https://github.com/samuelpowell/libserialport/releases/do
 
 libserialport = library_dependency("libserialport", aliases = ["serialport", "libserialport.0", "libserialport-0"])
 
-if is_windows()
+if Sys.iswindows()
   provides(Binaries, URI(Sys.ARCH == :x86_64 ? win64_bin_uri : win32_bin_uri),libserialport, os = :Windows)
 else
   provides(Sources, Dict(URI(src_uri) => libserialport))

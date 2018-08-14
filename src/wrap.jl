@@ -250,14 +250,14 @@ function sp_get_port_bluetooth_address(port::Port)
     address = (a != C_NULL) ? unsafe_string(a) : ""
 end
 
-if is_windows()
+if Sys.iswindows()
      # TODO: on Windows, result should be Ref{HANDLE}
     sp_get_port_handle(port::Port) = error("Returning port handle not supported on Windows")
-else    
+else
     # enum sp_return sp_get_port_handle(const struct sp_port *port, void *result_ptr);
     function sp_get_port_handle(port::Port)
         # For Linux and OS X
-        result = Ref{Cint}(0)    
+        result = Ref{Cint}(0)
         ret = ccall((:sp_get_port_handle, libserialport), SPReturn,
                     (Port, Ref{Cint}), port, result)
         handle_error(ret, loc())
