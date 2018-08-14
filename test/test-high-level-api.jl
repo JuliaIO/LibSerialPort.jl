@@ -26,7 +26,7 @@ function test_nonblocking_serial_loopback(sp::SerialPort)
     for i = 1:100
         data = readstring(sp)
         print(data)
-        if contains(data, "done")
+        if occursin(data, "done")
             break
         end
         sleep(0.001)
