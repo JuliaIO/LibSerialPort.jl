@@ -382,7 +382,7 @@ function Base.readuntil(sp::SerialPort, delim::Vector{Char}, timeout_ms::Real)
         if (time_ns() - start_time)/1e6 > timeout_ms
             break
         end
-        if nb_available(sp) > 0
+        if bytesavailable(sp) > 0
             c = read(sp, Char)
             write(out, c)
             lastchars = circshift(lastchars,-1)
@@ -396,11 +396,11 @@ function Base.readuntil(sp::SerialPort, delim::Vector{Char}, timeout_ms::Real)
 end
 
 """
-`Base.nb_available(sp::SerialPort)`
+`Base.bytesavailable(sp::SerialPort)`
 
 Gets the number of bytes waiting in the input buffer.
 """
-Base.nb_available(sp::SerialPort) = Int(sp_input_waiting(sp.ref))
+Base.bytesavailable(sp::SerialPort) = Int(sp_input_waiting(sp.ref))
 
 """
 `readbytes!(sp::SerialPort,nbytes::Integer)`
@@ -421,7 +421,7 @@ a time, until it is empty. Returns a `String`.
 """
 function Base.readstring(sp::SerialPort)
     result = Char[]
-    while Int(nb_available(sp)) > 0
+    while Int(bytesavailable(sp)) > 0
         byte = readbytes!(sp, 1)[1]
         push!(result, byte)
     end
