@@ -414,12 +414,12 @@ function Base.readbytes!(sp::SerialPort, nbytes::Integer)
 end
 
 """
-`readstring(sp::SerialPort)`
+`readstring(sp::SerialPort, String)`
 
 Read everything from the specified serial ports `sp` input buffer, one byte at
 a time, until it is empty. Returns a `String`.
 """
-function Base.readstring(sp::SerialPort)
+function Base.read(sp::SerialPort, String)
     result = Char[]
     while Int(bytesavailable(sp)) > 0
         byte = readbytes!(sp, 1)[1]

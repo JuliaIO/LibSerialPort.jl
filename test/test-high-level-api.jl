@@ -6,7 +6,7 @@ function test_nonblocking_serial_loopback(sp::SerialPort)
 
     println("\n[TEST] Read any incoming data for ~1 second...")
     for i = 1:1000
-        print(readstring(sp))
+        print(read(sp, String))
         sleep(0.001)
     end
     println()
@@ -18,13 +18,13 @@ function test_nonblocking_serial_loopback(sp::SerialPort)
 
     for i = 1:100
         write(sp, "Test message $i\n")
-        print(readstring(sp))
+        print(read(sp, String))
         i == 100 && write(sp, "done")
     end
 
     # Allow up to 100 more ms to get the remaining data
     for i = 1:100
-        data = readstring(sp)
+        data = read(sp, String)
         print(data)
         if occursin(data, "done")
             break
@@ -41,7 +41,7 @@ function test_readline(sp::SerialPort)
 
     println("\n[TEST] Read any incoming data for ~1 second...")
     for i = 1:1000
-        print(readstring(sp))
+        print(read(sp, String))
         sleep(0.001)
     end
     println()
