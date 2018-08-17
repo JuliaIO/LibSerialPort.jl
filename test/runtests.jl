@@ -21,20 +21,20 @@ end
 @testset "LibSerialPort" begin
     @testset "Low level API" begin
         include("test-low-level-api.jl")
-        test_low_level_api()
-        test_low_level_api(port)
+        @test test_low_level_api() == nothing
+        @test test_low_level_api(port) == nothing
     end
 
 
     @testset "High level API" begin
         include("test-high-level-api.jl")
-        test_high_level_api()
-        test_high_level_api(port)
+        @test test_high_level_api() == nothing
+        @test test_high_level_api(port) == nothing
     end
 
     @testset "Examples" begin
         include("../examples/console.jl")
-        console()
-        console(port)
+        @test console() == nothing
+        @test console(port) == nothing
     end
 end
