@@ -1,9 +1,24 @@
+#=
+Run test locally using
+$ julia test/runtest.jl /dev/ttyXYZ
+
+/dev/ttyXYZ can be:
+/dev/ttyS0  (for Travis)
+/dev/ttyS4
+/dev/ttyUSB0
+=#
+
 using LibSerialPort
 using Test
 
-@testset "LibSerialPort" begin
-    port = "/dev/ttyS4"
 
+if length(ARGS) == 0
+    port = "/dev/ttyS0"  # /dev/ttyS4 /dev/ttyUSB0
+else
+    port = ARGS[1]
+end
+
+@testset "LibSerialPort" begin
     @testset "Low level API" begin
         include("test-low-level-api.jl")
         test_low_level_api()
