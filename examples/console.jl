@@ -13,7 +13,7 @@ function serial_loop(sp::SerialPort)
     while true
         # Poll for new data without blocking
         @async input_line = readline(keep=true)
-        @async mcu_message *= readstring(sp)
+        @async mcu_message *= read(sp, String)
 
         # Alternative read method:
         # Requires setting a timeout and may cause bottlenecks
