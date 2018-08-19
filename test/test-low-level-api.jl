@@ -142,20 +142,23 @@ function test_blocking_serial_loopback(port::LibSerialPort.Port,
     sp_drain(port)
     sp_flush(port, SP_BUF_BOTH)
 
-    tic()
-    for i = 1:100
-        sp_blocking_write(port, Array{UInt8}("Test message $i\n"), write_timeout_ms)
-        sp_drain(port)
-        sp_flush(port, SP_BUF_OUTPUT)
-        nbytes_read, bytes = sp_blocking_read(port, 128, 50)
-        println("($i) nbytes_read: $nbytes_read")
-        if nbytes_read > 0
-            data = String(bytes)
-            println(data)
+    function loop()
+        for i = 1:100
+            sp_blocking_write(port, Array{UInt8}("Test message $i\n"),
+                write_timeout_ms)
+            sp_drain(port)
+            sp_flush(port, SP_BUF_OUTPUT)
+            nbytes_read, bytes = sp_blocking_read(port, 128, 50)
+            println("($i) nbytes_read: $nbytes_read")
+            if nbytes_read > 0
+                data = String(bytes)
+                println(data)
+            end
+            sp_flush(port, SP_BUF_INPUT)
         end
-        sp_flush(port, SP_BUF_INPUT)
     end
-    toc()
+
+    @time loop()
 end
 
 function test_nonblocking_serial_loopback(port::LibSerialPort.Port)
@@ -171,23 +174,26 @@ function test_nonblocking_serial_loopback(port::LibSerialPort.Port)
 
     print("\n\n[TEST] Serial loopback - ")
     println("Send 100 short messages and read whatever comes back...")
-    tic()
-    for i = 1:100
-        sp_nonblocking_write(port, Array{UInt8}("Test message $i\n"))
-        sp_drain(port)
-        nbytes_read, bytes = sp_nonblocking_read(port, 256)
-        print(String(bytes))
+
+    function loops()
+        for i = 1:100
+            sp_nonblocking_write(port, Array{UInt8}("Test message $i\n"))
+            sp_drain(port)
+            nbytes_read, bytes = sp_nonblocking_read(port, 256)
+            print(String(bytes))
+        end
+
+        # Read and print any remaining data for ~50 ms
+        for i = 1:50
+            nbytes_read, bytes = sp_nonblocking_read(port, 256)
+            print(String(bytes))
+            sleep(0.001)
+        end
+
+        sp_flush(port, SP_BUF_BOTH)
     end
 
-    # Read and print any remaining data for ~50 ms
-    for i = 1:50
-        nbytes_read, bytes = sp_nonblocking_read(port, 256)
-        print(String(bytes))
-        sleep(0.001)
-    end
-
-    sp_flush(port, SP_BUF_BOTH)
-    toc()
+    @time loops()
 end
 
 """
