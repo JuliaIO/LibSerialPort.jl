@@ -30,8 +30,18 @@ function test_change_port_copy_method1(port::LibSerialPort.Port)
 
     # Request to send / clear to send go as a pair.
     # They must be enabled or disabled together.
-    sp_set_rts(port2, SP_RTS_OFF)
-    sp_set_cts(port2, SP_CTS_IGNORE)
+    # RTS and CTS not supported by all host systems, hence the try/catch.
+    try
+        sp_set_rts(port2, SP_RTS_OFF)
+    catch e
+        println("NOTE: skipped set_rts - $e")
+    end
+
+    try
+        sp_set_cts(port2, SP_CTS_IGNORE)
+    catch e
+        println("NOTE: skipped set_cts - $e")
+    end
 
     sp_set_dtr(port2, SP_DTR_OFF)
     sp_set_dsr(port2, SP_DSR_IGNORE)
@@ -76,7 +86,13 @@ function test_change_port_copy_method2(port::LibSerialPort.Port)
     sp_set_config_dsr(config2, SP_DSR_IGNORE)
     sp_set_config_xon_xoff(config2, SP_XONXOFF_INOUT)
 
-    sp_set_config(port2, config2)
+    # sp_set_config(port2, config2)
+    try
+        sp_set_config(port2, config2)
+    catch e
+        println("NOTE: skipped sp_set_config - $e")
+    end
+
     sp_free_config(config2)
 
     print("[TEST2] UPDATED ")
