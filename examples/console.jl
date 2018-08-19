@@ -41,9 +41,9 @@ function serial_loop(sp::SerialPort)
     end
 end
 
-function main()
+function console(args...)
 
-    if length(ARGS) != 2
+    if length(args) != 2
         println("Usage: $(basename(@__FILE__)) port baudrate")
         println("Available ports:")
         list_ports()
@@ -51,9 +51,9 @@ function main()
     end
 
     # Open a serial connection to the microcontroller
-    mcu = open(ARGS[1], parse(Int, ARGS[2]))
+    mcu = open(args[1], parse(Int, args[2]))
 
     serial_loop(mcu)
 end
 
-main()
+console(ARGS...)

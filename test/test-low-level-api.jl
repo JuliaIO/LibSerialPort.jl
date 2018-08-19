@@ -181,9 +181,9 @@ and one stop bit. The baud rate is overridden on the command line with a
 second argument. Hardware and software flow control measures are disabled by
 default.
 """
-function main()
+function test_low_level_api(args...)
 
-    nargs = length(ARGS)
+    nargs = length(args)
     if nargs == 0
         println("Usage: $(basename(@__FILE__)) port [baudrate]")
         println("Available ports:")
@@ -191,8 +191,8 @@ function main()
         return
     end
 
-    port = sp_get_port_by_name(ARGS[1]) # e.g. "/dev/cu.wchusbserial1410"
-    baudrate = nargs >= 2 ? parse(Int, ARGS[2]) : 9600
+    port = sp_get_port_by_name(args[1]) # e.g. "/dev/cu.wchusbserial1410"
+    baudrate = nargs >= 2 ? parse(Int, args[2]) : 9600
 
     print_version()
     list_ports()
@@ -212,4 +212,4 @@ function main()
     sp_free_port(port)
 end
 
-main()
+test_low_level_api(ARGS...)

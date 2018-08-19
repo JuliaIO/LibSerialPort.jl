@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/scls19fr/LibSerialPort.jl.svg?branch=master)](https://travis-ci.com/scls19fr/LibSerialPort.jl)
+
 # LibSerialPort.jl
 
 [libserialport](http://sigrok.org/wiki/Libserialport) is a small, well-documented C library for general-purpose serial port communication. This is a julia wrapper for the library.
