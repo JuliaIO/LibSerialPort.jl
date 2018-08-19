@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/scls19fr/LibSerialPort.jl.svg?branch=master)](https://travis-ci.com/scls19fr/LibSerialPort.jl)
+[![Build Status](https://travis-ci.com/andrewadare/LibSerialPort.jl.svg?branch=master)](https://travis-ci.com/andrewadare/LibSerialPort.jl)
 
 # LibSerialPort.jl
 
