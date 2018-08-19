@@ -96,6 +96,23 @@ end
     SP_TRANSPORT_BLUETOOTH
 end
 
+# Define constructors to make conversion to Int explicit, since falling back to
+# `convert` from a missing constructor is now deprecated behavior.
+SPReturn(x::SPReturn) = SPReturn(Int(x))
+SPMode(x::SPMode) = SPMode(Int(x))
+SPEvent(x::SPEvent) = SPEvent(Int(x))
+SPBuffer(x::SPBuffer) = SPBuffer(Int(x))
+SPParity(x::SPParity) = SPParity(Int(x))
+SPrts(x::SPrts) = SPrts(Int(x))
+SPcts(x::SPcts) = SPcts(Int(x))
+SPdtr(x::SPdtr) = SPdtr(Int(x))
+SPdsr(x::SPdsr) = SPdsr(Int(x))
+SPXonXoff(x::SPXonXoff) = SPXonXoff(Int(x))
+SPFlowControl(x::SPFlowControl) = SPFlowControl(Int(x))
+SPSignal(x::SPSignal) = SPSignal(Int(x))
+SPTransport(x::SPTransport) = SPTransport(Int(x))
+
+
 function handle_error(ret::SPReturn, location::AbstractString)
     ret >= SP_OK && return
 
