@@ -371,19 +371,19 @@ end
 
 
 function Base.readuntil(sp::SerialPort, delim::AbstractString, timeout_ms::Real)
-    return readuntil(sp,convert(Vector{Char},delim),timeout_ms)
+    return readuntil(sp,Vector{Char}(delim),timeout_ms)
 end
 
-function Base.readuntil(sp::SerialPort, delim::Vector{Char}, timeout_ms::Real)
+function Base.readuntil(sp::SerialPort, delim::Vector{T}, timeout_ms::Real) where {T}
     start_time = time_ns()
     out = IOBuffer()
-    lastchars = Char[0 for i=1:length(delim)]
+    lastchars = T[0 for i=1:length(delim)]
     while !eof(sp)
         if (time_ns() - start_time)/1e6 > timeout_ms
             break
         end
         if bytesavailable(sp) > 0
-            c = read(sp, Char)
+            c = read(sp, T)
             write(out, c)
             lastchars = circshift(lastchars,-1)
             lastchars[end] = c
