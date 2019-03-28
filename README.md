@@ -35,6 +35,9 @@ Try
 
 to get a list of ports detected on your system.
 
-The examples/ directory contains a simple serial console for the command line. This may serve as a useful starting point for your application. The serial_example.ino sketch can be flashed to a microcontroller supported by the Arduino environment. The tests are also worth looking at for demonstration of i/o and configuration. They can be run via `julia test/runtests.jl <address> <baudrate>`. Unless the address of your device matches that in runtests.jl, doing `pkg> test LibSerialPort` will fail. This problem would be addressed by [support for args](https://github.com/JuliaLang/Pkg.jl/issues/518) in the Pkg REPL.
+The examples/ directory contains a simple serial console for the command line. This may serve as a useful starting point for your application. The serial_example.ino sketch can be flashed to a microcontroller supported by the Arduino environment.
+
+
+The tests are also worth looking at for demonstration of i/o and configuration. They can be run via `julia test/runtests.jl <address> <baudrate>`. Unless the address of your device matches that in runtests.jl, doing `pkg> test LibSerialPort` will fail. This problem would be addressed by [support for args](https://github.com/JuliaLang/Pkg.jl/issues/518) in the Pkg REPL.
 
 Note that on Windows, returning an OS-level port handle is not yet supported.
