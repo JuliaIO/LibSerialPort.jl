@@ -18,23 +18,26 @@ else
     port = ARGS[1]
 end
 
+baudrate = length(ARGS) >= 2 ? ARGS[2] : 115200
+
 @testset "LibSerialPort" begin
     @testset "Low level API" begin
         include("test-low-level-api.jl")
         @test test_low_level_api() == nothing
-        @test test_low_level_api(port) == nothing
+        @test test_low_level_api(port, baudrate) == nothing
     end
 
 
     @testset "High level API" begin
         include("test-high-level-api.jl")
         @test test_high_level_api() == nothing
-        @test test_high_level_api(port) == nothing
+        @test test_high_level_api(port, baudrate) == nothing
     end
 
-    @testset "Examples" begin
-        include("../examples/console.jl")
-        @test console() == nothing
-        @test console(port) == nothing
-    end
+    # console.jl runs forever, thus isn't amenable to unit testing
+    # @testset "Examples" begin
+    #     include("../examples/console.jl")
+    #     @test console() == nothing
+    #     @test console(port, baudrate) == nothing
+    # end
 end

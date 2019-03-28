@@ -85,6 +85,7 @@ function test_high_level_api(args...)
     test_readline(sp)
 
     close(sp)
+    return
 end
 
 test_high_level_api(ARGS...)
