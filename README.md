@@ -7,12 +7,12 @@
 Apart from a very few non-essential functions, the entire library API (about 75 functions) is wrapped using `ccall`. In addition, a higher-level interface is also provided that follows Julia's IO stream interface.
 
 
-# Dependencies
+## Dependencies
 
 [BinDeps.jl](https://github.com/JuliaLang/BinDeps.jl) is required, as well as standard tools for building the C library (make, gcc/clang, etc).
 
 
-# Installation
+## Installation
 
     pkg> add LibSerialPort
 
@@ -26,7 +26,7 @@ On Unix-like systems, `libserialport` will be built from source. On Windows a pr
 
 should list your new library.
 
-# Usage
+## Usage
 
 Try
 
