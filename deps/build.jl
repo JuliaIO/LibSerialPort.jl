@@ -3,8 +3,8 @@ using Libdl
 
 const version = "0.1.1"
 const src_uri = "http://sigrok.org/download/source/libserialport/libserialport-" * version * ".tar.gz"
-const win32_bin_uri = "https://github.com/samuelpowell/libserialport/releases/download/" * version * "-av/libserialport-" * version * "-av-i686.zip"
-const win64_bin_uri = "https://github.com/samuelpowell/libserialport/releases/download/" * version * "-av/libserialport-" * version * "-av-x86_64.zip"
+const win32_bin_uri = "https://github.com/JuliaIO/libserialport/releases/download/" * version * "-av/libserialport-" * version * "-av-i686.zip"
+const win64_bin_uri = "https://github.com/JuliaIO/libserialport/releases/download/" * version * "-av/libserialport-" * version * "-av-x86_64.zip"
 
 @BinDeps.setup
 
