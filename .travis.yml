@@ -10,6 +10,7 @@ julia:
   - nightly
 ## uncomment the following lines to allow failures on nightly julia
 ## (tests will run but not make your overall status red)
+before_instal: sudo adduser $USER dialout
 matrix:
   allow_failures:
   - julia: nightly
