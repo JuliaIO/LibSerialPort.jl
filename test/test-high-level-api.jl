@@ -76,6 +76,11 @@ function test_high_level_api(args...)
         return
     end
 
+    if !ispath(args[1])
+        println("Not found: ", args[1])
+        return
+    end
+
     sp = open(args[1], parse(Int, args[2]))
 
     print_port_metadata(sp)

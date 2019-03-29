@@ -212,6 +212,11 @@ function test_low_level_api(args...)
         return
     end
 
+    if !ispath(args[1])
+        println("Not found: ", args[1])
+        return
+    end
+
     port = sp_get_port_by_name(args[1]) # e.g. "/dev/cu.wchusbserial1410"
     baudrate = nargs >= 2 ? parse(Int, args[2]) : 9600
 
