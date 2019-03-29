@@ -18,7 +18,7 @@ else
     port = ARGS[1]
 end
 
-baudrate = length(ARGS) >= 2 ? ARGS[2] : 115200
+baudrate = length(ARGS) >= 2 ? ARGS[2] : "115200"
 
 @testset "LibSerialPort" begin
     @testset "Low level API" begin
