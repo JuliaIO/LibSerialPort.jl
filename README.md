@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/andrewadare/LibSerialPort.jl.svg?branch=master)](https://travis-ci.com/andrewadare/LibSerialPort.jl)
+[![Build Status](https://travis-ci.com/JuliaIO/LibSerialPort.jl.svg?branch=master)](https://travis-ci.com/JuliaIO/LibSerialPort.jl)
 
 # LibSerialPort.jl
 
