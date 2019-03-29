@@ -10,7 +10,10 @@ julia:
   - nightly
 ## uncomment the following lines to allow failures on nightly julia
 ## (tests will run but not make your overall status red)
-before_instal: sudo adduser $USER dialout
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; sudo usermod -a -G dialout $(whoami); fi
+
 matrix:
   allow_failures:
   - julia: nightly
@@ -20,5 +23,5 @@ notifications:
 #script:
 #  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 #  - julia -e 'Pkg.clone(pwd()); Pkg.build("LibSerialPort"); Pkg.test("LibSerialPort"; coverage=true)'
-# Documenter auto-deploy                                                                                                                                                                                                                            
-# following `using` instruction is for triggering precompilation                                                                                                                                                                                    
+# Documenter auto-deploy
+# following `using` instruction is for triggering precompilation
