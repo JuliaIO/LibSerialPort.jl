@@ -13,7 +13,8 @@ julia:
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo usermod -a -G dialout $(whoami); fi
-
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo newgrp dialout; fi
+  
 matrix:
   allow_failures:
   - julia: nightly
