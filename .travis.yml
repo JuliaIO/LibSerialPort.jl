@@ -12,7 +12,7 @@ julia:
 ## (tests will run but not make your overall status red)
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo usermod -a -G dialout $(whoami); fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo usermod -a -G dialout $(whoami) && newgrp dialout; fi
 
 matrix:
   allow_failures:
