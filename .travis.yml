@@ -10,7 +10,8 @@ julia:
   - nightly
 ## uncomment the following lines to allow failures on nightly julia
 ## (tests will run but not make your overall status red)
-before_instal: sudo adduser $USER dialout
+before_instal:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo chmod 666 /dev/tty*; fi
 matrix:
   allow_failures:
   - julia: nightly
