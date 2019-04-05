@@ -12,9 +12,8 @@ julia:
 ## (tests will run but not make your overall status red)
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo usermod -a -G dialout $USER; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then newgrp dialout; fi
-  
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo chmod 666 /dev/tty*; fi
+ 
 matrix:
   allow_failures:
   - julia: nightly
