@@ -214,7 +214,7 @@ end
 function sp_get_port_usb_bus_address(port::Port)
 
     if sp_get_port_transport(port) != SP_TRANSPORT_USB
-        warn("Port does not use USB transport")
+        @warn "Port does not use USB transport"
         return
     end
 
@@ -235,7 +235,7 @@ end
 function sp_get_port_usb_vid_pid(port::Port)
 
     if sp_get_port_transport(port) != SP_TRANSPORT_USB
-        warn("Port does not use USB transport")
+        @warn "Port does not use USB transport"
         return
     end
 
