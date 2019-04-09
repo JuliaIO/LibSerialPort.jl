@@ -11,7 +11,6 @@ $ julia test/runtest.jl /dev/ttyXYZ
 using LibSerialPort
 using Test
 
-
 if haskey(ENV, "CI")
     @testset "LibSerialPort CI port listing" begin
         list_ports()   
