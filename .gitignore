@@ -3,3 +3,5 @@ deps/*
 
 # except
 !deps/build.jl
+
+Manifest.toml
