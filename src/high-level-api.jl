@@ -125,6 +125,23 @@ function list_ports(;nports_guess::Integer=64)
     return nothing
 end
 
+"""
+`get_port_list([nports_guess::Integer])`
+
+Return a vector of currently visible ports.
+
+`nports_guess` provides the number of ports guessed. Its default is `64`.
+"""
+function get_port_list(;nports_guess::Integer=64)
+    ports = sp_list_ports()
+    port_list = String[]
+    for port in unsafe_wrap(Array, ports, nports_guess, own=false)
+        port == C_NULL && return port_list
+        push!(port_list, sp_get_port_name(port))
+    end
+    sp_free_port_list(ports)
+    return port_list
+end
 
 """
 `print_port_metadata(sp::SerialPort [,show_config::Bool])
