@@ -8,6 +8,7 @@ libserialport_jll = "220460dc-b50e-5ed0-8176-09b0fd261e90"
 
 [compat]
 julia = "1"
+libserialport_jll = "0.1.1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

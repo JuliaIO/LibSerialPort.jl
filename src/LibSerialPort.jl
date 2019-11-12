@@ -4,8 +4,6 @@ module LibSerialPort
 using Libdl
 using libserialport_jll
 
-const libserialport = libnettle #TODO: TEMPORARY FIX for a typo in libserialport_jll
-
 export
     # Enum types
     SPReturn,
