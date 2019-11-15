@@ -13,7 +13,7 @@ using Test
 
 if haskey(ENV, "CI")
     @testset "LibSerialPort CI port listing" begin
-        list_ports()   
+        list_ports()
     end
 else
     if length(ARGS) == 0
@@ -36,6 +36,20 @@ else
             include("test-high-level-api.jl")
             @test test_high_level_api() == nothing
             @test test_high_level_api(port, baudrate) == nothing
+        end
+
+        @testset "Reading functions" begin
+            include("test-high-level-api.jl")
+            @test test_high_level_api() == nothing
+            @test test_high_level_api(port, baudrate) == nothing
+        end
+
+        @testset "Reading with timeouts" begin
+            ports = LibSerialPort.get_port_list()
+            LibSerialPort.open(ports[1], 9600) do s
+                ret = readline(s, 1.0)
+                @show ret
+            end
         end
 
         # console.jl runs forever, thus isn't amenable to unit testing

@@ -178,5 +178,6 @@ export
 
 include("wrap.jl")
 include("high-level-api.jl")
+include("utils.jl")
 
 end # LibSerialPort
