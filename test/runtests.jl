@@ -17,7 +17,7 @@ if haskey(ENV, "CI")
     end
 else
     if length(ARGS) == 0
-        port = "/dev/ttyS0"  # /dev/ttyS4 /dev/ttyUSB0
+        port = "/dev/cu.usbserial-210321A367A8" #"/dev/ttyS0"  # /dev/ttyS4 /dev/ttyUSB0
     else
         port = ARGS[1]
     end
@@ -30,7 +30,6 @@ else
             @test test_low_level_api() == nothing
             @test test_low_level_api(port, baudrate) == nothing
         end
-
 
         @testset "High level API" begin
             include("test-high-level-api.jl")
@@ -45,10 +44,11 @@ else
         end
 
         @testset "Reading with timeouts" begin
-            ports = LibSerialPort.get_port_list()
-            LibSerialPort.open(ports[1], 9600) do s
-                ret = readline(s, 1.0)
-                @show ret
+            LibSerialPort.open(port, 115200) do s
+                #Tests assume serial port being tested won't output anything after being flushed
+                flush(s)
+                @test readline(s, 1.0) == "" #readline with a 1 second timeout
+                @test readuntil(s, 'a', 1.0) == "" #readuntil with a 1 second timeout
             end
         end
 
