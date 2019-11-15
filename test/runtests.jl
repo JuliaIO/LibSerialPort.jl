@@ -17,7 +17,7 @@ if haskey(ENV, "CI")
     end
 else
     if length(ARGS) == 0
-        port = "/dev/cu.usbserial-210321A367A8" #"/dev/ttyS0"  # /dev/ttyS4 /dev/ttyUSB0
+        port = "/dev/ttyS0"  # /dev/ttyS4 /dev/ttyUSB0
     else
         port = ARGS[1]
     end
