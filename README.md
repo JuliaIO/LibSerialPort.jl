@@ -34,6 +34,7 @@ Methods for `readline` and `readuntil` are exported that allow for a timeout in 
 i.e.
 ```julia
 LibSerialPort.open(port, 115200) do s
+    write(s, "input")
     ret = readline(s, 1.0) #try to readline with a 1 second timeout
     @show ret
 end
@@ -41,6 +42,7 @@ end
 
 ```julia
 LibSerialPort.open(port, 115200) do s
+    write(s, "input")
     ret = readuntil(s, 'x', 1.0) #try to readuntil char `x` with a 1 second timeout
     @show ret
 end
