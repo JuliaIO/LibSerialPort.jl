@@ -35,6 +35,7 @@ function readuntil(s::IO, delim::AbstractChar, timeout::T; keep::Bool=false) whe
     out = IOBuffer()
     t = Timer(timeout)
     while !eof(s) && isopen(t)
+        bytesavailable(s) == 0 && continue
         c = read(s, Char)
         if c == delim
             keep && write(out, c)
@@ -50,6 +51,7 @@ function readuntil(s::IO, delim::T, timeout::U; keep::Bool=false) where {T, U<:R
     out = (T === UInt8 ? Base.StringVector(0) : Vector{T}())
     t = Timer(timeout)
     while !eof(s) && isopen(t)
+        bytesavailable(s) == 0 && continue
         c = read(s, T)
         if c == delim
             keep && push!(out, c)
