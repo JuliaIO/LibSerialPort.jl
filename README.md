@@ -6,25 +6,10 @@
 
 Apart from a very few non-essential functions, the entire library API (about 75 functions) is wrapped using `ccall`. In addition, a higher-level interface is also provided that follows Julia's IO stream interface.
 
-
-## Dependencies
-
-[BinDeps.jl](https://github.com/JuliaLang/BinDeps.jl) is required, as well as standard tools for building the C library (make, gcc/clang, etc).
-
-
 ## Installation
 
     pkg> add LibSerialPort
 
-To install the C library, use `Pkg.build`:
-
-    pkg> build LibSerialPort
-
-On Unix-like systems, `libserialport` will be built from source. On Windows a pre-built shared library is downloaded and installed into the package directory. Alternatively, follow the [build instructions](http://sigrok.org/wiki/Libserialport) for a system-wide build. If installation through the package system succeeded, then
-
-    julia> readdir(joinpath(Pkg.dir("LibSerialPort"), "deps/usr/lib"))
-
-should list your new library.
 
 ## Usage
 
