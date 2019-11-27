@@ -26,3 +26,24 @@ The examples/ directory contains a simple serial console for the command line. T
 The tests are also worth looking at for demonstration of i/o and configuration. They can be run via `julia test/runtests.jl <address> <baudrate>`. Unless the address of your device matches that in runtests.jl, doing `pkg> test LibSerialPort` will fail. This problem would be addressed by [support for args](https://github.com/JuliaLang/Pkg.jl/issues/518) in the Pkg REPL.
 
 Note that on Windows, returning an OS-level port handle is not yet supported.
+
+### Reading with timeouts
+
+Methods for `readline` and `readuntil` are exported that allow for a timeout in seconds.
+
+i.e.
+```julia
+LibSerialPort.open(port, 115200) do s
+    write(s, "input")
+    ret = readline(s, 1.0) #try to readline with a 1 second timeout
+    @show ret
+end
+```
+
+```julia
+LibSerialPort.open(port, 115200) do s
+    write(s, "input")
+    ret = readuntil(s, 'x', 1.0) #try to readuntil char `x` with a 1 second timeout
+    @show ret
+end
+```
