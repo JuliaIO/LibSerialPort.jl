@@ -1,6 +1,6 @@
 name = "LibSerialPort"
 uuid = "a05a14c7-6e3b-5ba9-90a2-45558833e1df"
-version = "0.3.0"
+version = "0.4.0"
 
 [deps]
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
