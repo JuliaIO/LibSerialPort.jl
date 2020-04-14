@@ -158,23 +158,27 @@ end
 
 function print_port_metadata(port::LibSerialPort.Port; show_config::Bool=true)
     println("\nPort name:\t",       sp_get_port_name(port))
-    println("Manufacturer:\t",      sp_get_port_usb_manufacturer(port))
-    println("Product:\t",           sp_get_port_usb_product(port))
-    println("USB serial number:\t", sp_get_port_usb_serial(port))
-    println("Bluetooth address:\t", sp_get_port_bluetooth_address(port))
+    transport = sp_get_port_transport(port)
+    print("\nPort transport:\t");
+    if transport == SP_TRANSPORT_NATIVE
+        println("native serial port")
+    elseif transport == SP_TRANSPORT_USB
+        println("USB")
+        println("Manufacturer:\t",      sp_get_port_usb_manufacturer(port))
+        println("Product:\t",           sp_get_port_usb_product(port))
+        println("USB serial number:\t", sp_get_port_usb_serial(port))
+        bus, addr = sp_get_port_usb_bus_address(port)
+        println("USB bus #:\t", bus)
+        println("Address on bus:\t", addr)
+        vid, pid = sp_get_port_usb_vid_pid(port)
+        println("Vendor ID:\t", vid)
+        println("Product ID:\t", pid)
+    elseif transport == SP_TRANSPORT_BLUETOOTH
+        println("Bluetooth")
+        println("Bluetooth address:\t", sp_get_port_bluetooth_address(port))
+    end
     println("File descriptor:\t",   sp_get_port_handle(port))
 
-    bus, addr = sp_get_port_usb_bus_address(port)
-    if bus != -1
-        println("USB bus #:\t",   bus)
-        println("Address on bus:\t",  addr)
-    end
-
-    vid, pid = sp_get_port_usb_vid_pid(port)
-    if vid != -1
-        println("Vendor ID:\t",   vid)
-        println("Product ID:\t",  pid)
-    end
     if show_config
         print_port_settings(port)
     end
