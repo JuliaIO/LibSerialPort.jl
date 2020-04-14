@@ -1,6 +1,6 @@
 #=
 Run test locally using
-$ julia test/runtest.jl /dev/ttyXYZ
+$ julia test/runtests.jl /dev/ttyXYZ
 
 /dev/ttyXYZ can be:
 /dev/ttyS0  (for Travis)

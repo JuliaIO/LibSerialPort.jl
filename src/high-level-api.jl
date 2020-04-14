@@ -32,8 +32,8 @@ end
 """
 `set_speed(sp::SerialPort,bps::Integer)`
 
-Set connection speed of `sp` in bits per second. The library will return an
-error if bps is not a valid/supported value.
+Set connection speed of `sp` in bits per second. Raise an
+`ErrorException` if `bps` is not a valid/supported value.
 """
 function set_speed(sp::SerialPort, bps::Integer)
      sp_set_baudrate(sp.ref, bps)
@@ -41,7 +41,7 @@ function set_speed(sp::SerialPort, bps::Integer)
 end
 
 """
-`set_frame(sp::SerialPort [, ndatabits::Integer, pariry::SPParity, nstopbits::Integer])`
+`set_frame(sp::SerialPort [, ndatabits::Integer, parity::SPParity, nstopbits::Integer])`
 
 Configure packet framing. Defaults to the most common "8N1" scheme. See
 https://en.wikipedia.org/wiki/Universal_asynchronous_receiver/transmitter#Data_framing
@@ -316,7 +316,7 @@ function seteof(sp::SerialPort, state::Bool)
 end
 
 """
-`seteof(sp::SerialPort, state::Bool)`
+`reseteof(sp::SerialPort, state::Bool)`
 
 Reset EOF of `sp` to `false`
 """
