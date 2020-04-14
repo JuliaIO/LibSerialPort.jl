@@ -1,3 +1,5 @@
+import Base: open, close, write, unsafe_write, flush,
+    read, unsafe_read, readbytes!, readuntil, bytesavailable, eof
 
 mutable struct SerialPort <: IO
     ref::Port
@@ -264,75 +266,33 @@ Close the serial port `sp`.
 """
 function Base.close(sp::SerialPort)
     if sp.open
-        # Flush first, as is done in other close() methods in Base
-        sp_flush(sp.ref, SP_BUF_BOTH)
-
         sp_close(sp.ref)
         sp.open = false
     end
     return sp
 end
 
-"""
-`flush(sp::SerialPort [, buffer::SPBuffer])`
+# fixes https://github.com/JuliaIO/LibSerialPort.jl/issues/53
+@deprecate flush(sp::SerialPort, buffer::SPBuffer=SP_BUF_BOTH) sp_flush(sp, buffer)
 
-Flush `buffer` of serial port `sp`.
+# pass through some methods from the low-level interface
+sp_output_waiting(sp::SerialPort) = sp_output_waiting(sp.ref)
+sp_flush(sp::SerialPort, args...) = sp_flush(sp.ref, args...)
+sp_drain(sp::SerialPort)          = sp_drain(sp.ref)
 
-`buffer` can take the values: `SP_BUF_INPUT`, `SP_BUF_OUTPUT`, and
-`SP_BUF_BOTH`.
-"""
-function Base.flush(sp::SerialPort; buffer::SPBuffer=SP_BUF_BOTH)
-    sp_flush(sp.ref, buffer)
+# We define here only the basic methods for writing bytes.
+# All other write() methods for writing the canonical binary
+# representation of any type, and print() methods for writing
+# its text representation, are inherited from the IO supertype
+# (see julia/base/io.jl), i.e. work just like for files.
+
+function write(sp::SerialPort, b::UInt8)
+    Int(sp_blocking_write(sp.ref, Ref(b)))
 end
 
-"""
-`write(sp::SerialPort, data::String)`
-`write(sp::SerialPort, data::Array{Char})`
-`write(sp::SerialPort, data::Array{UInt8})`
-
-Write sequence of Bytes to `sp`.
-"""
-function Base.write(sp::SerialPort, data::Array{UInt8})
-    sp_nonblocking_write(sp.ref, data)
-    return sp_drain(sp.ref)
+function unsafe_write(sp::SerialPort, p::Ptr{UInt8}, nb::UInt)
+    Int(sp_blocking_write(sp.ref, p, nb))
 end
-
-function Base.write(sp::SerialPort, data::Array{Char})
-    sp_nonblocking_write(sp.ref, data)
-    return sp_drain(sp.ref)
-end
-
-function Base.write(sp::SerialPort, data::String)
-    # sp_nonblocking_write(sp.ref, convert(Array{UInt8},data))
-    sp_nonblocking_write(sp.ref, data)
-    return sp_drain(sp.ref)
-end
-
-"""
-`write(sp::SerialPort, data::UInt8)`
-`write(sp::SerialPort, data::Char)`
-
-Write single Byte to `sp`
-"""
-Base.write(sp::SerialPort, data::Char) = write(sp, [data])
-Base.write(sp::SerialPort, data::UInt8) = write(sp, [data])
-
-"""
-`write(sp::SerialPort, i::Integer)`
-
-Write string representation of `i` to `sp`.
-"""
-Base.write(sp::SerialPort, i::Integer) = Base.write(sp, "$i")
-
-"""
-`write(sp::SerialPort, f::AbstractFloat)`
-`write(sp::SerialPort, f::AbstractFloat, format::AbstractString)`
-
-Write formatted string representation of `f` to `sp`. By default the string is
-formated using `format="%.3f"`. For details on the format consult the
-documentation of the C library function `sprintf`.
-"""
-Base.write(sp::SerialPort, f::AbstractFloat, format::AbstractString="%.3f") = Base.write(sp, eval(:@sprintf($format, $f)))
 
 """
 `eof(sp::SerialPort)`

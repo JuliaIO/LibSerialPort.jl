@@ -11,7 +11,7 @@ function test_nonblocking_serial_loopback(sp::SerialPort)
     end
     println()
 
-    flush(sp, buffer=SP_BUF_BOTH)
+    sp_flush(sp, SP_BUF_BOTH)
 
     print("\n\n[TEST] Serial loopback - ")
     println("Send 100 short messages and read whatever comes back...")
@@ -34,7 +34,7 @@ function test_nonblocking_serial_loopback(sp::SerialPort)
 
     println()
 
-    flush(sp, buffer=SP_BUF_BOTH)
+    sp_flush(sp, SP_BUF_BOTH)
 end
 
 function test_readline(sp::SerialPort)
@@ -46,7 +46,7 @@ function test_readline(sp::SerialPort)
     end
     println()
 
-    flush(sp, buffer=SP_BUF_BOTH)
+    sp_flush(sp, SP_BUF_BOTH)
 
     print("\n\n[TEST] Serial loopback - ")
     println("Send 100 short messages and read whatever comes back...")
@@ -64,7 +64,7 @@ function test_readline(sp::SerialPort)
     end
     reseteof(sp)
 
-    flush(sp, buffer=SP_BUF_BOTH)
+    sp_flush(sp, SP_BUF_BOTH)
 end
 
 function test_high_level_api(args...)
