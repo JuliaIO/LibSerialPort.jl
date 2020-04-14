@@ -2,7 +2,7 @@ import Base: readline, readuntil
 export readline, readuntil
 
 #==
-Timeout versions of tbe base functions
+Timeout versions of the base functions
 ==#
 
 """
