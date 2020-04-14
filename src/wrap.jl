@@ -608,7 +608,7 @@ end
 function sp_blocking_write(port::Port, buffer::Array{UInt8}, timeout_ms::Integer)
     ret = ccall((:sp_blocking_write, libserialport), SPReturn,
                 (Port, Ptr{UInt8}, Csize_t, Cuint),
-                port, pointer(buffer), length(buffer), Cuint(timeout_ms))
+                port, pointer(buffer), length(buffer), timeout_ms)
     handle_error(ret, loc())
     ret
 end
@@ -649,7 +649,7 @@ end
 function sp_blocking_write(port::Port, buffer::String, timeout_ms::Integer)
     ret = ccall((:sp_blocking_write, libserialport), SPReturn,
                 (Port, Ptr{UInt8}, Csize_t, Cuint),
-                port, buffer, length(buffer), Cuint(timeout_ms))
+                port, buffer, length(buffer), timeout_ms)
     handle_error(ret, loc())
     ret
 end
