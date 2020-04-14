@@ -41,7 +41,7 @@ else
             LibSerialPort.open(port, 115200) do s
                 #Tests assume serial port being tested won't output anything after being flushed
                 #TODO: Find a better way to test this
-                flush(s)
+                sp_flush(s, SP_BUF_BOTH)
                 @test readline(s, 1.0) == "" #readline with a 1 second timeout
                 @test readuntil(s, 'a', 1.0) == "" #readuntil 'a' with a 1 second timeout
             end

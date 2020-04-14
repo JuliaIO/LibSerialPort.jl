@@ -613,10 +613,35 @@ function sp_blocking_write(port::Port, buffer::Array{UInt8}, timeout_ms::Integer
     ret
 end
 
-function sp_blocking_write(port::Port, buffer::Ptr{UInt8}, timeout_ms::Integer)
+"""
+    function sp_blocking_write(port::Port, buffer::Union{Ref{T},Ptr{T}},
+                               n::Integer = 1; timeout_ms::Integer = 0) where T`
+
+Write the `sizeof(T)*n` bytes starting from address `buffer` to the
+specified serial port, blocking until complete.
+
+Note that this function only ensures that the accepted bytes have been
+written to the OS; they may be held in driver or hardware buffers and
+not yet physically transmitted. To check whether all written bytes
+have actually been transmitted, use the `sp_output_waiting()` function.
+To wait until all written bytes have actually been transmitted, use
+the `sp_drain()` function.
+
+Wait up to `timeout_ms` milliseconds, where zero means to wait indefinitely.
+
+Returns the number of bytes written on success, or raises an `ErrorException`.
+If the number of bytes returned is less than that requested, the
+timeout was reached before the requested number of bytes was written.
+If `timeout_ms` is zero, the function will always return either the
+requested number of bytes or raise an `ErrorException`. In the event of an
+error there is no way to determine how many bytes were sent before the
+error occured.
+"""
+function sp_blocking_write(port::Port, buffer::Union{Ref{T},Ptr{T}}, n::Integer = 1,
+                           timeout_ms::Integer = 0) where T
     ret = ccall((:sp_blocking_write, libserialport), SPReturn,
                 (Port, Ptr{UInt8}, Csize_t, Cuint),
-                port, buffer, sizeof(buffer), Cuint(timeout_ms))
+                port, buffer, sizeof(T) * n, timeout_ms)
     handle_error(ret, loc())
     ret
 end
@@ -637,9 +662,27 @@ function sp_nonblocking_write(port::Port, buffer::Array{UInt8})
     ret
 end
 
-function sp_nonblocking_write(port::Port, buffer::Ptr{UInt8})
+"""
+    sp_nonblocking_write(port::Port, buffer::Union{Ptr{T},Ref{T}},
+                         n::Integer = 1) where T`
+
+Write the up to `sizeof(T)*n` bytes starting from address `buffer` to
+the specified serial port, without blocking.
+
+Note that this function only ensures that the accepted bytes have been
+written to the OS; they may be held in driver or hardware buffers and
+not yet physically transmitted. To check whether all written bytes
+have actually been transmitted, use the `sp_output_waiting()`
+function. To wait until all written bytes have actually been
+transmitted, use the `sp_drain()` function.
+
+Returns the number of bytes written on success, or raises an `ErrorException`.
+The number of bytes returned may be any number from zero to the
+maximum that was requested.
+"""
+function sp_nonblocking_write(port::Port, buffer::Union{Ptr{T},Ref{T}}, n::Integer = 1) where T
     ret = ccall((:sp_nonblocking_write, libserialport), SPReturn,
-                (Port, Ptr{UInt8}, Csize_t), port, buffer, sizeof(buffer))
+                (Port, Ptr{UInt8}, Csize_t), port, buffer, n * sizeof(T))
     handle_error(ret, loc())
     ret
 end
@@ -672,6 +715,16 @@ function sp_output_waiting(port::Port)
 end
 
 # enum sp_return sp_flush(struct sp_port *port, enum sp_buffer buffers);
+"""
+    sp_flush(port::Port, buffers::SPBuffer)
+    sp_flush(port::SerialPort, buffers::SPBuffer)
+
+Flush serial port buffers. Data in the selected buffer(s) is discarded.
+
+Supported values for `buffers`: `SP_BUF_INPUT`, `SP_BUF_OUTPUT`, `SP_BUF_BOTH`
+
+Returns SP_OK upon success or raises an `ErrorException` otherwise.
+"""
 function sp_flush(port::Port, buffers::SPBuffer)
     ret = ccall((:sp_flush, libserialport), SPReturn,
                 (Port, SPBuffer), port, buffers)
@@ -680,6 +733,12 @@ function sp_flush(port::Port, buffers::SPBuffer)
 end
 
 # enum sp_return sp_drain(struct sp_port *port);
+"""
+    sp_drain(port::Port)
+    sp_drain(SerialPort::Port)
+
+Wait for buffered data to be transmitted.
+"""
 function sp_drain(port::Port)
     ret = ccall((:sp_drain, libserialport), SPReturn, (Port,), port)
     handle_error(ret, loc())
