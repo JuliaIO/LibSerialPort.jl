@@ -3,10 +3,10 @@ import Base: isopen, open, close, write, unsafe_write, flush,
 
 mutable struct SerialPort <: IO
     ref::Port
-    eof::Bool
+    is_eof::Bool
     is_open::Bool
-    function SerialPort(ref, eof, is_open)
-        sp = new(ref, eof, is_open)
+    function SerialPort(ref, is_eof, is_open)
+        sp = new(ref, is_eof, is_open)
         finalizer(destroy!, sp)
         return sp
     end
@@ -30,11 +30,18 @@ function destroy!(sp::SerialPort)
 end
 
 """
-    isopen(sp::SerialPort) -> Bool
+`isopen(sp::SerialPort) -> Bool`
 
 Determine whether a SerialPort object is open.
 """
 isopen(sp::SerialPort) = sp.is_open
+
+"""
+`eof(sp::SerialPort) -> Bool`
+
+Return EOF state (`true` or `false`)`.
+"""
+eof(sp::SerialPort) = sp.is_eof
 
 """
 `set_speed(sp::SerialPort,bps::Integer)`
@@ -307,19 +314,12 @@ function unsafe_write(sp::SerialPort, p::Ptr{UInt8}, nb::UInt)
 end
 
 """
-`eof(sp::SerialPort)`
-
-Return EOF state (`true` or `false`) of `sp`.
-"""
-eof(sp::SerialPort) = sp.eof
-
-"""
 `seteof(sp::SerialPort, state::Bool)`
 
 Set EOF of `sp` to `state`
 """
 function seteof(sp::SerialPort, state::Bool)
-    sp.eof = state
+    sp.is_eof = state
     return nothing
 end
 
