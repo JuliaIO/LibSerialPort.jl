@@ -1,12 +1,12 @@
-import Base: open, close, write, unsafe_write, flush,
+import Base: isopen, open, close, write, unsafe_write, flush,
     read, unsafe_read, readbytes!, readuntil, bytesavailable, eof
 
 mutable struct SerialPort <: IO
     ref::Port
     eof::Bool
-    open::Bool
-    function SerialPort(ref, eof, open)
-        sp = new(ref, eof, open)
+    is_open::Bool
+    function SerialPort(ref, eof, is_open)
+        sp = new(ref, eof, is_open)
         finalizer(destroy!, sp)
         return sp
     end
@@ -28,6 +28,13 @@ function destroy!(sp::SerialPort)
     close(sp)
     sp_free_port(sp.ref)
 end
+
+"""
+    isopen(sp::SerialPort) -> Bool
+
+Determine whether a SerialPort object is open.
+"""
+isopen(sp::SerialPort) = sp.is_open
 
 """
 `set_speed(sp::SerialPort,bps::Integer)`
@@ -222,9 +229,9 @@ Open the serial port `sp`.
 `mode` can take the values: `SP_MODE_READ`, `SP_MODE_WRITE`, and
 `SP_MODE_READ_WRITE`
 """
-function Base.open(sp::SerialPort; mode::SPMode=SP_MODE_READ_WRITE)
+function open(sp::SerialPort; mode::SPMode=SP_MODE_READ_WRITE)
     sp_open(sp.ref, mode)
-    sp.open = true
+    sp.is_open = true
     return sp
 end
 
@@ -236,14 +243,15 @@ construct, configure and open a `SerialPort` object.
 
 For details on posssible settings see `?set_flow_control` and `?set_frame`.
 """
-function Base.open(portname::AbstractString,
-                   bps::Integer;
-                   mode::SPMode=SP_MODE_READ_WRITE,
-                   ndatabits::Integer=8,
-                   parity::SPParity=SP_PARITY_NONE,
-                   nstopbits::Integer=1)
-    sp = SerialPort(sp_get_port_by_name(portname), false, true)
+function open(portname::AbstractString,
+              bps::Integer;
+              mode::SPMode=SP_MODE_READ_WRITE,
+              ndatabits::Integer=8,
+              parity::SPParity=SP_PARITY_NONE,
+              nstopbits::Integer=1)
+    sp = SerialPort(sp_get_port_by_name(portname), false, false)
     sp_open(sp.ref, mode)
+    sp.is_open = true
     set_speed(sp, bps)
     set_frame(sp, ndatabits=ndatabits, parity=parity, nstopbits=nstopbits)
     return sp
@@ -268,10 +276,10 @@ close(sp::SerialPort)
 
 Close the serial port `sp`.
 """
-function Base.close(sp::SerialPort)
-    if sp.open
+function close(sp::SerialPort)
+    if isopen(sp)
         sp_close(sp.ref)
-        sp.open = false
+        sp.is_open = false
     end
     return sp
 end
@@ -303,7 +311,7 @@ end
 
 Return EOF state (`true` or `false`) of `sp`.
 """
-Base.eof(sp::SerialPort) = sp.eof
+eof(sp::SerialPort) = sp.eof
 
 """
 `seteof(sp::SerialPort, state::Bool)`
@@ -330,14 +338,29 @@ Read a single Byte from the specified port and return it represented as `T`.
 `T` might be either `Char or `UInt8`. if no Byte is availible in the port
 buffer return zero.
 """
-function Base.read(sp::SerialPort, readType::Type{Char})
+function read(sp::SerialPort, readType::Type{Char})
     nbytes_read, bytes = sp_nonblocking_read(sp.ref, 1)
     return (nbytes_read == 1) ? convert(readType,bytes[1]) : readType(0)
 end
 
-function Base.read(sp::SerialPort, readType::Type{UInt8})
+function read(sp::SerialPort, readType::Type{UInt8})
     nbytes_read, bytes = sp_nonblocking_read(sp.ref, 1)
     return (nbytes_read == 1) ? convert(readType,bytes[1]) : readType(0)
+end
+
+"""
+`read(sp::SerialPort, ::Type{String})`
+
+Read everything from the specified serial ports `sp` input buffer, one byte at
+a time, until it is empty. Returns a `String`.
+"""
+function read(sp::SerialPort, ::Type{String})
+    result = Char[]
+    while Int(bytesavailable(sp)) > 0
+        byte = readbytes!(sp, 1)[1]
+        push!(result, byte)
+    end
+    return String(join(result))
 end
 
 """
@@ -346,16 +369,16 @@ end
 Read until the specified delimiting byte (e.g. `'\\n'`) is encountered, or until
 timeout_ms has elapsed, whichever comes first.
 """
-function Base.readuntil(sp::SerialPort, delim::Char, timeout_ms::Real)
+function readuntil(sp::SerialPort, delim::Char, timeout_ms::Real)
     return readuntil(sp,[delim],timeout_ms)
 end
 
 
-function Base.readuntil(sp::SerialPort, delim::AbstractString, timeout_ms::Real)
+function readuntil(sp::SerialPort, delim::AbstractString, timeout_ms::Real)
     return readuntil(sp,convert(Vector{Char},delim),timeout_ms)
 end
 
-function Base.readuntil(sp::SerialPort, delim::Vector{Char}, timeout_ms::Real)
+function readuntil(sp::SerialPort, delim::Vector{Char}, timeout_ms::Real)
     start_time = time_ns()
     out = IOBuffer()
     lastchars = Char[0 for i=1:length(delim)]
@@ -377,11 +400,11 @@ function Base.readuntil(sp::SerialPort, delim::Vector{Char}, timeout_ms::Real)
 end
 
 """
-`Base.bytesavailable(sp::SerialPort)`
+`bytesavailable(sp::SerialPort)`
 
 Gets the number of bytes waiting in the input buffer.
 """
-Base.bytesavailable(sp::SerialPort) = Int(sp_input_waiting(sp.ref))
+bytesavailable(sp::SerialPort) = Int(sp_input_waiting(sp.ref))
 
 """
 `readbytes!(sp::SerialPort,nbytes::Integer)`
@@ -389,22 +412,7 @@ Base.bytesavailable(sp::SerialPort) = Int(sp_input_waiting(sp.ref))
 Read `nbytes` from the specified serial port `sp`, without blocking. Returns
 a `UInt8` `Array`.
 """
-function Base.readbytes!(sp::SerialPort, nbytes::Integer)
+function readbytes!(sp::SerialPort, nbytes::Integer)
     nbytes_read, bytes = sp_nonblocking_read(sp.ref, nbytes)
     return bytes
-end
-
-"""
-`read(sp::SerialPort, ::Type{String})`
-
-Read everything from the specified serial ports `sp` input buffer, one byte at
-a time, until it is empty. Returns a `String`.
-"""
-function Base.read(sp::SerialPort, ::Type{String})
-    result = Char[]
-    while Int(bytesavailable(sp)) > 0
-        byte = readbytes!(sp, 1)[1]
-        push!(result, byte)
-    end
-    return String(join(result))
 end
