@@ -1,6 +1,7 @@
 # `export LIBSERIALPORT_DEBUG=` to display debug info (`unset` to clear)
 
 using LibSerialPort
+using Test
 
 """
 Test that we can change some port configuration settings on a copy of the
@@ -132,28 +133,26 @@ function test_blocking_serial_loopback(port::LibSerialPort.Port,
     write_timeout_ms::Integer, read_timeout_ms::Integer)
 
     println("\nTesting serial loopback with blocking write/read functions...")
-    println()
-    nbytes_read, bytes = sp_blocking_read(port, 128, 50)
-    println("nbytes_read: $nbytes_read")
-    if nbytes_read > 0
-        data = String(bytes)
-        println(data)
-    end
-    sp_drain(port)
+
+    # Clear serial buffers (deletes any buffered data)
     sp_flush(port, SP_BUF_BOTH)
+    sleep(0.5)
 
     function loop()
-        for i = 1:100
-            sp_blocking_write(port, "Test message $i\n", write_timeout_ms)
-            sp_drain(port)
-            sp_flush(port, SP_BUF_OUTPUT)
-            nbytes_read, bytes = sp_blocking_read(port, 128, 50)
-            println("($i) nbytes_read: $nbytes_read")
-            if nbytes_read > 0
-                data = String(bytes)
-                println(data)
+        for i = 1:10
+            message = "Test message $i\n"
+            sp_blocking_write(port, message, write_timeout_ms)
+
+            sleep(0.1)
+
+            num_bytes_to_read = Int(sp_input_waiting(port))
+            if num_bytes_to_read > 0
+                nbytes_read, bytes = sp_blocking_read(port, num_bytes_to_read, read_timeout_ms)
+
+                @test nbytes_read == num_bytes_to_read
+
+                println("($i) $nbytes_read, $num_bytes_to_read\n$(String(bytes))")
             end
-            sp_flush(port, SP_BUF_INPUT)
         end
     end
 
@@ -162,34 +161,27 @@ end
 
 function test_nonblocking_serial_loopback(port::LibSerialPort.Port)
 
-    println("\n[TEST] Read any incoming data for ~1 second...")
-    for i = 1:1000
-        nbytes_read, bytes = sp_nonblocking_read(port, 1024)
-        print(String(bytes))
-        sleep(0.001)
-    end
-
     sp_flush(port, SP_BUF_BOTH)
 
-    print("\n\n[TEST] Serial loopback - ")
-    println("Send 100 short messages and read whatever comes back...")
+    println("\nTesting serial loopback with nonblocking write/read functions...")
 
     function loops()
-        for i = 1:100
+        for i = 1:10
             sp_nonblocking_write(port, "Test message $i\n")
-            sp_drain(port)
-            nbytes_read, bytes = sp_nonblocking_read(port, 256)
-            print(String(bytes))
+            sp_drain(port)  # Wait for messages to be sent to the OS
         end
 
-        # Read and print any remaining data for ~50 ms
-        for i = 1:50
-            nbytes_read, bytes = sp_nonblocking_read(port, 256)
-            print(String(bytes))
-            sleep(0.001)
-        end
+        sleep(0.1)  # Give the connected device time to echo back
 
-        sp_flush(port, SP_BUF_BOTH)
+        for i = 1:10
+            num_bytes_to_read = Int(sp_input_waiting(port))
+            if num_bytes_to_read > 0
+                nbytes_read, bytes = sp_nonblocking_read(port, num_bytes_to_read)
+                @test nbytes_read == num_bytes_to_read
+                # println("($i) $nbytes_read, $num_bytes_to_read\n$(String(bytes))")
+                sleep(0.1)
+            end
+        end
     end
 
     @time loops()
@@ -229,11 +221,14 @@ function test_low_level_api(args...)
 
     sp_set_baudrate(port, baudrate)
 
-    test_blocking_serial_loopback(port, 10, 40)
+    @testset "Blocking read/write" begin
+        test_blocking_serial_loopback(port, 10, 10)
+    end
 
-    test_nonblocking_serial_loopback(port)
+    @testset "Nonblocking read/write" begin
+        test_nonblocking_serial_loopback(port)
+    end
 
-    println("\nClosing and freeing port. Over and out!")
     sp_close(port)
     sp_free_port(port)
 end
