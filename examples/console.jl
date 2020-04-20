@@ -5,26 +5,23 @@
 using LibSerialPort
 
 function serial_loop(sp::SerialPort)
-    input_line = ""
+    user_input = ""
     mcu_message = ""
 
     println("Starting I/O loop. Press ESC [return] to quit")
+    sleep(3)
 
     while true
         # Poll for new data without blocking
-        @async input_line = readline(keep=true)
-        @async mcu_message *= read(sp, String)
+        @async user_input = readline(keep=true)
+        @async mcu_message *= String(nonblocking_read(sp))
 
-        # Alternative read method:
-        # Requires setting a timeout and may cause bottlenecks
-        # @async mcu_message = readuntil(sp, "\r\n", 50)
-
-        occursin("\e", input_line) && exit()
+        occursin("\e", user_input) && exit()
 
         # Send user input to device
-        if endswith(input_line, '\n')
-            write(sp, "$input_line")
-            input_line = ""
+        if endswith(user_input, '\n')
+            write(sp, "$user_input")
+            user_input = ""
         end
 
         # Print message from device
