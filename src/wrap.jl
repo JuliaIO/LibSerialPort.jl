@@ -1,3 +1,5 @@
+
+# Julia types for the sp_port, sp_port_config, and sp_event_set structs
 struct SPPort end
 struct SPConfig end
 struct SPEventSet end
@@ -502,6 +504,10 @@ function sp_set_flowcontrol(port::Port, flowcontrol::SPFlowControl)
 end
 
 # enum sp_return sp_blocking_read(struct sp_port *port, void *buf, size_t count, unsigned int timeout_ms);
+function sp_blocking_read(port::Port, buffer::Union{Ref{T},Ptr{T}}, nbytes::Integer, timeout_ms::Integer) where T
+    handle_error(ccall((:sp_blocking_read, libserialport), SPReturn, (Port, Ptr{UInt8}, Csize_t, Cuint),
+        port, buffer, sizeof(T) * nbytes, timeout_ms))
+end
 function sp_blocking_read(port::Port, nbytes::Integer, timeout_ms::Integer)
     buffer = zeros(UInt8, nbytes)
 
@@ -524,6 +530,11 @@ function sp_blocking_read_next(port::Port, nbytes::Integer, timeout_ms::Integer)
 end
 
 # enum sp_return sp_nonblocking_read(struct sp_port *port, void *buf, size_t count);
+function sp_nonblocking_read(port::Port, buffer::Union{Ref{T},Ptr{T}}, nbytes::Integer) where T
+    handle_error(ccall((:sp_nonblocking_read, libserialport), SPReturn,
+                       (Port, Ptr{UInt8}, Csize_t),
+                       port, buffer, sizeof(T) * nbytes))
+end
 function sp_nonblocking_read(port::Port, nbytes::Integer)
     buffer = zeros(UInt8, nbytes)
 
