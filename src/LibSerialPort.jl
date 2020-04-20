@@ -162,7 +162,8 @@ export
     set_frame,
     set_flow_control,
     seteof,
-    reseteof
+    reseteof,
+    nonblocking_read
 
 include("wrap.jl")
 include("high-level-api.jl")
