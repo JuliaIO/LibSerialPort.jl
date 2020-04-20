@@ -1,4 +1,10 @@
-# `export LIBSERIALPORT_DEBUG=` to display debug info (`unset` to clear)
+"""
+This test is written to run on a machine connected to an Arduino-compatible
+microcontroller running examples/serial_example.ino.
+
+In bash, `export LIBSERIALPORT_DEBUG=` to display debug info (`unset` to clear)
+"""
+
 
 using LibSerialPort
 using Test
@@ -138,7 +144,9 @@ function test_blocking_serial_loopback(port::LibSerialPort.Port,
     sp_flush(port, SP_BUF_BOTH)
     sleep(0.5)
 
-    function loop()
+    function loopback_with_reallocation()
+        """Use sp_blocking_read, which allocates a new read buffer internally on every call.
+        """
         for i = 1:10
             message = "Test message $i\n"
             sp_blocking_write(port, message, write_timeout_ms)
@@ -147,16 +155,50 @@ function test_blocking_serial_loopback(port::LibSerialPort.Port,
 
             num_bytes_to_read = Int(sp_input_waiting(port))
             if num_bytes_to_read > 0
-                nbytes_read, bytes = sp_blocking_read(port, num_bytes_to_read, read_timeout_ms)
+
+                nbytes_read, bytes_read = sp_blocking_read(port, num_bytes_to_read, read_timeout_ms)
+                response = String(bytes_read)
 
                 @test nbytes_read == num_bytes_to_read
+                @test occursin("Received Test message $i", response)
 
-                println("($i) $nbytes_read, $num_bytes_to_read\n$(String(bytes))")
+                println("($i) $nbytes_read, $num_bytes_to_read\n$response")
             end
         end
     end
 
-    @time loop()
+    function loopback_with_preallocation()
+        """Use sp_blocking_read with a preallocated read buffer.
+        """
+        for i = 1:10
+            message = "Test message $i\n"
+            sp_blocking_write(port, message, write_timeout_ms)
+
+            sleep(0.1)
+
+            num_bytes_to_read = Int(sp_input_waiting(port))
+            if num_bytes_to_read > 0
+
+                nbytes_read = 0
+                bytes_read = zeros(UInt8, 1024)
+
+                for j in 1:num_bytes_to_read
+                    b = Ref{UInt8}(0)
+                    nbytes_read += Int(sp_blocking_read(port, b, 1, read_timeout_ms))
+                    bytes_read[j] = b.x
+                end
+
+                response = String(bytes_read[1:nbytes_read])
+
+                @test nbytes_read == num_bytes_to_read
+
+                println("($i) $nbytes_read, $num_bytes_to_read\n$response")
+            end
+        end
+    end
+
+    @time loopback_with_reallocation()
+    @time loopback_with_preallocation()
 end
 
 function test_nonblocking_serial_loopback(port::LibSerialPort.Port)
@@ -168,7 +210,6 @@ function test_nonblocking_serial_loopback(port::LibSerialPort.Port)
     function loops()
         for i = 1:10
             sp_nonblocking_write(port, "Test message $i\n")
-            sp_drain(port)  # Wait for messages to be sent to the OS
         end
 
         sleep(0.1)  # Give the connected device time to echo back
@@ -178,7 +219,6 @@ function test_nonblocking_serial_loopback(port::LibSerialPort.Port)
             if num_bytes_to_read > 0
                 nbytes_read, bytes = sp_nonblocking_read(port, num_bytes_to_read)
                 @test nbytes_read == num_bytes_to_read
-                # println("($i) $nbytes_read, $num_bytes_to_read\n$(String(bytes))")
                 sleep(0.1)
             end
         end
