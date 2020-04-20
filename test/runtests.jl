@@ -17,7 +17,7 @@ if haskey(ENV, "CI")
     end
 else
     if length(ARGS) == 0
-        port = "/dev/ttyS0"  # /dev/ttyS4 /dev/ttyUSB0
+        port = "/dev/ttyS0"
     else
         port = ARGS[1]
     end
@@ -37,21 +37,5 @@ else
             @test test_high_level_api(port, baudrate) == nothing
         end
 
-        @testset "Reading with timeouts" begin
-            LibSerialPort.open(port, 115200) do s
-                #Tests assume serial port being tested won't output anything after being flushed
-                #TODO: Find a better way to test this
-                sp_flush(s, SP_BUF_BOTH)
-                @test readline(s, 1.0) == "" #readline with a 1 second timeout
-                @test readuntil(s, 'a', 1.0) == "" #readuntil 'a' with a 1 second timeout
-            end
-        end
-
-        # console.jl runs forever, thus isn't amenable to unit testing
-        # @testset "Examples" begin
-        #     include("../examples/console.jl")
-        #     @test console() == nothing
-        #     @test console(port, baudrate) == nothing
-        # end
     end
 end
