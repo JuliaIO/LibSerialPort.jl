@@ -1,12 +1,12 @@
 import Base: isopen, open, close, write, unsafe_write, flush,
-    read, unsafe_read, readbytes!, readuntil, bytesavailable, eof
+    read, unsafe_read, bytesavailable, eof
 
 
 mutable struct SerialPort <: IO
     ref::Port
     is_eof::Bool
     is_open::Bool
-    read_timeout_ms::AbstractFloat
+    read_timeout_ms::Int  # 0 to wait indefinitely, per sigrok libserialport interface
     function SerialPort(ref, is_eof, is_open, read_timeout_ms)
         sp = new(ref, is_eof, is_open, read_timeout_ms)
         finalizer(destroy!, sp)
@@ -20,7 +20,7 @@ end
 
 Constructor for the `SerialPort` object.
 """
-SerialPort(portname::AbstractString) = SerialPort(sp_get_port_by_name(portname), false, false, Inf)
+SerialPort(portname::AbstractString) = SerialPort(sp_get_port_by_name(portname), false, false, 0)
 
 
 """
@@ -335,75 +335,37 @@ Reset EOF of `sp` to `false`
 reseteof(sp::SerialPort) = seteof(sp, false)
 
 
-"""
-`read(sp::SerialPort, T::Type{UInt8})`
-`read(sp::SerialPort, T::Type{Char})`
+# Julia's Base module defines `read(s::IO, nb::Integer = typemax(Int))`.
+# Override the default `nb` to a more useful value for this context.
+read(sp::SerialPort) = read(sp, bytesavailable(sp))
 
-Read a single Byte from the specified port and return it represented as `T`.
-`T` might be either `Char or `UInt8`. if no Byte is availible in the port
-buffer return zero.
-"""
-function read(sp::SerialPort, readType::Type{Char})
-    nbytes_read, bytes = sp_nonblocking_read(sp.ref, 1)
-    return (nbytes_read == 1) ? convert(readType,bytes[1]) : readType(0)
-end
 
-function read(sp::SerialPort, readType::Type{UInt8})
-    nbytes_read, bytes = sp_nonblocking_read(sp.ref, 1)
-    return (nbytes_read == 1) ? convert(readType,bytes[1]) : readType(0)
+function read(sp::SerialPort, ::Type{UInt8})
+    byte_ref = Ref{UInt8}(0)
+    sp_blocking_read(sp.ref, byte_ref, 1, sp.read_timeout_ms)
+    return byte_ref.x
 end
 
 
+function unsafe_read(sp::SerialPort, p::Ptr{UInt8}, nb::UInt)
+    sp_blocking_read(sp.ref, p, nb, sp.read_timeout_ms)
+end
+
+
 """
-`read(sp::SerialPort, ::Type{String})`
+`nonblocking_read(sp::SerialPort)`
 
 Read everything from the specified serial ports `sp` input buffer, one byte at
 a time, until it is empty. Returns a `String`.
 """
-function read(sp::SerialPort, ::Type{String})
-    result = Char[]
-    while Int(bytesavailable(sp)) > 0
-        byte = readbytes!(sp, 1)[1]
-        push!(result, byte)
+function nonblocking_read(sp::SerialPort)
+    result = UInt8[]
+    byte_ref = Ref{UInt8}(0)
+    while bytesavailable(sp) > 0
+        sp_nonblocking_read(sp.ref, byte_ref, 1)
+        push!(result, byte_ref.x)
     end
-    return String(join(result))
-end
-
-
-"""
-`readuntil(sp::SerialPort,delim::Union{Char,AbstractString,Vector{Char}},timeout_ms::Integer)`
-
-Read until the specified delimiting byte (e.g. `'\\n'`) is encountered, or until
-timeout_ms has elapsed, whichever comes first.
-"""
-function readuntil(sp::SerialPort, delim::Char, timeout_ms::Real)
-    return readuntil(sp,[delim],timeout_ms)
-end
-
-
-function readuntil(sp::SerialPort, delim::AbstractString, timeout_ms::Real)
-    return readuntil(sp,convert(Vector{Char},delim),timeout_ms)
-end
-
-function readuntil(sp::SerialPort, delim::Vector{Char}, timeout_ms::Real)
-    start_time = time_ns()
-    out = IOBuffer()
-    lastchars = Char[0 for i=1:length(delim)]
-    while !eof(sp)
-        if (time_ns() - start_time)/1e6 > timeout_ms
-            break
-        end
-        if bytesavailable(sp) > 0
-            c = read(sp, Char)
-            write(out, c)
-            lastchars = circshift(lastchars,-1)
-            lastchars[end] = c
-            if lastchars == delim
-                break
-            end
-        end
-    end
-    return String(take!(out))
+    return result
 end
 
 
@@ -414,14 +376,3 @@ Gets the number of bytes waiting in the input buffer.
 """
 bytesavailable(sp::SerialPort) = Int(sp_input_waiting(sp.ref))
 
-
-"""
-`readbytes!(sp::SerialPort,nbytes::Integer)`
-
-Read `nbytes` from the specified serial port `sp`, without blocking. Returns
-a `UInt8` `Array`.
-"""
-function readbytes!(sp::SerialPort, nbytes::Integer)
-    nbytes_read, bytes = sp_nonblocking_read(sp.ref, nbytes)
-    return bytes
-end
