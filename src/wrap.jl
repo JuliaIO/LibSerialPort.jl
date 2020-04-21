@@ -313,7 +313,7 @@ end
 # enum sp_return sp_set_baudrate(struct sp_port *port, int baudrate);
 function sp_set_baudrate(port::Port, baudrate::Integer)
     check(ccall((:sp_set_baudrate, libserialport), SPReturn,
-                       (Port, Cint), port, Cint(baudrate)))
+                       (Port, Cint), port, baudrate))
 end
 
 # enum sp_return sp_get_config_baudrate(const struct sp_port_config *config, int *baudrate_ptr);
@@ -327,14 +327,14 @@ end
 # enum sp_return sp_set_config_baudrate(struct sp_port_config *config, int baudrate);
 function sp_set_config_baudrate(config::Config, baudrate::Integer)
     check(ccall((:sp_set_config_baudrate, libserialport), SPReturn,
-                       (Config, Cint), config, Cint(baudrate)))
+                       (Config, Cint), config, baudrate))
 end
 
 # enum sp_return sp_set_bits(struct sp_port *port, int bits);
 function sp_set_bits(port::Port, bits::Integer)
     @assert 5 <= bits <= 8
     check(ccall((:sp_set_bits, libserialport), SPReturn,
-                       (Port, Cint), port, Cint(bits)))
+                       (Port, Cint), port, bits))
 end
 
 # enum sp_return sp_get_config_bits(const struct sp_port_config *config, int *bits_ptr);
@@ -348,7 +348,7 @@ end
 # enum sp_return sp_set_config_bits(struct sp_port_config *config, int bits);
 function sp_set_config_bits(config::Config, bits::Integer)
     check(ccall((:sp_set_config_bits, libserialport), SPReturn,
-                       (Config, Cint), config, Cint(bits)))
+                       (Config, Cint), config, bits))
 end
 
 # enum sp_return sp_set_parity(struct sp_port *port, enum sp_parity parity);
@@ -374,7 +374,7 @@ end
 # enum sp_return sp_set_stopbits(struct sp_port *port, int stopbits);
 function sp_set_stopbits(port::Port, stopbits::Integer)
     check(ccall((:sp_set_stopbits, libserialport), SPReturn,
-                       (Port, Cint), port, Cint(stopbits)))
+                       (Port, Cint), port, stopbits))
 end
 
 # enum sp_return sp_get_config_stopbits(const struct sp_port_config *config, int *stopbits_ptr);
@@ -388,7 +388,7 @@ end
 # enum sp_return sp_set_config_stopbits(struct sp_port_config *config, int stopbits);
 function sp_set_config_stopbits(config::Config, stopbits::Integer)
     check(ccall((:sp_set_config_stopbits, libserialport), SPReturn,
-                       (Config, Cint), config, Cint(stopbits)))
+                       (Config, Cint), config, stopbits))
 end
 
 # enum sp_return sp_set_rts(struct sp_port *port, enum sp_rts rts);
