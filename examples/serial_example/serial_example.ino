@@ -1,14 +1,21 @@
+// Serial loopback example with a few testing options for LibSerialPort.jl
+
+// Use this to introduce latency in the response.
+unsigned long responseDelay = 0;
+
+// Use these to generate additional traffic (timestamped ADC values).
+bool write_adc = false;
+unsigned long writeInterval = 50;  // ms
+
 int incomingByte = 0;   // for incoming serial data
 String cmd = "";        // Usage of Arduino's String class is OK for an example
-bool write_adc = false;
-unsigned long writeInterval = 50;
 unsigned long timeMarker = millis();
 
 void handleByte(byte b)
 {
   if (b == '\r' || b == '\n')
   {
-    Serial.print("Received ");
+    delay(responseDelay);
     Serial.println(cmd);
     cmd = "";
   }
