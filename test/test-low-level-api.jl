@@ -261,6 +261,8 @@ function test_low_level_api(args...)
 
     sp_set_baudrate(port, baudrate)
 
+    sleep(2)
+
     @testset "Blocking read/write" begin
         test_blocking_serial_loopback(port, 10, 10)
     end
