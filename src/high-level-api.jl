@@ -219,7 +219,10 @@ end
 
 Print port settings for `sp`.
 """
-print_port_settings(sp::SerialPort) = print_port_settings(sp.ref)
+function print_port_settings(sp::SerialPort)
+    print_port_settings(sp.ref)
+    println("Read timeout (ms, forever if 0): ", sp.read_timeout_ms)
+end
 
 function print_port_settings(port::LibSerialPort.Port)
     println("Configuration for ", sp_get_port_name(port), ":")
@@ -301,18 +304,36 @@ sp_output_waiting(sp::SerialPort) = sp_output_waiting(sp.ref)
 sp_flush(sp::SerialPort, args...) = sp_flush(sp.ref, args...)
 sp_drain(sp::SerialPort)          = sp_drain(sp.ref)
 
-# We define here only the basic methods for writing bytes.
-# All other write() methods for writing the canonical binary
+# We define here only the basic methods for reading and writing
+# bytes. All other methods for reading/writing the canonical binary
 # representation of any type, and print() methods for writing
 # its text representation, are inherited from the IO supertype
 # (see julia/base/io.jl), i.e. work just like for files.
 
-function write(sp::SerialPort, b::UInt8)
-    Int(sp_blocking_write(sp.ref, Ref(b)))
+function read(sp::SerialPort, ::Type{UInt8})
+    byte_ref = Ref{UInt8}(0)
+    nbytes = sp_blocking_read(sp.ref, byte_ref, 1, sp.read_timeout_ms)
+
+    # TODO: how to handle timeouts?
+    # if nbytes == 0
+    #     println("read timeout")
+    # end
+    return byte_ref.x
 end
 
+
+function unsafe_read(sp::SerialPort, p::Ptr{UInt8}, nb::UInt)
+    sp_blocking_read(sp.ref, p, nb, sp.read_timeout_ms)
+end
+
+
+function write(sp::SerialPort, b::UInt8)
+    sp_blocking_write(sp.ref, Ref(b))
+end
+
+
 function unsafe_write(sp::SerialPort, p::Ptr{UInt8}, nb::UInt)
-    Int(sp_blocking_write(sp.ref, p, nb))
+    sp_blocking_write(sp.ref, p, nb)
 end
 
 
@@ -338,18 +359,6 @@ reseteof(sp::SerialPort) = seteof(sp, false)
 # Julia's Base module defines `read(s::IO, nb::Integer = typemax(Int))`.
 # Override the default `nb` to a more useful value for this context.
 read(sp::SerialPort) = read(sp, bytesavailable(sp))
-
-
-function read(sp::SerialPort, ::Type{UInt8})
-    byte_ref = Ref{UInt8}(0)
-    sp_blocking_read(sp.ref, byte_ref, 1, sp.read_timeout_ms)
-    return byte_ref.x
-end
-
-
-function unsafe_read(sp::SerialPort, p::Ptr{UInt8}, nb::UInt)
-    sp_blocking_read(sp.ref, p, nb, sp.read_timeout_ms)
-end
 
 
 """
