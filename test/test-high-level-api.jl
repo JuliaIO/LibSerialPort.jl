@@ -18,7 +18,7 @@ function test_blocking_serial_loopback(sp::SerialPort)
         sleep(0.1)
         line = readline(sp)
         println(line)
-        @test startswith(line, "Received test message")
+        @test startswith(line, "test message")
     end
 
 end

@@ -160,7 +160,7 @@ function test_blocking_serial_loopback(port::LibSerialPort.Port,
                 response = String(bytes_read)
 
                 @test nbytes_read == num_bytes_to_read
-                @test occursin("Received Test message $i", response)
+                @test occursin("Test message $i", response)
 
                 println("($i) $nbytes_read, $num_bytes_to_read\n$response")
             end
