@@ -505,8 +505,10 @@ end
 
 # enum sp_return sp_blocking_read(struct sp_port *port, void *buf, size_t count, unsigned int timeout_ms);
 function sp_blocking_read(port::Port, buffer::Union{Ref{T},Ptr{T}}, nbytes::Integer, timeout_ms::Integer) where T
-    handle_error(ccall((:sp_blocking_read, libserialport), SPReturn, (Port, Ptr{UInt8}, Csize_t, Cuint),
+    # If the read succeeds, the return value is the number of bytes read.
+    ret = handle_error(ccall((:sp_blocking_read, libserialport), SPReturn, (Port, Ptr{UInt8}, Csize_t, Cuint),
         port, buffer, sizeof(T) * nbytes, timeout_ms))
+    return Int(ret)
 end
 function sp_blocking_read(port::Port, nbytes::Integer, timeout_ms::Integer)
     buffer = zeros(UInt8, nbytes)
@@ -578,15 +580,19 @@ error occured.
 """
 function sp_blocking_write(port::Port, buffer::Union{Ref{T},Ptr{T}}, n::Integer = 1,
                            timeout_ms::Integer = 0) where T
-    handle_error(ccall((:sp_blocking_write, libserialport), SPReturn,
-                       (Port, Ptr{UInt8}, Csize_t, Cuint),
-                       port, buffer, sizeof(T) * n, timeout_ms))
+    # If successful, the return value is the number of bytes written.
+    ret = handle_error(ccall((:sp_blocking_write, libserialport), SPReturn,
+                             (Port, Ptr{UInt8}, Csize_t, Cuint),
+                             port, buffer, sizeof(T) * n, timeout_ms))
+    return Int(ret)
 end
 
 function sp_blocking_write(port::Port, buffer::String, timeout_ms::Integer)
-    handle_error(ccall((:sp_blocking_write, libserialport), SPReturn,
+    # If successful, the return value is the number of bytes written.
+    ret = handle_error(ccall((:sp_blocking_write, libserialport), SPReturn,
                        (Port, Ptr{UInt8}, Csize_t, Cuint),
                        port, buffer, length(buffer), timeout_ms))
+    return Int(ret)
 end
 
 # enum sp_return sp_nonblocking_write(struct sp_port *port, const void *buf, size_t count);
