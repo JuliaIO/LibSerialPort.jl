@@ -1,5 +1,5 @@
 #=
-These tests requre a serial device to echo bytes written from the host computer.
+These tests require a serial device to echo bytes written from the host computer.
 
 These hardware configurations should both work:
  - Use a standalone USB-to-UART adapter (e.g. FTDI FT232) in loopback mode (TX and RX pins jumped).
