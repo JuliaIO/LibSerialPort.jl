@@ -383,5 +383,5 @@ end
 
 Gets the number of bytes waiting in the input buffer.
 """
-bytesavailable(sp::SerialPort) = Int(sp_input_waiting(sp.ref))
+bytesavailable(sp::SerialPort) = sp_input_waiting(sp.ref)
 
