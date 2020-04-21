@@ -1,4 +1,10 @@
 #=
+These tests requre a serial device to echo bytes written from the host computer.
+
+These hardware configurations should both work:
+ - Use a standalone USB-to-UART adapter (e.g. FTDI FT232) in loopback mode (TX and RX pins jumped).
+ - Use a USB-to-serial equipped, arduino-compatible microcontroller running examples/serial_example.ino.
+
 Run test locally using
 $ julia test/runtests.jl /dev/ttyXYZ
 
