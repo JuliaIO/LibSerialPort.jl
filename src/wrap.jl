@@ -641,8 +641,8 @@ function sp_blocking_read(port::Port, nbytes::Integer, timeout_ms::Integer)
         (Port, Ptr{UInt8}, Csize_t, Cuint),
         port,
         buffer,
-        Csize_t(nbytes),
-        Cuint(timeout_ms),
+        nbytes,
+        timeout_ms,
     ))
     return ret, buffer
 end
@@ -658,8 +658,8 @@ function sp_blocking_read_next(port::Port, nbytes::Integer, timeout_ms::Integer)
         (Port, Ptr{UInt8}, Csize_t, Cuint),
         port,
         buffer,
-        Csize_t(nbytes),
-        Cuint(timeout_ms),
+        nbytes,
+        timeout_ms,
     ))
     return ret, buffer
 end
