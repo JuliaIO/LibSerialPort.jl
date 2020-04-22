@@ -214,6 +214,35 @@ function print_port_metadata(port::LibSerialPort.Port; show_config::Bool=true)
 end
 
 
+function get_port_settings(config::LibSerialPort.Config)
+    return Dict(
+        "baudrate" => sp_get_config_baudrate(config),
+        "bits"     => sp_get_config_bits(config),
+        "parity"   => sp_get_config_parity(config),
+        "stopbits" => sp_get_config_stopbits(config),
+        "RTS"      => sp_get_config_rts(config),
+        "CTS"      => sp_get_config_cts(config),
+        "DTR"      => sp_get_config_dtr(config),
+        "DSR"      => sp_get_config_dsr(config),
+        "XonXoff"  => sp_get_config_xon_xoff(config),
+        )
+end
+
+function get_port_settings(port::LibSerialPort.Port)
+    config = sp_get_config(port)
+    settings = get_port_settings(config)
+    sp_free_config(config)
+    return settings
+end
+
+"""
+`get_port_settings(sp::SerialPort)`
+
+Return port settings for `sp` as a dictionary.
+"""
+get_port_settings(sp::SerialPort) = get_port_settings(sp.ref)
+
+
 """
 `print_port_settings(sp::SerialPort)`
 
@@ -222,6 +251,7 @@ Print port settings for `sp`.
 function print_port_settings(sp::SerialPort)
     print_port_settings(sp.ref)
     println("Read timeout (ms, forever if 0): ", sp.read_timeout_ms)
+    return
 end
 
 function print_port_settings(port::LibSerialPort.Port)
@@ -229,19 +259,15 @@ function print_port_settings(port::LibSerialPort.Port)
     config = sp_get_config(port)
     print_port_settings(config)
     sp_free_config(config)
+    return
 end
 
 function print_port_settings(config::LibSerialPort.Config)
-    println("\tbaudrate\t", sp_get_config_baudrate(config))
-    println("\tbits\t",     sp_get_config_bits(config))
-    println("\tparity\t",   sp_get_config_parity(config))
-    println("\tstopbits\t", sp_get_config_stopbits(config))
-    println("\tRTS\t",      sp_get_config_rts(config))
-    println("\tCTS\t",      sp_get_config_cts(config))
-    println("\tDTR\t",      sp_get_config_dtr(config))
-    println("\tDSR\t",      sp_get_config_dsr(config))
-    println("\tXonXoff\t",  sp_get_config_xon_xoff(config))
-    println("")
+    s = get_port_settings(config)
+    for (k, v) in s
+        println("\t$k\t", v)
+    end
+    return
 end
 
 

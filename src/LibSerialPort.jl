@@ -156,6 +156,7 @@ export
     # Functions from high-level API
     list_ports,
     get_port_list,
+    get_port_settings,
     print_port_metadata,
     print_port_settings,
     set_speed,
