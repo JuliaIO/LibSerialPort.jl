@@ -23,6 +23,8 @@ function test_port_configuration(port::LibSerialPort.Port)
 end
 
 function test_change_port_copy_method1(port::LibSerialPort.Port)
+    original_port_settings = get_port_settings(port)
+
     port2 = sp_copy_port(port)
     sp_close(port)
     sp_open(port2, SP_MODE_READ_WRITE)
@@ -67,9 +69,12 @@ function test_change_port_copy_method1(port::LibSerialPort.Port)
 
     print("[TEST1] ORIGINAL ")
     print_port_settings(port)
+
+    @test get_port_settings(port) == original_port_settings
 end
 
 function test_change_port_copy_method2(port::LibSerialPort.Port)
+    original_port_settings = get_port_settings(port)
     port2 = sp_copy_port(port)
     sp_close(port)
     sp_open(port2, SP_MODE_READ_WRITE)
@@ -114,6 +119,8 @@ function test_change_port_copy_method2(port::LibSerialPort.Port)
 
     print("[TEST2] ORIGINAL ")
     print_port_settings(port)
+
+    @test get_port_settings(port) == original_port_settings
 end
 
 """
@@ -257,7 +264,9 @@ function test_low_level_api(args...)
 
     sp_open(port, SP_MODE_READ_WRITE)
 
-    test_port_configuration(port)
+    @testset "Test port configuration" begin
+        test_port_configuration(port)
+    end
 
     sp_set_baudrate(port, baudrate)
 
