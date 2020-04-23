@@ -1,17 +1,16 @@
 #=
 These tests require a serial device to echo bytes written from the host computer.
 
-These hardware configurations should both work:
- - Use a standalone USB-to-UART adapter (e.g. FTDI FT232) in loopback mode (TX and RX pins jumped).
- - Use a USB-to-serial equipped, arduino-compatible microcontroller running examples/serial_example.ino.
+For example, these hardware configurations should work:
+ - A standalone USB-to-UART adapter (e.g. FTDI FT232) in loopback mode (TX and RX pins jumped).
+ - A USB-to-serial equipped, arduino-compatible microcontroller running examples/serial_example.ino.
+ - The USB-to-serial chip on some microcontroller boards can be used directly, bypassing the micro.
+   For example, an Arduino UNO R3 can be connected via USB with RESET grounded and TX wired to RX.
 
-Run test locally using
-$ julia test/runtests.jl /dev/ttyXYZ
+Run the tests locally using
+$ julia test/runtests.jl <port address> <baudrate>
 
-/dev/ttyXYZ can be:
-/dev/ttyS0  (for Travis)
-/dev/ttyS4
-/dev/ttyUSB0
+LibSerialPort.list_ports() may help with finding the correct port address.
 =#
 
 using LibSerialPort
