@@ -353,7 +353,10 @@ end
 
 # enum sp_return sp_set_bits(struct sp_port *port, int bits);
 function sp_set_bits(port::Port, bits::Integer)
-    @assert 5 <= bits <= 8
+    if !(5 <= bits <= 8)
+        throw(ArgumentError(
+            "libserialport allows 5-8 data bits/frame. Received $bits."))
+    end
     check(ccall((:sp_set_bits, libserialport), SPReturn, (Port, Cint), port, bits))
 end
 
