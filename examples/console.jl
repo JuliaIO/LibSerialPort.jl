@@ -1,6 +1,11 @@
-# Basic serial console.
-# Data is read from a serial device and lines (but not individual keypresses)
-# are written to the device asynchronously.
+"""
+Basic line-buffering serial console.
+Data is read  asynchronously from a serial device and user input is written
+by line (not keypress).
+
+If a serial device is connected that echoes bytes, each line of user input
+should be duplicated.
+"""
 
 using LibSerialPort
 
@@ -9,24 +14,23 @@ function serial_loop(sp::SerialPort)
     mcu_message = ""
 
     println("Starting I/O loop. Press ESC [return] to quit")
-    sleep(3)
 
     while true
         # Poll for new data without blocking
         @async user_input = readline(keep=true)
         @async mcu_message *= String(nonblocking_read(sp))
 
-        occursin("\e", user_input) && exit()
+        occursin("\e", user_input) && exit()  # escape
 
-        # Send user input to device
+        # Send user input to device with ENTER
         if endswith(user_input, '\n')
             write(sp, "$user_input")
             user_input = ""
         end
 
-        # Print message from device
-        if occursin("\r\n", mcu_message)
-            lines = split(mcu_message, "\r\n")
+        # Print response from device as a line
+        if occursin("\n", mcu_message)
+            lines = split(mcu_message, "\n")
             while length(lines) > 1
                 println(popfirst!(lines))
             end
