@@ -44,6 +44,41 @@ function test_nonblocking_serial_loopback(sp::SerialPort)
 end
 
 
+"""
+Check that a serial device returns the expected result under a given
+setting for the number of data bits `n` in a UART frame.
+
+The most common value for n is 8. Support for other values is device-dependent,
+but only 5,6,7,8 are supported by libserialport.
+"""
+function test_bytestring_roundtrip(s::SerialPort, n::Int=8)
+
+    # If 0x11 and 0x13 are missing, flow control may be enabled.
+    # set_flow_control(s, xonxoff=SP_XONXOFF_DISABLED)
+
+    msg = collect(UInt8(0):UInt8(255))
+
+    write(s, msg)
+    sp_drain(s)
+
+    sleep(0.1)
+    # rcv = nonblocking_read(s)
+    rcv = read(s)
+
+    # Expected response
+    msg .&= UInt8(1 << n - 1)
+
+    if rcv != msg
+        @warn("Received data does not match transmitted data:")
+        println("Bytes received: ", rcv)
+        println("Bytes missing:  ", setdiff(msg, rcv));
+        println("Bytes added:    ", setdiff(rcv, msg));
+    end
+
+    @test rcv == msg
+end
+
+
 function test_high_level_api(args...)
 
     if length(args) != 2
@@ -73,6 +108,10 @@ function test_high_level_api(args...)
 
     @testset "Nonblocking read" begin
         test_nonblocking_serial_loopback(sp)
+    end
+
+    @testset "Bytestring roundtrip" begin
+        test_bytestring_roundtrip(sp)
     end
 
     close(sp)
