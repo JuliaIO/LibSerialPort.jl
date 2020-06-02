@@ -372,6 +372,7 @@ function Base.readuntil(sp::SerialPort, delim::Vector{Char}, timeout_ms::Real)
                 break
             end
         end
+        yield()
     end
     return String(take!(out))
 end
