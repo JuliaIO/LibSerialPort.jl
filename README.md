@@ -16,34 +16,31 @@ Apart from a very few non-essential functions, the entire library API (about 75 
 Try
 
     julia> using LibSerialPort
-    julia> list_ports()
-
-to get a list of ports detected on your system.
+    julia> list_ports()  # or get_port_list() for an array of names
 
 The examples/ directory contains a simple serial console for the command line. This may serve as a useful starting point for your application. The serial_example.ino sketch can be flashed to a microcontroller supported by the Arduino environment.
 
+```julia
+using LibSerialPort
+
+# Modify these as needed
+name = "/dev/ttyS0"
+baudrate = 115200
+
+# Snippet from examples/mwe.jl
+LibSerialPort.open(portname, baudrate) do sp
+	sleep(2)
+
+	if bytesavailable(sp) > 0
+    	println(String(read(sp)))
+	end
+
+    write(sp, "hello\n")
+    sleep(0.1)
+    println(readline(sp))
+end
+```
 
 The tests are also worth looking at for demonstration of i/o and configuration. They can be run via `julia test/runtests.jl <address> <baudrate>`. Unless the address of your device matches that in runtests.jl, doing `pkg> test LibSerialPort` will fail. This problem would be addressed by [support for args](https://github.com/JuliaLang/Pkg.jl/issues/518) in the Pkg REPL.
 
 Note that on Windows, returning an OS-level port handle is not yet supported.
-
-### Reading with timeouts
-
-Methods for `readline` and `readuntil` are exported that allow for a timeout in seconds.
-
-i.e.
-```julia
-LibSerialPort.open(port, 115200) do s
-    write(s, "input")
-    ret = readline(s, 1.0) #try to readline with a 1 second timeout
-    @show ret
-end
-```
-
-```julia
-LibSerialPort.open(port, 115200) do s
-    write(s, "input")
-    ret = readuntil(s, 'x', 1.0) #try to readuntil char `x` with a 1 second timeout
-    @show ret
-end
-```

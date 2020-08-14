@@ -26,60 +26,48 @@ export
     SP_ERR_FAIL,
     SP_ERR_MEM,
     SP_ERR_SUPP,
-
     SP_MODE_READ,
     SP_MODE_WRITE,
     SP_MODE_READ_WRITE,
-
     SP_EVENT_RX_READY,
     SP_EVENT_TX_READY,
     SP_EVENT_ERROR,
-
     SP_BUF_INPUT,
     SP_BUF_OUTPUT,
     SP_BUF_BOTH,
-
     SP_PARITY_INVALID,
     SP_PARITY_NONE,
     SP_PARITY_ODD,
     SP_PARITY_EVEN,
     SP_PARITY_MARK,
     SP_PARITY_SPACE,
-
     SP_RTS_INVALID,
     SP_RTS_OFF,
     SP_RTS_ON,
     SP_RTS_FLOW_CONTROL,
-
     SP_CTS_INVALID,
     SP_CTS_IGNORE,
     SP_CTS_FLOW_CONTROL,
-
     SP_DTR_INVALID,
     SP_DTR_OFF,
     SP_DTR_ON,
     SP_DTR_FLOW_CONTROL,
-
     SP_DSR_INVALID,
     SP_DSR_IGNORE,
     SP_DSR_FLOW_CONTROL,
-
     SP_XONXOFF_INVALID,
     SP_XONXOFF_DISABLED,
     SP_XONXOFF_IN,
     SP_XONXOFF_OUT,
     SP_XONXOFF_INOUT,
-
     SP_FLOWCONTROL_NONE,
     SP_FLOWCONTROL_XONXOFF,
     SP_FLOWCONTROL_RTSCTS,
     SP_FLOWCONTROL_DTRDSR,
-
     SP_SIG_CTS,
     SP_SIG_DSR,
     SP_SIG_DCD,
     SP_SIG_RI,
-
     SP_TRANSPORT_NATIVE,
     SP_TRANSPORT_USB,
     SP_TRANSPORT_BLUETOOTH,
@@ -168,16 +156,17 @@ export
     # Functions from high-level API
     list_ports,
     get_port_list,
+    get_port_settings,
     print_port_metadata,
     print_port_settings,
     set_speed,
     set_frame,
     set_flow_control,
     seteof,
-    reseteof
+    reseteof,
+    nonblocking_read
 
 include("wrap.jl")
 include("high-level-api.jl")
-include("utils.jl")
 
 end # LibSerialPort

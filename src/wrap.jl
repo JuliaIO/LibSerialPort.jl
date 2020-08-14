@@ -1,3 +1,5 @@
+
+# Julia types for the sp_port, sp_port_config, and sp_event_set structs
 struct SPPort end
 struct SPConfig end
 struct SPEventSet end
@@ -113,8 +115,8 @@ SPSignal(x::SPSignal) = SPSignal(Int(x))
 SPTransport(x::SPTransport) = SPTransport(Int(x))
 
 
-function handle_error(ret::SPReturn)
-    ret >= SP_OK && return ret
+function check(ret::SPReturn)
+    ret >= SP_OK && return Int(ret)
 
     msg = "libserialport returned $ret - "
 
@@ -139,8 +141,13 @@ end
 # enum sp_return sp_get_port_by_name(const char *portname, struct sp_port **port_ptr);
 function sp_get_port_by_name(portname::AbstractString)
     portp = PortP()
-    handle_error(ccall((:sp_get_port_by_name, libserialport), SPReturn,
-                       (Ptr{UInt8}, PortP), portname, portp))
+    check(ccall(
+        (:sp_get_port_by_name, libserialport),
+        SPReturn,
+        (Ptr{UInt8}, PortP),
+        portname,
+        portp,
+    ))
     portp[]
 end
 
@@ -152,16 +159,14 @@ end
 # enum sp_return sp_list_ports(struct sp_port ***list_ptr);
 function sp_list_ports()
     ports = Ref{Ptr{Ptr{SPPort}}}()
-    handle_error(ccall((:sp_list_ports, libserialport),
-                       SPReturn, (Ref{Ptr{Ptr{SPPort}}},), ports))
+    check(ccall((:sp_list_ports, libserialport), SPReturn, (Ref{Ptr{Ptr{SPPort}}},), ports))
     return ports[]
 end
 
 # enum sp_return sp_copy_port(const struct sp_port *port, struct sp_port **copy_ptr);
 function sp_copy_port(port::Port)
     port_copy = PortP()
-    handle_error(ccall((:sp_copy_port, libserialport), SPReturn,
-                       (Port, PortP), port, port_copy))
+    check(ccall((:sp_copy_port, libserialport), SPReturn, (Port, PortP), port, port_copy))
     return port_copy[]
 end
 
@@ -172,13 +177,12 @@ end
 
 # enum sp_return sp_open(struct sp_port *port, enum sp_mode flags);
 function sp_open(port::Port, mode::SPMode)
-    handle_error(ccall((:sp_open, libserialport), SPReturn, (Port, SPMode),
-                       port, mode))
+    check(ccall((:sp_open, libserialport), SPReturn, (Port, SPMode), port, mode))
 end
 
 # enum sp_return sp_close(struct sp_port *port);
 function sp_close(port::Port)
-    handle_error(ccall((:sp_close, libserialport), SPReturn, (Port,), port))
+    check(ccall((:sp_close, libserialport), SPReturn, (Port,), port))
 end
 
 # char *sp_get_port_name(const struct sp_port *port);
@@ -208,14 +212,20 @@ function sp_get_port_usb_bus_address(port::Port)
 
     usb_bus = Ref{Cint}()
     usb_address = Ref{Cint}()
-    ret = ccall((:sp_get_port_usb_bus_address, libserialport), SPReturn,
-                (Port, Ref{Cint}, Ref{Cint}), port, usb_bus, usb_address)
+    ret = ccall(
+        (:sp_get_port_usb_bus_address, libserialport),
+        SPReturn,
+        (Port, Ref{Cint}, Ref{Cint}),
+        port,
+        usb_bus,
+        usb_address,
+    )
 
     if ret == SP_ERR_SUPP
         return -1, -1
     end
 
-    handle_error(ret)
+    check(ret)
     return usb_bus[], usb_address[]
 end
 
@@ -229,55 +239,62 @@ function sp_get_port_usb_vid_pid(port::Port)
 
     vid = Ref{Cint}()
     pid = Ref{Cint}()
-    ret = ccall((:sp_get_port_usb_vid_pid, libserialport), SPReturn,
-                (Port, Ref{Cint}, Ref{Cint}), port, vid, pid)
+    ret = ccall(
+        (:sp_get_port_usb_vid_pid, libserialport),
+        SPReturn,
+        (Port, Ref{Cint}, Ref{Cint}),
+        port,
+        vid,
+        pid,
+    )
 
     if ret == SP_ERR_SUPP
         return -1, -1
     end
 
-    handle_error(ret)
+    check(ret)
     return vid[], pid[]
 end
 
 # char *sp_get_port_usb_manufacturer(const struct sp_port *port);
 function sp_get_port_usb_manufacturer(port::Port)
-    m = ccall((:sp_get_port_usb_manufacturer, libserialport),
-              Ptr{UInt8}, (Port,), port)
+    m = ccall((:sp_get_port_usb_manufacturer, libserialport), Ptr{UInt8}, (Port,), port)
     manufacturer = (m != C_NULL) ? unsafe_string(m) : ""
 end
 
 # char *sp_get_port_usb_product(const struct sp_port *port);
 function sp_get_port_usb_product(port::Port)
-    p = ccall((:sp_get_port_usb_product, libserialport),
-              Ptr{UInt8}, (Port,), port)
+    p = ccall((:sp_get_port_usb_product, libserialport), Ptr{UInt8}, (Port,), port)
     product = (p != C_NULL) ? unsafe_string(p) : ""
 end
 
 # char *sp_get_port_usb_serial(const struct sp_port *port);
 function sp_get_port_usb_serial(port::Port)
-    s = ccall((:sp_get_port_usb_serial, libserialport),
-              Ptr{UInt8}, (Port,), port)
+    s = ccall((:sp_get_port_usb_serial, libserialport), Ptr{UInt8}, (Port,), port)
     serial = (s != C_NULL) ? unsafe_string(s) : ""
 end
 
 # char *sp_get_port_bluetooth_address(const struct sp_port *port);
 function sp_get_port_bluetooth_address(port::Port)
-    a = ccall((:sp_get_port_bluetooth_address, libserialport),
-              Ptr{UInt8}, (Port,), port)
+    a = ccall((:sp_get_port_bluetooth_address, libserialport), Ptr{UInt8}, (Port,), port)
     address = (a != C_NULL) ? unsafe_string(a) : ""
 end
 
 if Sys.iswindows()
-     # TODO: on Windows, result should be Ref{HANDLE}
+    # TODO: on Windows, result should be Ref{HANDLE}
     sp_get_port_handle(port::Port) = error("Returning port handle not supported on Windows")
 else
     # enum sp_return sp_get_port_handle(const struct sp_port *port, void *result_ptr);
     function sp_get_port_handle(port::Port)
         # For Linux and OS X
         result = Ref{Cint}(0)
-        handle_error(ccall((:sp_get_port_handle, libserialport), SPReturn,
-                           (Port, Ref{Cint}), port, result))
+        check(ccall(
+            (:sp_get_port_handle, libserialport),
+            SPReturn,
+            (Port, Ref{Cint}),
+            port,
+            result,
+        ))
         result[]
     end
 end
@@ -285,8 +302,7 @@ end
 # enum sp_return sp_new_config(struct sp_port_config **config_ptr);
 function sp_new_config()
     pc = ConfigP()
-    handle_error(ccall((:sp_new_config, libserialport), SPReturn, (ConfigP,),
-                       pc))
+    check(ccall((:sp_new_config, libserialport), SPReturn, (ConfigP,), pc))
     pc[]
 end
 
@@ -297,219 +313,341 @@ end
 
 function sp_get_config(port::Port)
     config = sp_new_config()
-    handle_error(ccall((:sp_get_config, libserialport), SPReturn,
-                       (Port, Config), port, config))
+    check(ccall((:sp_get_config, libserialport), SPReturn, (Port, Config), port, config))
     config
 end
 
 # enum sp_return sp_set_config(struct sp_port *port, const struct sp_port_config *config);
 function sp_set_config(port::Port, config::Config)
-    handle_error(ccall((:sp_set_config, libserialport), SPReturn,
-                       (Port, Config), port, config))
+    check(ccall((:sp_set_config, libserialport), SPReturn, (Port, Config), port, config))
 end
 
 # enum sp_return sp_set_baudrate(struct sp_port *port, int baudrate);
 function sp_set_baudrate(port::Port, baudrate::Integer)
-    handle_error(ccall((:sp_set_baudrate, libserialport), SPReturn,
-                       (Port, Cint), port, Cint(baudrate)))
+    check(ccall((:sp_set_baudrate, libserialport), SPReturn, (Port, Cint), port, baudrate))
 end
 
 # enum sp_return sp_get_config_baudrate(const struct sp_port_config *config, int *baudrate_ptr);
 function sp_get_config_baudrate(config::Config)
     baudrate = Ref{Cint}()
-    handle_error(ccall((:sp_get_config_baudrate, libserialport), SPReturn,
-                       (Config, Ref{Cint}), config, baudrate))
+    check(ccall(
+        (:sp_get_config_baudrate, libserialport),
+        SPReturn,
+        (Config, Ref{Cint}),
+        config,
+        baudrate,
+    ))
     baudrate[]
 end
 
 # enum sp_return sp_set_config_baudrate(struct sp_port_config *config, int baudrate);
 function sp_set_config_baudrate(config::Config, baudrate::Integer)
-    handle_error(ccall((:sp_set_config_baudrate, libserialport), SPReturn,
-                       (Config, Cint), config, Cint(baudrate)))
+    check(ccall(
+        (:sp_set_config_baudrate, libserialport),
+        SPReturn,
+        (Config, Cint),
+        config,
+        baudrate,
+    ))
 end
 
 # enum sp_return sp_set_bits(struct sp_port *port, int bits);
 function sp_set_bits(port::Port, bits::Integer)
-    @assert 5 <= bits <= 8
-    handle_error(ccall((:sp_set_bits, libserialport), SPReturn,
-                       (Port, Cint), port, Cint(bits)))
+    if !(5 <= bits <= 8)
+        throw(ArgumentError(
+            "libserialport allows 5-8 data bits/frame. Received $bits."))
+    end
+    check(ccall((:sp_set_bits, libserialport), SPReturn, (Port, Cint), port, bits))
 end
 
 # enum sp_return sp_get_config_bits(const struct sp_port_config *config, int *bits_ptr);
 function sp_get_config_bits(config::Config)
     bits = Ref{Cint}()
-    handle_error(ccall((:sp_get_config_bits, libserialport), SPReturn,
-                       (Config, Ref{Cint}), config, bits))
+    check(ccall(
+        (:sp_get_config_bits, libserialport),
+        SPReturn,
+        (Config, Ref{Cint}),
+        config,
+        bits,
+    ))
     bits[]
 end
 
 # enum sp_return sp_set_config_bits(struct sp_port_config *config, int bits);
 function sp_set_config_bits(config::Config, bits::Integer)
-    handle_error(ccall((:sp_set_config_bits, libserialport), SPReturn,
-                       (Config, Cint), config, Cint(bits)))
+    check(ccall(
+        (:sp_set_config_bits, libserialport),
+        SPReturn,
+        (Config, Cint),
+        config,
+        bits,
+    ))
 end
 
 # enum sp_return sp_set_parity(struct sp_port *port, enum sp_parity parity);
 function sp_set_parity(port::Port, parity::SPParity)
-    handle_error(ccall((:sp_set_parity, libserialport), SPReturn,
-                       (Port, SPParity), port, parity))
+    check(ccall((:sp_set_parity, libserialport), SPReturn, (Port, SPParity), port, parity))
 end
 
 # enum sp_return sp_get_config_parity(const struct sp_port_config *config, enum sp_parity *parity_ptr);
 function sp_get_config_parity(config::Config)
     parity = Ref{SPParity}()
-    handle_error(ccall((:sp_get_config_parity, libserialport), SPReturn,
-                       (Config, Ref{SPParity}), config, parity))
+    check(ccall(
+        (:sp_get_config_parity, libserialport),
+        SPReturn,
+        (Config, Ref{SPParity}),
+        config,
+        parity,
+    ))
     parity[]
 end
 
 # enum sp_return sp_set_config_parity(struct sp_port_config *config, enum sp_parity parity);
 function sp_set_config_parity(config::Config, parity::SPParity)
-    handle_error(ccall((:sp_set_config_parity, libserialport), SPReturn,
-                       (Config, SPParity), config, parity))
+    check(ccall(
+        (:sp_set_config_parity, libserialport),
+        SPReturn,
+        (Config, SPParity),
+        config,
+        parity,
+    ))
 end
 
 # enum sp_return sp_set_stopbits(struct sp_port *port, int stopbits);
 function sp_set_stopbits(port::Port, stopbits::Integer)
-    handle_error(ccall((:sp_set_stopbits, libserialport), SPReturn,
-                       (Port, Cint), port, Cint(stopbits)))
+    check(ccall((:sp_set_stopbits, libserialport), SPReturn, (Port, Cint), port, stopbits))
 end
 
 # enum sp_return sp_get_config_stopbits(const struct sp_port_config *config, int *stopbits_ptr);
 function sp_get_config_stopbits(config::Config)
     bits = Ref{Cint}()
-    handle_error(ccall((:sp_get_config_stopbits, libserialport), SPReturn,
-                       (Config, Ref{Cint}), config, bits))
+    check(ccall(
+        (:sp_get_config_stopbits, libserialport),
+        SPReturn,
+        (Config, Ref{Cint}),
+        config,
+        bits,
+    ))
     bits[]
 end
 
 # enum sp_return sp_set_config_stopbits(struct sp_port_config *config, int stopbits);
 function sp_set_config_stopbits(config::Config, stopbits::Integer)
-    handle_error(ccall((:sp_set_config_stopbits, libserialport), SPReturn,
-                       (Config, Cint), config, Cint(stopbits)))
+    check(ccall(
+        (:sp_set_config_stopbits, libserialport),
+        SPReturn,
+        (Config, Cint),
+        config,
+        stopbits,
+    ))
 end
 
 # enum sp_return sp_set_rts(struct sp_port *port, enum sp_rts rts);
 function sp_set_rts(port::Port, rts::SPrts)
-    handle_error(ccall((:sp_set_rts, libserialport), SPReturn,
-                       (Port, SPrts), port, rts))
+    check(ccall((:sp_set_rts, libserialport), SPReturn, (Port, SPrts), port, rts))
 end
 
 # enum sp_return sp_get_config_rts(const struct sp_port_config *config, enum sp_rts *rts_ptr);
 function sp_get_config_rts(config::Config)
     rts = Ref{SPrts}()
-    handle_error(ccall((:sp_get_config_rts, libserialport), SPReturn,
-                       (Config, Ref{SPrts}), config, rts))
+    check(ccall(
+        (:sp_get_config_rts, libserialport),
+        SPReturn,
+        (Config, Ref{SPrts}),
+        config,
+        rts,
+    ))
     rts[]
 end
 
 # enum sp_return sp_set_config_rts(struct sp_port_config *config, enum sp_rts rts);
 function sp_set_config_rts(config::Config, rts::SPrts)
-    handle_error(ccall((:sp_set_config_rts, libserialport), SPReturn,
-                       (Config, SPrts), config, SPrts(rts)))
+    check(ccall(
+        (:sp_set_config_rts, libserialport),
+        SPReturn,
+        (Config, SPrts),
+        config,
+        rts,
+    ))
 end
 
 # enum sp_return sp_set_cts(struct sp_port *port, enum sp_cts cts);
 function sp_set_cts(port::Port, cts::SPcts)
-    handle_error(ccall((:sp_set_cts, libserialport), SPReturn,
-                       (Port, SPcts), port, cts))
+    check(ccall((:sp_set_cts, libserialport), SPReturn, (Port, SPcts), port, cts))
 end
 
 # enum sp_return sp_get_config_cts(const struct sp_port_config *config, enum sp_cts *cts_ptr);
 function sp_get_config_cts(config::Config)
     cts = Ref{SPcts}()
-    handle_error(ccall((:sp_get_config_cts, libserialport), SPReturn,
-                       (Config, Ref{SPcts}), config, cts))
+    check(ccall(
+        (:sp_get_config_cts, libserialport),
+        SPReturn,
+        (Config, Ref{SPcts}),
+        config,
+        cts,
+    ))
     cts[]
 end
 
 # enum sp_return sp_set_config_cts(struct sp_port_config *config, enum sp_cts cts);
 function sp_set_config_cts(config::Config, cts::SPcts)
-    handle_error(ccall((:sp_set_config_cts, libserialport), SPReturn,
-                       (Config, SPcts), config, SPcts(cts)))
+    check(ccall(
+        (:sp_set_config_cts, libserialport),
+        SPReturn,
+        (Config, SPcts),
+        config,
+        cts,
+    ))
 end
 
 # enum sp_return sp_set_dtr(struct sp_port *port, enum sp_dtr dtr);
 function sp_set_dtr(port::Port, dtr::SPdtr)
-    handle_error(ccall((:sp_set_dtr, libserialport), SPReturn,
-                       (Port, SPdtr), port, dtr))
+    check(ccall((:sp_set_dtr, libserialport), SPReturn, (Port, SPdtr), port, dtr))
 end
 
 # enum sp_return sp_get_config_dtr(const struct sp_port_config *config, enum sp_dtr *dtr_ptr);
 function sp_get_config_dtr(config::Config)
     dtr = Ref{SPdtr}()
-    handle_error(ccall((:sp_get_config_dtr, libserialport), SPReturn,
-                       (Config, Ref{SPdtr}), config, dtr))
+    check(ccall(
+        (:sp_get_config_dtr, libserialport),
+        SPReturn,
+        (Config, Ref{SPdtr}),
+        config,
+        dtr,
+    ))
     dtr[]
 end
 
 # enum sp_return sp_set_config_dtr(struct sp_port_config *config, enum sp_dtr dtr);
 function sp_set_config_dtr(config::Config, dtr::SPdtr)
-    handle_error(ccall((:sp_set_config_dtr, libserialport), SPReturn,
-                       (Config, SPdtr), config, SPdtr(dtr)))
+    check(ccall(
+        (:sp_set_config_dtr, libserialport),
+        SPReturn,
+        (Config, SPdtr),
+        config,
+        dtr,
+    ))
 end
 
 # enum sp_return sp_set_dsr(struct sp_port *port, enum sp_dsr dsr);
 function sp_set_dsr(port::Port, dsr::SPdsr)
-    handle_error(ccall((:sp_set_dsr, libserialport), SPReturn,
-                       (Port, SPdsr), port, dsr))
+    check(ccall((:sp_set_dsr, libserialport), SPReturn, (Port, SPdsr), port, dsr))
 end
 
 # enum sp_return sp_get_config_dsr(const struct sp_port_config *config, enum sp_dsr *dsr_ptr);
 function sp_get_config_dsr(config::Config)
     dsr = Ref{SPdsr}()
-    handle_error(ccall((:sp_get_config_dsr, libserialport), SPReturn,
-                       (Config, Ref{SPdsr}), config, dsr))
+    check(ccall(
+        (:sp_get_config_dsr, libserialport),
+        SPReturn,
+        (Config, Ref{SPdsr}),
+        config,
+        dsr,
+    ))
     dsr[]
 end
 
 # enum sp_return sp_set_config_dsr(struct sp_port_config *config, enum sp_dsr dsr);
 function sp_set_config_dsr(config::Config, dsr::SPdsr)
-    handle_error(ccall((:sp_set_config_dsr, libserialport), SPReturn,
-                       (Config, SPdsr), config, SPdsr(dsr)))
+    check(ccall(
+        (:sp_set_config_dsr, libserialport),
+        SPReturn,
+        (Config, SPdsr),
+        config,
+        dsr,
+    ))
 end
 
 # enum sp_return sp_set_xon_xoff(struct sp_port *port, enum sp_xonxoff xon_xoff);
 function sp_set_xon_xoff(port::Port, xon_xoff::SPXonXoff)
-    handle_error(ccall((:sp_set_xon_xoff, libserialport), SPReturn,
-                       (Port, SPXonXoff), port, xon_xoff))
+    check(ccall(
+        (:sp_set_xon_xoff, libserialport),
+        SPReturn,
+        (Port, SPXonXoff),
+        port,
+        xon_xoff,
+    ))
 end
 
 # enum sp_return sp_get_config_xon_xoff(const struct sp_port_config *config, enum sp_xonxoff *xon_xoff_ptr);
 function sp_get_config_xon_xoff(config::Config)
     xon_xoff = Ref{SPXonXoff}()
-    handle_error(ccall((:sp_get_config_xon_xoff, libserialport), SPReturn,
-                       (Config, Ref{SPXonXoff}), config, xon_xoff))
+    check(ccall(
+        (:sp_get_config_xon_xoff, libserialport),
+        SPReturn,
+        (Config, Ref{SPXonXoff}),
+        config,
+        xon_xoff,
+    ))
     xon_xoff[]
 end
 
 # enum sp_return sp_set_config_xon_xoff(struct sp_port_config *config, enum sp_xonxoff xon_xoff);
 function sp_set_config_xon_xoff(config::Config, xon_xoff::SPXonXoff)
-    handle_error(ccall((:sp_set_config_xon_xoff, libserialport), SPReturn,
-                       (Config, SPXonXoff), config, SPXonXoff(xon_xoff)))
+    check(ccall(
+        (:sp_set_config_xon_xoff, libserialport),
+        SPReturn,
+        (Config, SPXonXoff),
+        config,
+        SPXonXoff(xon_xoff),
+    ))
 end
 
 # enum sp_return sp_set_config_flowcontrol(struct sp_port_config *config, enum sp_flowcontrol flowcontrol);
 function sp_set_config_flowcontrol(config::Config, flowcontrol::SPFlowControl)
-    handle_error(ccall((:sp_set_config_flowcontrol, libserialport), SPReturn,
-                       (Config, SPFlowControl), config, flowcontrol))
+    check(ccall(
+        (:sp_set_config_flowcontrol, libserialport),
+        SPReturn,
+        (Config, SPFlowControl),
+        config,
+        flowcontrol,
+    ))
 end
 
 # enum sp_return sp_set_flowcontrol(struct sp_port *port, enum sp_flowcontrol flowcontrol);
 function sp_set_flowcontrol(port::Port, flowcontrol::SPFlowControl)
-    handle_error(ccall((:sp_set_flowcontrol, libserialport), SPReturn,
-                       (Port, SPFlowControl), port, flowcontrol))
+    check(ccall(
+        (:sp_set_flowcontrol, libserialport),
+        SPReturn,
+        (Port, SPFlowControl),
+        port,
+        flowcontrol,
+    ))
 end
 
 # enum sp_return sp_blocking_read(struct sp_port *port, void *buf, size_t count, unsigned int timeout_ms);
+function sp_blocking_read(
+    port::Port,
+    buffer::Union{Ref{T},Ptr{T}},
+    nbytes::Integer,
+    timeout_ms::Integer,
+) where {T}
+    # If the read succeeds, the return value is the number of bytes read.
+    ret = check(ccall(
+        (:sp_blocking_read, libserialport),
+        SPReturn,
+        (Port, Ptr{UInt8}, Csize_t, Cuint),
+        port,
+        buffer,
+        sizeof(T) * nbytes,
+        timeout_ms,
+    ))
+    return ret
+end
 function sp_blocking_read(port::Port, nbytes::Integer, timeout_ms::Integer)
     buffer = zeros(UInt8, nbytes)
 
     # If the read succeeds, the return value is the number of bytes read.
-    ret = handle_error(ccall((:sp_blocking_read, libserialport), SPReturn,
-                             (Port, Ptr{UInt8}, Csize_t, Cuint),
-                             port, buffer, Csize_t(nbytes), Cuint(timeout_ms)))
-    return Int(ret), buffer
+    ret = check(ccall(
+        (:sp_blocking_read, libserialport),
+        SPReturn,
+        (Port, Ptr{UInt8}, Csize_t, Cuint),
+        port,
+        buffer,
+        nbytes,
+        timeout_ms,
+    ))
+    return ret, buffer
 end
 
 # enum sp_return sp_blocking_read_next(struct sp_port *port, void *buf, size_t count, unsigned int timeout_ms);
@@ -517,28 +655,59 @@ function sp_blocking_read_next(port::Port, nbytes::Integer, timeout_ms::Integer)
     buffer = zeros(UInt8, nbytes)
 
     # If the read succeeds, the return value is the number of bytes read.
-    ret = handle_error(ccall((:sp_blocking_read_next, libserialport), SPReturn,
-                             (Port, Ptr{UInt8}, Csize_t, Cuint),
-                             port, buffer, Csize_t(nbytes), Cuint(timeout_ms)))
-    return Int(ret), buffer
+    ret = check(ccall(
+        (:sp_blocking_read_next, libserialport),
+        SPReturn,
+        (Port, Ptr{UInt8}, Csize_t, Cuint),
+        port,
+        buffer,
+        nbytes,
+        timeout_ms,
+    ))
+    return ret, buffer
 end
 
 # enum sp_return sp_nonblocking_read(struct sp_port *port, void *buf, size_t count);
+function sp_nonblocking_read(
+    port::Port,
+    buffer::Union{Ref{T},Ptr{T}},
+    nbytes::Integer,
+) where {T}
+    check(ccall(
+        (:sp_nonblocking_read, libserialport),
+        SPReturn,
+        (Port, Ptr{UInt8}, Csize_t),
+        port,
+        buffer,
+        sizeof(T) * nbytes,
+    ))
+end
 function sp_nonblocking_read(port::Port, nbytes::Integer)
     buffer = zeros(UInt8, nbytes)
 
     # If the read succeeds, the return value is the number of bytes read.
-    ret = handle_error(ccall((:sp_nonblocking_read, libserialport), SPReturn,
-                             (Port, Ptr{UInt8}, Csize_t),
-                             port, buffer, Csize_t(nbytes)))
-    return Int(ret), buffer
+    ret = check(ccall(
+        (:sp_nonblocking_read, libserialport),
+        SPReturn,
+        (Port, Ptr{UInt8}, Csize_t),
+        port,
+        buffer,
+        Csize_t(nbytes),
+    ))
+    return ret, buffer
 end
 
 # enum sp_return sp_blocking_write(struct sp_port *port, const void *buf, size_t count, unsigned int timeout_ms);
 function sp_blocking_write(port::Port, buffer::Array{UInt8}, timeout_ms::Integer)
-    handle_error(ccall((:sp_blocking_write, libserialport), SPReturn,
-                       (Port, Ptr{UInt8}, Csize_t, Cuint),
-                       port, pointer(buffer), length(buffer), timeout_ms))
+    check(ccall(
+        (:sp_blocking_write, libserialport),
+        SPReturn,
+        (Port, Ptr{UInt8}, Csize_t, Cuint),
+        port,
+        pointer(buffer),
+        length(buffer),
+        timeout_ms,
+    ))
 end
 
 """
@@ -565,24 +734,49 @@ requested number of bytes or raise an `ErrorException`. In the event of an
 error there is no way to determine how many bytes were sent before the
 error occured.
 """
-function sp_blocking_write(port::Port, buffer::Union{Ref{T},Ptr{T}}, n::Integer = 1,
-                           timeout_ms::Integer = 0) where T
-    handle_error(ccall((:sp_blocking_write, libserialport), SPReturn,
-                       (Port, Ptr{UInt8}, Csize_t, Cuint),
-                       port, buffer, sizeof(T) * n, timeout_ms))
+function sp_blocking_write(
+    port::Port,
+    buffer::Union{Ref{T},Ptr{T}},
+    n::Integer = 1,
+    timeout_ms::Integer = 0,
+) where {T}
+    # If successful, the return value is the number of bytes written.
+    ret = check(ccall(
+        (:sp_blocking_write, libserialport),
+        SPReturn,
+        (Port, Ptr{UInt8}, Csize_t, Cuint),
+        port,
+        buffer,
+        sizeof(T) * n,
+        timeout_ms,
+    ))
+    return ret
 end
 
 function sp_blocking_write(port::Port, buffer::String, timeout_ms::Integer)
-    handle_error(ccall((:sp_blocking_write, libserialport), SPReturn,
-                       (Port, Ptr{UInt8}, Csize_t, Cuint),
-                       port, buffer, length(buffer), timeout_ms))
+    # If successful, the return value is the number of bytes written.
+    ret = check(ccall(
+        (:sp_blocking_write, libserialport),
+        SPReturn,
+        (Port, Ptr{UInt8}, Csize_t, Cuint),
+        port,
+        buffer,
+        length(buffer),
+        timeout_ms,
+    ))
+    return ret
 end
 
 # enum sp_return sp_nonblocking_write(struct sp_port *port, const void *buf, size_t count);
 function sp_nonblocking_write(port::Port, buffer::Array{UInt8})
-    handle_error(ccall((:sp_nonblocking_write, libserialport), SPReturn,
-                       (Port, Ptr{UInt8}, Csize_t),
-                       port, pointer(buffer), length(buffer)))
+    check(ccall(
+        (:sp_nonblocking_write, libserialport),
+        SPReturn,
+        (Port, Ptr{UInt8}, Csize_t),
+        port,
+        pointer(buffer),
+        length(buffer),
+    ))
 end
 
 """
@@ -603,16 +797,30 @@ Returns the number of bytes written on success, or raises an `ErrorException`.
 The number of bytes returned may be any number from zero to the
 maximum that was requested.
 """
-function sp_nonblocking_write(port::Port, buffer::Union{Ptr{T},Ref{T}}, n::Integer = 1) where T
-    handle_error(ccall((:sp_nonblocking_write, libserialport), SPReturn,
-                       (Port, Ptr{UInt8}, Csize_t),
-                       port, buffer, n * sizeof(T)))
+function sp_nonblocking_write(
+    port::Port,
+    buffer::Union{Ptr{T},Ref{T}},
+    n::Integer = 1,
+) where {T}
+    check(ccall(
+        (:sp_nonblocking_write, libserialport),
+        SPReturn,
+        (Port, Ptr{UInt8}, Csize_t),
+        port,
+        buffer,
+        n * sizeof(T),
+    ))
 end
 
 function sp_nonblocking_write(port::Port, buffer::String)
-    handle_error(ccall((:sp_nonblocking_write, libserialport), SPReturn,
-                       (Port, Ptr{UInt8}, Csize_t),
-                       port, buffer, sizeof(buffer)))
+    check(ccall(
+        (:sp_nonblocking_write, libserialport),
+        SPReturn,
+        (Port, Ptr{UInt8}, Csize_t),
+        port,
+        buffer,
+        sizeof(buffer),
+    ))
 end
 
 # enum sp_return sp_input_waiting(struct sp_port *port);
@@ -620,8 +828,7 @@ end
 Returns the number of bytes in the input buffer or an error code.
 """
 function sp_input_waiting(port::Port)
-    handle_error(ccall((:sp_input_waiting, libserialport), SPReturn, (Port,),
-                       port))
+    check(ccall((:sp_input_waiting, libserialport), SPReturn, (Port,), port))
 end
 
 # enum sp_return sp_output_waiting(struct sp_port *port);
@@ -629,8 +836,7 @@ end
 Returns the number of bytes in the output buffer or an error code.
 """
 function sp_output_waiting(port::Port)
-    handle_error(ccall((:sp_output_waiting, libserialport), SPReturn, (Port,),
-                       port))
+    check(ccall((:sp_output_waiting, libserialport), SPReturn, (Port,), port))
 end
 
 # enum sp_return sp_flush(struct sp_port *port, enum sp_buffer buffers);
@@ -645,8 +851,7 @@ Supported values for `buffers`: `SP_BUF_INPUT`, `SP_BUF_OUTPUT`, `SP_BUF_BOTH`
 Returns SP_OK upon success or raises an `ErrorException` otherwise.
 """
 function sp_flush(port::Port, buffers::SPBuffer)
-    handle_error(ccall((:sp_flush, libserialport), SPReturn,
-                       (Port, SPBuffer), port, buffers))
+    check(ccall((:sp_flush, libserialport), SPReturn, (Port, SPBuffer), port, buffers))
 end
 
 # enum sp_return sp_drain(struct sp_port *port);
@@ -657,51 +862,74 @@ end
 Wait for buffered data to be transmitted.
 """
 function sp_drain(port::Port)
-    handle_error(ccall((:sp_drain, libserialport), SPReturn, (Port,), port))
+    check(ccall((:sp_drain, libserialport), SPReturn, (Port,), port))
 end
 
 # enum sp_return sp_new_event_set(struct sp_event_set **result_ptr);
 function sp_new_event_set()
     event_set = Ref{Ptr{SPEventSet}}()
-    handle_error(ccall((:sp_new_event_set, libserialport), SPReturn,
-                       (Ref{Ptr{SPEventSet}},), event_set))
+    check(ccall(
+        (:sp_new_event_set, libserialport),
+        SPReturn,
+        (Ref{Ptr{SPEventSet}},),
+        event_set,
+    ))
     event_set[]
 end
 
 # enum sp_return sp_add_port_events(struct sp_event_set *event_set, const struct sp_port *port, enum sp_event mask);
 function sp_add_port_events(event_set::Ref{SPEventSet}, port::Port, mask::SPEvent)
-    handle_error(ccall((:sp_add_port_events, libserialport), SPReturn,
-                       (Ref{SPEventSet}, Port, SPEvent), event_set, port, mask))
+    check(ccall(
+        (:sp_add_port_events, libserialport),
+        SPReturn,
+        (Ref{SPEventSet}, Port, SPEvent),
+        event_set,
+        port,
+        mask,
+    ))
 end
 
 # enum sp_return sp_wait(struct sp_event_set *event_set, unsigned int timeout_ms);
 function sp_wait(event_set::Ref{SPEventSet}, timeout_ms::Integer)
-    handle_error(ccall((:sp_wait, libserialport), SPReturn,
-                       (Ref{SPEventSet}, Cuint), event_set, timeout_ms))
+    check(ccall(
+        (:sp_wait, libserialport),
+        SPReturn,
+        (Ref{SPEventSet}, Cuint),
+        event_set,
+        timeout_ms,
+    ))
 end
 
 # void sp_free_event_set(struct sp_event_set *event_set);
 function sp_free_event_set(event_set::Ref{SPEventSet})
-    handle_error(ccall((:sp_free_event_set, libserialport), SPReturn,
-                       (Ref{SPEventSet},), event_set))
+    check(ccall(
+        (:sp_free_event_set, libserialport),
+        SPReturn,
+        (Ref{SPEventSet},),
+        event_set,
+    ))
 end
 
 # enum sp_return sp_get_signals(struct sp_port *port, enum sp_signal *signal_mask);
 function sp_get_signals(port::Port, signal_mask::Ref{SPSignal})
-    handle_error(ccall((:sp_get_signals, libserialport), SPReturn,
-                       (Port, Ref{SPSignal}), port, signal_mask))
+    check(ccall(
+        (:sp_get_signals, libserialport),
+        SPReturn,
+        (Port, Ref{SPSignal}),
+        port,
+        signal_mask,
+    ))
     signal_mask[]
 end
 
 # enum sp_return sp_start_break(struct sp_port *port);
 function sp_start_break(port::Port)
-    handle_error(ccall((:sp_start_break, libserialport), SPReturn, (Port,),
-                       port))
+    check(ccall((:sp_start_break, libserialport), SPReturn, (Port,), port))
 end
 
 # enum sp_return sp_end_break(struct sp_port *port);
 function sp_end_break(port::Port)
-    handle_error(ccall((:sp_end_break, libserialport), SPReturn, (Port,), port))
+    check(ccall((:sp_end_break, libserialport), SPReturn, (Port,), port))
 end
 
 # int sp_last_error_code(void);

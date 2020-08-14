@@ -1,11 +1,16 @@
 #=
-Run test locally using
-$ julia test/runtests.jl /dev/ttyXYZ
+These tests require a serial device to echo bytes written from the host computer.
 
-/dev/ttyXYZ can be:
-/dev/ttyS0  (for Travis)
-/dev/ttyS4
-/dev/ttyUSB0
+For example, these hardware configurations should work:
+ - A standalone USB-to-UART adapter (e.g. FTDI FT232) in loopback mode (TX and RX pins jumped).
+ - A USB-to-serial equipped, arduino-compatible microcontroller running examples/serial_example.ino.
+ - The USB-to-serial chip on some microcontroller boards can be used directly, bypassing the micro.
+   For example, an Arduino UNO R3 can be connected via USB with RESET grounded and TX wired to RX.
+
+Run the tests locally using
+$ julia test/runtests.jl <port address> <baudrate>
+
+LibSerialPort.list_ports() may help with finding the correct port address.
 =#
 
 using LibSerialPort
@@ -17,7 +22,7 @@ if haskey(ENV, "CI")
     end
 else
     if length(ARGS) == 0
-        port = "/dev/ttyS0"  # /dev/ttyS4 /dev/ttyUSB0
+        port = "/dev/ttyS0"
     else
         port = ARGS[1]
     end
@@ -37,21 +42,5 @@ else
             @test test_high_level_api(port, baudrate) == nothing
         end
 
-        @testset "Reading with timeouts" begin
-            LibSerialPort.open(port, 115200) do s
-                #Tests assume serial port being tested won't output anything after being flushed
-                #TODO: Find a better way to test this
-                sp_flush(s, SP_BUF_BOTH)
-                @test readline(s, 1.0) == "" #readline with a 1 second timeout
-                @test readuntil(s, 'a', 1.0) == "" #readuntil 'a' with a 1 second timeout
-            end
-        end
-
-        # console.jl runs forever, thus isn't amenable to unit testing
-        # @testset "Examples" begin
-        #     include("../examples/console.jl")
-        #     @test console() == nothing
-        #     @test console(port, baudrate) == nothing
-        # end
     end
 end

@@ -1,21 +1,13 @@
-int incomingByte = 0;   // for incoming serial data
-String cmd = "";        // Usage of Arduino's String class is OK for an example
-unsigned long writeInterval = 50;
-unsigned long timeMarker = millis();
+// Serial loopback example with a few testing options for LibSerialPort.jl
 
-void handleByte(byte b)
-{
-  if (b == '\r' || b == '\n')
-  {
-    Serial.print("Received ");
-    Serial.println(cmd);
-    cmd = "";
-  }
-  else
-  {
-    cmd += char(b);
-  }
-}
+// Use this to introduce latency in the response.
+unsigned long responseDelay = 0;
+
+// Use these to generate additional traffic (timestamped ADC values).
+bool write_adc = false;
+unsigned long writeInterval = 50;  // ms
+
+unsigned long timeMarker = millis();
 
 void setup()
 {
@@ -26,10 +18,10 @@ void loop()
 {
   if (Serial.available() > 0)
   {
-    incomingByte = Serial.read();
-    handleByte(incomingByte);
+    delay(responseDelay);
+    Serial.write(Serial.read());
   }
-  if (millis() - timeMarker > writeInterval)
+  if (write_adc && millis() - timeMarker > writeInterval)
   {
     timeMarker = millis();
     Serial.print(timeMarker);
