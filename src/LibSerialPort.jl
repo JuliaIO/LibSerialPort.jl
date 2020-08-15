@@ -162,6 +162,10 @@ export
     set_speed,
     set_frame,
     set_flow_control,
+    set_read_timeout,
+    set_write_timeout,
+    clear_read_timeout,
+    clear_write_timeout,
     seteof,
     reseteof,
     nonblocking_read

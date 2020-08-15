@@ -6,12 +6,27 @@ mutable struct SerialPort <: IO
     ref::Port
     is_eof::Bool
     is_open::Bool
-    read_timeout_ms::Int  # 0 to wait indefinitely, per sigrok libserialport interface
-    function SerialPort(ref, is_eof, is_open, read_timeout_ms)
-        sp = new(ref, is_eof, is_open, read_timeout_ms)
+
+    # cumulative timeout limits, passed on to blocking libserialport functions
+    # 0 means wait indefinitely, as per sigrok libserialport interface
+    read_timeout_ms::Cuint
+    write_timeout_ms::Cuint
+
+    function SerialPort(ref, is_eof, is_open)
+        sp = new(ref, is_eof, is_open, 0, 0)
         finalizer(destroy!, sp)
         return sp
     end
+end
+
+
+"""
+A `Timeout` exception is thrown by blocking read or write functions
+when the cumulative blocking time since that last call to
+`set_read_timeout(t)` or `set_write_timeout(t)` has exceeded `t`
+seconds.
+"""
+struct Timeout <: Exception
 end
 
 
@@ -20,7 +35,7 @@ end
 
 Constructor for the `SerialPort` object.
 """
-SerialPort(portname::AbstractString) = SerialPort(sp_get_port_by_name(portname), false, false, 0)
+SerialPort(portname::AbstractString) = SerialPort(sp_get_port_by_name(portname), false, false)
 
 
 """
@@ -330,6 +345,98 @@ sp_output_waiting(sp::SerialPort) = sp_output_waiting(sp.ref)
 sp_flush(sp::SerialPort, args...) = sp_flush(sp.ref, args...)
 sp_drain(sp::SerialPort)          = sp_drain(sp.ref)
 
+"""
+    set_read_timeout(sp::SerialPort, seconds::Real)
+
+Set a read timeout limit of `t` > 0 seconds for the total (cumulative)
+time that subsequently called blocking read functions can wait before
+a `Timeout` exception is thrown.
+
+# Example
+
+```
+sp=LibSerialPort.open("/dev/ttyUSB0", 115200)
+# wait until either two lines have been received
+# or 10 seconds have elapsed
+set_read_timeout(sp, 10)
+try
+    line1 = readuntil(sp, '\n')
+    line2 = readuntil(sp, '\n')
+catch e
+    if isa(e, LibSerialPort.Timeout)
+        println("Too late!")
+    else
+        rethrow()
+    end
+end
+clear_read_timeout(sp)
+```
+
+See also: [`clear_read_timeout`](@ref), [`set_write_timeout`](@ref)
+"""
+function set_read_timeout(sp::SerialPort, seconds::Real)
+    @assert seconds > 0
+    sp.read_timeout_ms =  seconds * 1000;
+    return
+end
+
+"""
+    set_write_timeout(sp::SerialPort, seconds::Real)
+
+Set a write timeout limit of `t` > 0 seconds for the total (cumulative)
+time that subsequently called blocking read functions can wait before
+a `Timeout` exception is thrown.
+
+# Example
+
+```
+sp=LibSerialPort.open("/dev/ttyUSB0", 300)
+# wait until either 4000 periods have been
+# passed on to the serial-port driver or
+# 10 seconds have elapsed
+set_write_timeout(sp, 10)
+try
+    for i=1:50 ; write(sp, '.' ^ 80); end
+catch e
+    if isa(e, LibSerialPort.Timeout)
+        println("This took too long!")
+    else
+        rethrow()
+    end
+end
+clear_write_timeout(sp)
+```
+
+See also: [`clear_write_timeout`](@ref), [`set_read_timeout`](@ref)
+"""
+function set_write_timeout(sp::SerialPort, seconds::Real)
+    @assert seconds > 0
+    sp.write_timeout_ms =  seconds * 1000;
+    return
+end
+
+"""
+    clear_read_timeout(sp::SerialPort)
+
+Cancel any previous read timeout, such that blocking read operations
+will now wait without any time limit.
+"""
+function clear_read_timeout(sp::SerialPort)
+    sp.read_timeout_ms = 0;
+    return
+end
+
+"""
+    clear_write_timeout(sp::SerialPort)
+
+Cancel any previous write timeout, such that blocking write
+operations will block without any time limit.
+"""
+function clear_write_timeout(sp::SerialPort)
+    sp.write_timeout_ms = 0;
+    return
+end
+
 # We define here only the basic methods for reading and writing
 # bytes. All other methods for reading/writing the canonical binary
 # representation of any type, and print() methods for writing
@@ -338,28 +445,59 @@ sp_drain(sp::SerialPort)          = sp_drain(sp.ref)
 
 function read(sp::SerialPort, ::Type{UInt8})
     byte_ref = Ref{UInt8}(0)
-    nbytes = sp_blocking_read(sp.ref, byte_ref, 1, sp.read_timeout_ms)
-
-    # TODO: how to handle timeouts?
-    # if nbytes == 0
-    #     println("read timeout")
-    # end
-    return byte_ref.x
+    unsafe_read(sp, byte_ref, 1)
+    return byte_ref[]
 end
 
 
 function unsafe_read(sp::SerialPort, p::Ptr{UInt8}, nb::UInt)
-    sp_blocking_read(sp.ref, p, nb, sp.read_timeout_ms)
+    if sp.read_timeout_ms > 0
+        starttime = time_ns()
+    end
+    nbytes = sp_blocking_read(sp.ref, p, nb, sp.read_timeout_ms)
+    if nbytes < nb
+        @assert sp.read_timeout_ms > 0
+        sp.read_timeout_ms = 0
+        throw(Timeout())
+    elseif sp.read_timeout_ms > 0
+        # how much of the timeout have we used up already?
+        elapsed_ms = (time_ns() - starttime + 999_999) ÷ 1_000_000
+        if sp.read_timeout_ms > elapsed_ms
+            sp.read_timeout_ms -= elapsed_ms
+        else
+            sp.read_timeout_ms = 0
+            throw(Timeout())
+        end
+    end
+    nothing
 end
 
 
 function write(sp::SerialPort, b::UInt8)
-    sp_blocking_write(sp.ref, Ref(b))
+    unsafe_write(sp, Ref(b), 1)
 end
 
 
 function unsafe_write(sp::SerialPort, p::Ptr{UInt8}, nb::UInt)
-    sp_blocking_write(sp.ref, p, nb)
+    if sp.write_timeout_ms > 0
+        starttime = time_ns()
+    end
+    nbytes = sp_blocking_write(sp.ref, p, nb, sp.write_timeout_ms)
+    if nbytes < nb
+        @assert sp.write_timeout_ms > 0
+        sp.write_timeout_ms = 0
+        throw(Timeout())
+    elseif sp.write_timeout_ms > 0
+        # how much of the timeout have we used up already?
+        elapsed_ms = (time_ns() - starttime + 999_999) ÷ 1_000_000
+        if sp.write_timeout_ms > elapsed_ms
+            sp.write_timeout_ms -= elapsed_ms
+        else
+            sp.write_timeout_ms = 0
+            throw(Timeout())
+        end
+    end
+    nbytes
 end
 
 
