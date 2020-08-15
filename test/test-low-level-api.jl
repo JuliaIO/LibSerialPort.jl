@@ -131,8 +131,7 @@ end
 This example demonstrates serial communication with one port. The default
 configuration is 115200-8-N-1, i.e. 115200 bps with 8 data bits, no parity check,
 and one stop bit. The baud rate is overridden on the command line with a
-second argument. Hardware and software flow control measures are disabled by
-default.
+second argument. Hardware and software flow control measures are disabled.
 """
 function test_low_level_api(args...)
 
@@ -159,6 +158,7 @@ function test_low_level_api(args...)
 
     sp_set_baudrate(port, baudrate)
     sp_set_bits(port, 8)
+    sp_set_flowcontrol(port, SP_FLOWCONTROL_NONE)
 
     sleep(2)
 
