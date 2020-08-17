@@ -14,6 +14,7 @@ LibSerialPort.list_ports() may help with finding the correct port address.
 =#
 
 using LibSerialPort
+using LibSerialPort.Lib
 using Test
 
 if haskey(ENV, "CI")
