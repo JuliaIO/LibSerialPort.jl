@@ -825,7 +825,7 @@ end
 
 # enum sp_return sp_input_waiting(struct sp_port *port);
 """
-Returns the number of bytes in the input buffer or an error code.
+Returns the number of bytes in the input buffer.
 """
 function sp_input_waiting(port::Port)
     check(ccall((:sp_input_waiting, libserialport), SPReturn, (Port,), port))
@@ -833,7 +833,7 @@ end
 
 # enum sp_return sp_output_waiting(struct sp_port *port);
 """
-Returns the number of bytes in the output buffer or an error code.
+Returns the number of bytes in the output buffer.
 """
 function sp_output_waiting(port::Port)
     check(ccall((:sp_output_waiting, libserialport), SPReturn, (Port,), port))
@@ -844,11 +844,19 @@ end
     sp_flush(port::Port, buffers::SPBuffer)
     sp_flush(port::SerialPort, buffers::SPBuffer)
 
-Flush serial port buffers. Data in the selected buffer(s) is discarded.
+Discard data in the selected serial-port buffer(s).
 
 Supported values for `buffers`: `SP_BUF_INPUT`, `SP_BUF_OUTPUT`, `SP_BUF_BOTH`
 
-Returns SP_OK upon success or raises an `ErrorException` otherwise.
+Returns `SP_OK` upon success or raises an `ErrorException` otherwise.
+
+!!! note
+
+    Not to be confused with `Base.flush`, which writes out buffered
+    data rather than discarding it: the underlying `libserialport` C
+    library unfortunately uses the verb “flush” differently from its
+    normal meaning for `Base.IO` (`sp_drain` provides the latter
+    in this library).
 """
 function sp_flush(port::Port, buffers::SPBuffer)
     check(ccall((:sp_flush, libserialport), SPReturn, (Port, SPBuffer), port, buffers))

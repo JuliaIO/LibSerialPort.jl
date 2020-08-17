@@ -31,17 +31,18 @@ end
 
 
 """
-`sp = SerialPort(portname::AbstractString)`
+    SerialPort(portname::AbstractString)
 
-Constructor for the `SerialPort` object.
+Constructs and returns a `SerialPort` object.
 """
 SerialPort(portname::AbstractString) = SerialPort(sp_get_port_by_name(portname), false, false)
 
 
 """
-`destroy!(sp::SerialPort)`
+    destroy!(sp::SerialPort)
 
-Destructor for the `SerialPort` object.
+Close the `SerialPort` object and deallocate associated memory
+objects.
 """
 function destroy!(sp::SerialPort)
     close(sp)
@@ -50,47 +51,62 @@ end
 
 
 """
-`isopen(sp::SerialPort) -> Bool`
+    isopen(sp::SerialPort) -> Bool
 
-Determine whether a SerialPort object is open.
+Determine whether a `SerialPort` object is open.
 """
 isopen(sp::SerialPort) = sp.is_open
 
 
 """
-`eof(sp::SerialPort) -> Bool`
+    eof(sp::SerialPort) -> Bool
 
-Return EOF state (`true` or `false`)`.
+Return the “end-of-file” state (`true` or `false`). Since serial ports
+do not have any standard mechanism for signalling the end of a
+transmitted file, this is just a dummy function that returns whatever
+Boolean value `eof` was previously set with `seteof(sp, eof)`.
+Returns `false` by default.
 """
 eof(sp::SerialPort) = sp.is_eof
 
 
 """
-`set_speed(sp::SerialPort,bps::Integer)`
+    set_speed(sp::SerialPort, baudrate::Integer)
 
-Set connection speed of `sp` in bits per second. Raise an
-`ErrorException` if `bps` is not a valid/supported value.
+Set the data signalling rate, or the reciprocal duration of one data
+bit, in bits/s. The set of values supported depends on the UART
+hardware, but typically includes e.g. 9600, 19200 and 115200.
+
+Raise an `ErrorException` if `bps` is not a value supported by the
+driver or hardware.
 """
-function set_speed(sp::SerialPort, bps::Integer)
-     sp_set_baudrate(sp.ref, bps)
+function set_speed(sp::SerialPort, baudrate::Integer)
+     sp_set_baudrate(sp.ref, baudrate)
      return nothing
 end
 
 
 """
-`set_frame(sp::SerialPort [, ndatabits::Integer, parity::SPParity, nstopbits::Integer])`
+    set_frame(sp::SerialPort;
+              ndatabits::Integer = 8,
+              parity::SPParity   = SP_PARITY_NONE,
+              nstopbits::Integer = 1)
 
-Configure packet framing. Defaults to the most common "8N1" scheme. See
-https://en.wikipedia.org/wiki/Universal_asynchronous_receiver/transmitter#Data_framing
+Configure the [data
+framing](https://en.wikipedia.org/wiki/Universal_asynchronous_receiver/transmitter#Data_framing)
+parameters. Defaults to the very common “8N1” scheme, which consists
+of a start bit followed by eight data bits, no parity bit, one stop
+bit.
+
 for more details.
 
-`ndatabits` is the number of data bits which is `8` in the common "8N1" sceme.
+* `ndatabits` is the number of data bits, which is `8` in the common "8N1" scheme
 
-The `parity` is set to none in the "8N1" sceme and can take the values:
-`SP_PARITY_NONE`, `SP_PARITY_ODD`, `SP_PARITY_EVEN`, `SP_PARITY_MARK` and
-`SP_PARITY_SPACE`.
+* `parity` controls the presence and value of a party bit and can take
+  the values `SP_PARITY_NONE` (default), `SP_PARITY_ODD`,
+  `SP_PARITY_EVEN`, `SP_PARITY_MARK` and `SP_PARITY_SPACE`
 
-`nstopbits` is the number of stop bits, which is `1` by default.
+* `nstopbits` sets the number of stop bits, typically `1` (default) or `2`
 """
 function set_frame(sp::SerialPort;
     ndatabits::Integer=8,
@@ -105,25 +121,36 @@ end
 
 
 """
-`set_flow_control(sp::SerialPort [,rts::SPrts, cts::SPcts, dtr::SPdtr, dst::SPdsr, xonxoff::SPXonXoff])`
+    set_flow_control(sp::SerialPort;
+                     rts::SPrts = SP_RTS_OFF,
+                     cts::SPcts = SP_CTS_IGNORE,
+                     dtr::SPdtr = SP_DTR_OFF,
+                     dst::SPdsr = SP_DSR_IGNORE,
+                     xonxoff::SPXonXoff = SP_XONXOFF_DISABLED)`
 
-Configure flow control settings. Many systems don't support all options.
+Configure the flow-control lines and method. Many systems don't support all options.
 If an unsupported option is requested, the library will return SP_ERR_SUPP.
 
-`rts` can take the values: `SP_RTS_OFF`, `SP_RTS_ON` and `SP_RTS_FLOW_CONTROL`
-and defaults to `SP_RTS_OFF`.
+* `rts` controls the output line _Ready To Send (RTS)_ and can take
+  the values `SP_RTS_OFF` (default), `SP_RTS_ON` and
+  `SP_RTS_FLOW_CONTROL`.
 
-`cts` can take the values: `SP_CTS_IGNORE` and `SP_CTS_FLOW_CONTROL`. Its
-default is `SP_CTS_IGNORE`.
+* `cts` controls the input line _Clear To Send (CTS)_ and can take the
+  values `SP_CTS_IGNORE` (default) and `SP_CTS_FLOW_CONTROL`
 
-`dtr` can take the values: `SP_DTR_OFF`, `SP_DTR_ON`, and `SP_DTR_FLOW_CONTROL`
-and defaults to `SP_DTR_OFF`.
+* `dtr` controls the output line _Data Terminal Ready (DTR)_ and can
+  take the values `SP_DTR_OFF` (default), `SP_DTR_ON`, and
+  `SP_DTR_FLOW_CONTROL`
 
-`dsr` can take the values: `SP_DSR_IGNORE` and `SP_DSR_FLOW_CONTROL`. Its
-default is SP_DSR_IGNORE`.
+* `dsr` controls the input line _Data Set Ready (DSR)_ and can take
+  the values `SP_DSR_IGNORE` (default) and `SP_DSR_FLOW_CONTROL`
 
-`xonxoff` can take values: `SP_XONXOFF_DISABLED`, `SP_XONXOFF_IN`,
-`SP_XONXOFF_OUT`, and `SP_XONXOFF_INOUT` and defaults to `SP_XONXOFF_DISABLED`.
+* `xonxoff` controls whether [software flow
+  control](https://en.wikipedia.org/wiki/Software_flow_control) via the
+  control bytes XOFF (pause transmission, 0x13, Ctrl-S) and XON (resume
+  transmission, 0x11, Ctrl-Q) is active, and in which direction; it can
+  take the values: `SP_XONXOFF_DISABLED` (default), `SP_XONXOFF_IN`,
+  `SP_XONXOFF_OUT`, and `SP_XONXOFF_INOUT`
 """
 function set_flow_control(sp::SerialPort;
     rts::SPrts=SP_RTS_OFF,
@@ -145,7 +172,7 @@ end
 
 
 """
-`listports([nports_guess::Integer])`
+    list_ports([nports_guess::Integer])`
 
 Print a list of currently visible ports, along with some basic info.
 
@@ -168,7 +195,7 @@ end
 
 
 """
-`get_port_list([nports_guess::Integer])`
+    get_port_list([nports_guess::Integer])
 
 Return a vector of currently visible ports.
 
@@ -187,7 +214,7 @@ end
 
 
 """
-`print_port_metadata(sp::SerialPort [,show_config::Bool])
+    print_port_metadata(sp::SerialPort; show_config::Bool = true)
 
 Print info found for this port.
 Note: port should be open to obtain a valid FD/handle before accessing fields.
@@ -251,7 +278,7 @@ function get_port_settings(port::LibSerialPort.Port)
 end
 
 """
-`get_port_settings(sp::SerialPort)`
+    get_port_settings(sp::SerialPort)
 
 Return port settings for `sp` as a dictionary.
 """
@@ -259,7 +286,7 @@ get_port_settings(sp::SerialPort) = get_port_settings(sp.ref)
 
 
 """
-`print_port_settings(sp::SerialPort)`
+    print_port_settings(sp::SerialPort)
 
 Print port settings for `sp`.
 """
@@ -287,12 +314,13 @@ end
 
 
 """
-`open(sp::SerialPort [, mode::SPMode])`
+    open(sp::SerialPort; mode::SPMode = SP_MODE_READ_WRITE)
 
 Open the serial port `sp`.
 
-`mode` can take the values: `SP_MODE_READ`, `SP_MODE_WRITE`, and
-`SP_MODE_READ_WRITE`
+`mode` selects in which direction of transmission access is requested
+and can take the values: `SP_MODE_READ`, `SP_MODE_WRITE`, and
+`SP_MODE_READ_WRITE` (default).
 """
 function open(sp::SerialPort; mode::SPMode=SP_MODE_READ_WRITE)
     sp_open(sp.ref, mode)
@@ -302,15 +330,33 @@ end
 
 
 """
-`open(portname::AbstractString,baudrate::Integer [,mode::SPMode,
-    ndatabits::Integer,parity::SPParity,nstopbits::Integer])`
+    open(portname::AbstractString, baudrate::Integer;
+         mode::SPMode, ndatabits::Integer,
+         parity::SPParity, nstopbits::Integer)
 
-construct, configure and open a `SerialPort` object.
+Construct, configure and open a `SerialPort` object.
 
-For details on posssible settings see `?set_flow_control` and `?set_frame`.
+* `portname` is the name of the serial port to open. Typical port
+  names available depend on the operating system. Some valid names are
+  listed by [`get_port_list()`](@ref), but there are can be others and aliases:
+* * Linux: `"/dev/ttyS0"`, `"/dev/ttyUSB0"`, `"/dev/serial/by-id/..."`
+* * macOS: `"/dev/cu.usbserial-0001"`, `"/dev/cu.Bluetooth-Incoming-Port"`
+* * Windows: `"COM1"`, `"COM2"`,`"COM3"`
+* `baudrate` is the data signalling rate, or the reciprocal duration
+  of one data bit, in bits/s. The set of values supported depends on
+  the UART hardware, but typically includes e.g. 9600, 19200 and 115200.
+* `mode` selects in which direction of transmission access is
+  requested and can take the values: `SP_MODE_READ`, `SP_MODE_WRITE`,
+  and `SP_MODE_READ_WRITE` (default).
+
+The parameters `ndatabits`, `parity` and `nstopbits` have the same
+meaning as in [`set_frame`](@ref) and default to the common “8N1”
+frame format (8 data bits, no parity, one stop bit).
+
+To set the flow-control method, use [`set_flow_control`](@ref).
 """
 function open(portname::AbstractString,
-              bps::Integer;
+              baudrate::Integer;
               mode::SPMode=SP_MODE_READ_WRITE,
               ndatabits::Integer=8,
               parity::SPParity=SP_PARITY_NONE,
@@ -318,14 +364,14 @@ function open(portname::AbstractString,
     sp = SerialPort(portname)
     sp_open(sp.ref, mode)
     sp.is_open = true
-    set_speed(sp, bps)
+    set_speed(sp, baudrate)
     set_frame(sp, ndatabits=ndatabits, parity=parity, nstopbits=nstopbits)
     return sp
 end
 
 
 """
-close(sp::SerialPort)
+    close(sp::SerialPort)
 
 Close the serial port `sp`.
 """
@@ -502,9 +548,9 @@ end
 
 
 """
-`seteof(sp::SerialPort, state::Bool)`
+    seteof(sp::SerialPort, state::Bool)
 
-Set EOF of `sp` to `state`
+Set the return value of `eof(sp)` to `state`.
 """
 function seteof(sp::SerialPort, state::Bool)
     sp.is_eof = state
@@ -513,20 +559,30 @@ end
 
 
 """
-`reseteof(sp::SerialPort, state::Bool)`
+    reseteof(sp::SerialPort)
 
-Reset EOF of `sp` to `false`
+Set the return value of `eof(sp)` to its default of `false`
 """
 reseteof(sp::SerialPort) = seteof(sp, false)
 
 
-# Julia's Base module defines `read(s::IO, nb::Integer = typemax(Int))`.
-# Override the default `nb` to a more useful value for this context.
+"""
+    read(sp::SerialPort)
+
+Return all incoming bytes currently available in the UART as a
+Vector{UInt8}.
+
+!!! note
+
+    Julia's Base module defines `read(s::IO, nb::Integer = typemax(Int))`.
+    This method overrides the default value `nb` to `bytesavailable(sp)`,
+    which is useful for this context.
+"""
 read(sp::SerialPort) = read(sp, bytesavailable(sp))
 
 
 """
-`nonblocking_read(sp::SerialPort)`
+    nonblocking_read(sp::SerialPort)
 
 Read everything from the specified serial ports `sp` input buffer, one byte at
 a time, until it is empty. Returns a `String`.
@@ -543,9 +599,8 @@ end
 
 
 """
-`bytesavailable(sp::SerialPort)`
+    bytesavailable(sp::SerialPort)
 
-Gets the number of bytes waiting in the input buffer.
+Return the number of bytes waiting in the input buffer.
 """
 bytesavailable(sp::SerialPort) = sp_input_waiting(sp.ref)
-
