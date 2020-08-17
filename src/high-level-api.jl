@@ -334,7 +334,7 @@ function close(sp::SerialPort)
         sp_close(sp.ref)
         sp.is_open = false
     end
-    return sp
+    return
 end
 
 # fixes https://github.com/JuliaIO/LibSerialPort.jl/issues/53
