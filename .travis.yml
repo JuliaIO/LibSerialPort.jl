@@ -16,6 +16,7 @@ julia:
 jobs:
   allow_failures:
     - julia: nightly
+    - arch: arm64
   exclude:
     - os: osx
       arch: x86
