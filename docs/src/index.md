@@ -40,7 +40,7 @@ sp_output_waiting
 
 Many of the read/write methods defined in `Base` that operate on an
 object of type `IO` can also be used with objects of type
-`SerialPort`. Therefore we repead the documentations of some of these
+`SerialPort`. Therefore we repeat the documentation of some of these
 here. (Note that some of the following docstings also refer to other
 methods that are not applicable to `SerialPort`.)
 
