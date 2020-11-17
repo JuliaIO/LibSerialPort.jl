@@ -96,7 +96,7 @@ export
     SP_XONXOFF_OUT,
     SP_XONXOFF_INOUT
 
-import Base: isopen, open, close, write, unsafe_write, flush,
+import Base: isopen, close, write, unsafe_write, flush,
     read, unsafe_read, bytesavailable, eof
 
 
