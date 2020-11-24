@@ -504,8 +504,8 @@ sp=LibSerialPort.open("/dev/ttyUSB0", 115200)
 # or 10 seconds have elapsed
 set_read_timeout(sp, 10)
 try
-    line1 = readuntil(sp, '\n')
-    line2 = readuntil(sp, '\n')
+    line1 = readuntil(sp, '\\n')
+    line2 = readuntil(sp, '\\n')
 catch e
     if isa(e, LibSerialPort.Timeout)
         println("Too late!")
