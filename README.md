@@ -24,7 +24,7 @@ The examples/ directory contains a simple serial console for the command line. T
 using LibSerialPort
 
 # Modify these as needed
-name = "/dev/ttyS0"
+portname = "/dev/ttyS0"
 baudrate = 115200
 
 # Snippet from examples/mwe.jl
