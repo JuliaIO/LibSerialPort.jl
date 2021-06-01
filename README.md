@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/JuliaIO/LibSerialPort.jl.svg?branch=master)](https://travis-ci.com/JuliaIO/LibSerialPort.jl)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaIO.github.io/LibSerialPort.jl/stable) [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaIO.github.io/LibSerialPort.jl/dev) [![Build Status](https://travis-ci.com/JuliaIO/LibSerialPort.jl.svg?branch=master)](https://travis-ci.com/JuliaIO/LibSerialPort.jl)
 
 # LibSerialPort.jl
 
@@ -24,7 +24,7 @@ The examples/ directory contains a simple serial console for the command line. T
 using LibSerialPort
 
 # Modify these as needed
-name = "/dev/ttyS0"
+portname = "/dev/ttyS0"
 baudrate = 115200
 
 # Snippet from examples/mwe.jl

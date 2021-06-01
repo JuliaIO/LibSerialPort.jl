@@ -26,15 +26,6 @@ jobs:
       arch: arm64
     - julia: nightly
       arch: arm64
-  include:
-    - stage: "Documentation"
-      julia: 1.5
-      os: linux
-      script:
-        - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd()));
-                                               Pkg.instantiate()'
-        - julia --project=docs/ docs/make.jl
-      after_success: skip
 
 before_install:
   # - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo chmod 666 /dev/tty*; fi

@@ -6,3 +6,7 @@ makedocs(
         prettyurls = get(ENV, "CI", nothing) == "true"
     )
 )
+
+deploydocs(
+    repo = "github.com/JuliaIO/LibSerialPort.jl.git",
+)

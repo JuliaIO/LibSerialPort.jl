@@ -48,6 +48,7 @@ methods that are not applicable to `SerialPort`.)
 Base.read(::IO, ::Any)
 Base.read!
 Base.readbytes!
+Base.readchomp
 Base.readavailable
 Base.readline
 Base.readlines
