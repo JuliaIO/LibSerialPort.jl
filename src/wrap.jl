@@ -276,6 +276,14 @@ SPSignal(x::SPSignal) = SPSignal(Int(x))
 SPTransport(x::SPTransport) = SPTransport(Int(x))
 
 
+"""
+A generic error to encapsulate any errors thrown when working with a
+a serial port from `LibSerialPort`. Allows for more accurate exception.
+"""
+struct SerialPortError <: Exception
+    msg::String
+end
+
 function check(ret::SPReturn)
     ret >= SP_OK && return Int(ret)
 
@@ -293,10 +301,10 @@ function check(ret::SPReturn)
     elseif ret == SP_ERR_SUPP
         msg *= "No support for the requested operation in the current OS, driver or device."
     else
-        error("Unknown SPReturn value")
+        throw(SerialPortError(("Unknown SPReturn value")))
     end
 
-    error(msg)
+    throw(SerialPortError((msg)))
 end
 
 # enum sp_return sp_get_port_by_name(const char *portname, struct sp_port **port_ptr);
