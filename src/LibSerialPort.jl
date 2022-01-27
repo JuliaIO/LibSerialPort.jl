@@ -31,7 +31,18 @@ module LibSerialPort
 
 include("wrap.jl")
 using .Lib   # low-level wrapper for the libserialport C API
-import .Lib: sp_flush, sp_drain, sp_output_waiting
+import .Lib.sp_output_waiting
+import .Lib.sp_flush
+import .Lib.sp_drain
+import .Lib.sp_get_port_description
+import .Lib.sp_get_port_transport
+import .Lib.sp_get_port_usb_bus_address
+import .Lib.sp_get_port_usb_vid_pid
+import .Lib.sp_get_port_usb_manufacturer
+import .Lib.sp_get_port_usb_product
+import .Lib.sp_get_port_usb_serial
+import .Lib.sp_get_port_bluetooth_address
+import .Lib.sp_get_port_handle
 
 export
     SerialPort,
@@ -488,6 +499,15 @@ end
 sp_output_waiting(sp::SerialPort) = sp_output_waiting(sp.ref)
 sp_flush(sp::SerialPort, args...) = sp_flush(sp.ref, args...)
 sp_drain(sp::SerialPort)          = sp_drain(sp.ref)
+sp_get_port_description(sp::SerialPort) = sp_get_port_description(sp.ref)
+sp_get_port_transport(sp::SerialPort) = sp_get_port_transport(sp.ref)
+sp_get_port_usb_bus_address(sp::SerialPort) = sp_get_port_usb_bus_address(sp.ref)
+sp_get_port_usb_vid_pid(sp::SerialPort) = sp_get_port_usb_vid_pid(sp.ref)
+sp_get_port_usb_manufacturer(sp::SerialPort) = sp_get_port_usb_manufacturer(sp.ref)
+sp_get_port_usb_product(sp::SerialPort) = sp_get_port_usb_product(sp.ref)
+sp_get_port_usb_serial(sp::SerialPort) = sp_get_port_usb_serial(sp.ref)
+sp_get_port_bluetooth_address(sp::SerialPort) = sp_get_port_bluetooth_address(sp.ref)
+sp_get_port_handle(sp::SerialPort) = sp_get_port_handle(sp.ref)
 
 """
     set_read_timeout(sp::SerialPort, seconds::Real)
