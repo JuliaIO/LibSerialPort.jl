@@ -31,7 +31,18 @@ module LibSerialPort
 
 include("wrap.jl")
 using .Lib   # low-level wrapper for the libserialport C API
-import .Lib: sp_flush, sp_drain, sp_output_waiting
+import .Lib.sp_output_waiting
+import .Lib.sp_flush
+import .Lib.sp_drain
+import .Lib.sp_get_port_description
+import .Lib.sp_get_port_transport
+import .Lib.sp_get_port_usb_bus_address
+import .Lib.sp_get_port_usb_vid_pid
+import .Lib.sp_get_port_usb_manufacturer
+import .Lib.sp_get_port_usb_product
+import .Lib.sp_get_port_usb_serial
+import .Lib.sp_get_port_bluetooth_address
+import .Lib.sp_get_port_handle
 
 export
     SerialPort,
