@@ -235,10 +235,10 @@ end
                      cts::SPcts = SP_CTS_IGNORE,
                      dtr::SPdtr = SP_DTR_OFF,
                      dst::SPdsr = SP_DSR_IGNORE,
-                     xonxoff::SPXonXoff = SP_XONXOFF_DISABLED)`
+                     xonxoff::SPXonXoff = SP_XONXOFF_DISABLED)
 
 Configure the flow-control lines and method. Many systems don't support all options.
-If an unsupported option is requested, the library will return SP_ERR_SUPP.
+If an unsupported option is requested, the library will return `SP_ERR_SUPP`.
 
 * `rts` controls the output line _Ready To Send (RTS)_ and can take
   the values `SP_RTS_OFF` (default), `SP_RTS_ON` and
