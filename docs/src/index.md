@@ -40,11 +40,9 @@ sp_output_waiting
 
 Many of the read/write methods defined in `Base` that operate on an
 object of type `IO` can also be used with objects of type
-`SerialPort`. Therefore we repeat the documentation of some of these
-here. (Note that some of the following docstings also refer to other
-methods that are not applicable to `SerialPort`.)
+`SerialPort`. Therefore, also consult the documentation for
 
-```@docs
+```
 Base.read(::IO, ::Any)
 Base.read!
 Base.readbytes!
@@ -63,17 +61,4 @@ Base.print(::IO, ::Any)
 read(::SerialPort)
 nonblocking_read(::SerialPort)
 bytesavailable(::SerialPort)
-```
-
-# Other references
-
-The following are listed here only because they are referenced above:
-
-```@docs
-Base.ntoh
-Base.hton
-Base.ltoh
-Base.htol
-Base.stdout
-Base.string(xs...)
 ```
