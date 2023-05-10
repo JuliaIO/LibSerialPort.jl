@@ -612,7 +612,12 @@ function read(sp::SerialPort, ::Type{UInt8})
     unsafe_read(sp, byte_ref, 1)
     return byte_ref[]
 end
-
+        
+function read(sp::SerialPort, nb::UInt, ::Type{UInt8})
+    byte_ref = Ref{UInt8}(0)
+    unsafe_read(sp, byte_ref, nb)
+    return byte_ref[]
+end
 
 function unsafe_read(sp::SerialPort, p::Ptr{UInt8}, nb::UInt)
     if sp.read_timeout_ms > 0
@@ -641,6 +646,9 @@ function write(sp::SerialPort, b::UInt8)
     unsafe_write(sp, Ref(b), 1)
 end
 
+function write(sp::SerialPort, nb::UInt, b::UInt8)
+    unsafe_write(sp, Ref(b), nb)
+end
 
 function unsafe_write(sp::SerialPort, p::Ptr{UInt8}, nb::UInt)
     if sp.write_timeout_ms > 0
