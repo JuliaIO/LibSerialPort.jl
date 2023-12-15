@@ -284,24 +284,26 @@ end
     list_ports([nports_guess::Integer])`
 
 Print a list of currently visible ports, along with some basic info.
+Also return that info in an array so that user can parse and look for the right port to use.
 
 `nports_guess` provides the number of ports guessed. Its default is `64`.
 """
 function list_ports(;nports_guess::Integer=64)
     ports = sp_list_ports()
 
+    portinfo = []
     for port in unsafe_wrap(Array, ports, nports_guess, own=false)
-        port == C_NULL && return
+        port == C_NULL && break
 
         println(sp_get_port_name(port))
         println("\tDescription:\t",    sp_get_port_description(port))
         println("\tTransport type:\t", sp_get_port_transport(port))
+        push!(portinfo,[sp_get_port_name(port),sp_get_port_description(port),sp_get_port_transport(port)])
+        println(portinfo)
     end
-
     sp_free_port_list(ports)
-    return nothing
+    return portinfo
 end
-
 
 """
     get_port_list([nports_guess::Integer])
