@@ -1,4 +1,4 @@
-[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaIO.github.io/LibSerialPort.jl/stable) [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaIO.github.io/LibSerialPort.jl/dev) [![Build Status](https://travis-ci.com/JuliaIO/LibSerialPort.jl.svg?branch=master)](https://travis-ci.com/JuliaIO/LibSerialPort.jl)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaIO.github.io/LibSerialPort.jl/stable) [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaIO.github.io/LibSerialPort.jl/dev)
 
 # LibSerialPort.jl
 
