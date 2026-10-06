@@ -288,18 +288,17 @@ Also return that info in an array so that user can parse and look for the right 
 
 `nports_guess` provides the number of ports guessed. Its default is `64`.
 """
-function list_ports(;nports_guess::Integer=64)
+function list_ports(;nports_guess::Integer=64, print::Bool=true)
     ports = sp_list_ports()
 
     portinfo = []
     for port in unsafe_wrap(Array, ports, nports_guess, own=false)
         port == C_NULL && break
 
-        println(sp_get_port_name(port))
-        println("\tDescription:\t",    sp_get_port_description(port))
-        println("\tTransport type:\t", sp_get_port_transport(port))
+        print && println(sp_get_port_name(port))
+        print && println("\tDescription:\t",    sp_get_port_description(port))
+        print && println("\tTransport type:\t", sp_get_port_transport(port))
         push!(portinfo,[sp_get_port_name(port),sp_get_port_description(port),sp_get_port_transport(port)])
-        println(portinfo)
     end
     sp_free_port_list(ports)
     return portinfo
